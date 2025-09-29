@@ -1,0 +1,8 @@
+import asyncHandler from "../utils/asyncHandler.js";
+import type { Request, Response, NextFunction } from "express";
+
+const getTopUps = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {}
+);
+
+export { getTopUps };

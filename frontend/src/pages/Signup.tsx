@@ -1,0 +1,137 @@
+import { Loader, Mail, User, Lock } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import Logo from "../components/Logo";
+import { useAuth } from "../context/authcontext";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import  { signUpSchema, type SignUpAuth } from "../validation/validators";
+import { signUpUser } from "../api/index";
+import { handleValidationError } from "../utils";
+
+
+const Signup = () => {
+  //form state management
+  const [data, setData] = useState({
+    userName: "",
+    email: "",
+    password: "",
+  });
+
+  //  global authentication state mangement
+  const { signUp} = useAuth();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<SignUpAuth>({
+    //validation using zod schema
+    resolver: zodResolver(signUpSchema)
+  });
+
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setData({
+  //     ...data,
+  //     [e.target.name]: e.target.value,
+  //   });
+  // };
+  
+  //Api communication
+  const onSubmit: SubmitHandler<SignUpAuth> = async (data) => {
+    
+    const response = await signUp(data);
+    // response.error
+    //   ? response.error.forEach((error: any) =>
+    //       setError(error.path, { message: error.message })
+    //     )
+    //   : "";
+    console.log(response)
+  };
+
+  return (
+    <form
+      className="w-[90%] flex max-w-[20rem] flex-col mx-auto gap-4 "
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <div className="text-center mt-5 grid gap-7">
+        <div className="flex justify-center mt-5">
+          <Logo />
+        </div>
+        <p className="font-semibold text-[.9rem] text-gray-500">
+          Sign up and make airtime distribution at scale a breeze
+        </p>
+      </div>
+
+      <div>
+        <Input
+          type="email"
+          // name="email"
+          placeholder="Email"
+          // value={data.email}
+          // onChange={handleChange}
+          {...register("email", { required: "Email is required" })}
+        />
+        {errors.email && (
+          <div className="text-red-500  text-[.8rem]">
+            {errors.email.message}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <Input
+          type="text"
+          // name="userName"
+          placeholder="Username"
+          // value={data.userName}
+          // onChange={handleChange}
+          {...register("userName", { required: "Username is required" })}
+        />
+        {errors.userName && (
+          <div className="text-red-500 text-[.8rem]">
+            {errors.userName.message}
+          </div>
+        )}
+      </div>
+
+      <div>
+        {" "}
+        <Input
+          type="password"
+          // name="password"
+          placeholder="Password"
+          // value={data.password}
+          {...register("password", { required: "Password is required" })}
+          // onChange={handleChange}
+        />
+        {errors.password && (
+          <div className="text-red-500 text-[.8rem]">
+            {errors.password.message}
+          </div>
+        )}
+      </div>
+
+      <Button
+        value="Sign up"
+        icon={isSubmitting ? Loader : null}
+        isLoading={isSubmitting}
+        disabled={isSubmitting}
+        className="mt-4"
+        onClick={() => handleValidationError(errors)}
+      />
+      <div className="text-center dark:border-[1.5px] dark:border-gray-600 border-none py-1.5 rounded-sm">
+        <p className=" text-[.9rem] text-gray-500">Have an account?</p>
+        <Link to={"/log-in"} className="text-violet-500 hover:underline font-medium">
+          Log in
+        </Link>
+      </div>
+    </form>
+  );
+};
+
+export default Signup;
