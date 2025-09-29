@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+ app: 
+  build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: 
+      NODE_ENV: production
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+  
+  db:
+    image: 
+    environment:
+      MSSQL_PASSWORD:
+      MSSQL_DATABASE:
+    ports:
+      #  - "33061:3306"
+    volumes:
+
+volumes:
+  db-data:
+        
+         

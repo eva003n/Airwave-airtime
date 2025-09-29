@@ -1,0 +1,9 @@
+node_mobules
+/**/*/dist
+/**/*/.env
+/**/*/.env.*
+.vscode
+.git
+.github
+.husky
+.history
