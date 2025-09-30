@@ -4,7 +4,7 @@ services:
   build:
     context: ./backend
     # include the image 
-    dockerfile: ./backend/Dockerfile
+    dockerfile: Dockerfile
   container_name: airwave_api
   environment:
     - NODE_ENV=development
@@ -39,7 +39,7 @@ services:
  frontend:
     build:
       context: ./frontend
-      dockerfile: ./frontend/Dockerfile
+      dockerfile: Dockerfile
     container_name: airwave_web
     depends_on:
        - backend
