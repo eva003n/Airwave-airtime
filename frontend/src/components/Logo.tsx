@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
 import logoImage from "/images/Airwave-logo.png";
 
-type IconProp = React.ComponentType<React.SVGProps<SVGSVGElement>>
 
-const Logo = ({ icon: Icon, width = 24, hide = false }: {icon?: IconProp, width?: number, hide?: boolean }) => {
+const Logo = () => {
   return (
     <div className="flex gap-1 items-center">
       <img src={logoImage} width={50}/>

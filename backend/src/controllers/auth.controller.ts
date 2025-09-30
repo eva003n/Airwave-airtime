@@ -1,64 +1,95 @@
 import type { Request, Response, NextFunction } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
-import type { SignInAuth, SignUpAuth, Token } from "../middlewares/validators/validators.js";
+import type {
+  SignInAuth,
+  SignUpAuth,
+  Token,
+} from "../middlewares/validators/validators.js";
 import ApiResponse from "../utils/ApiResponse.js";
-import User, {UserRole} from "../models/User.js";
+import User, { UserRole } from "../models/User.js";
 import ApiError from "../utils/ApiError.js";
 import { compare } from "bcryptjs";
-import jwt, { type JwtPayload, type Secret } from "jsonwebtoken";
-import { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, APP_NAME, NODE_ENV } from "../config/env.js";
+import jwt, {
+  type JwtPayload,
+  type Secret,
+  type SignOptions,
+} from "jsonwebtoken";
+import {
+  ACCESS_TOKEN_SECRET,
+  ACCESS_TOKEN_EXPIRY,
+  REFRESH_TOKEN_SECRET,
+  REFRESH_TOKEN_EXPIRY,
+  APP_NAME,
+  NODE_ENV,
+} from "../config/env.js";
 
-
-const signUp = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    const {userName, email, password} = req.body as SignUpAuth
-
-   const newUser = await User.create({
-     username: userName,
-     email: email,
-     password: password,
-   
-   });
-    return res.status(200).json(new ApiResponse(200, newUser, "Account created successfully, please login"))
-    
-})
-const signIn = asyncHandler(
+const signUp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userName, password } = req.body as SignInAuth;
-//check if account exist
-    const isUser = await User.findOne({ where: { username: userName } });
-    
-    if(!isUser) return next(ApiError.notFound(404, req.originalUrl, "Account doesnt exist, kindly create an account"))
+    const { userName, email, password } = req.body as SignUpAuth;
 
-      //verify password
-      const isValidPassword = await compare(password, isUser.get("password"))
-
-      if(!isValidPassword) return next(ApiError.unAuthorizedRequest(403, req.originalUrl, "Invalid username or password"))
-
-    //generate token for user session
-    const { accessToken, refreshToken } = generateToken(isUser.id as string, isUser.email);
-
-    //save refresh token in database
-    isUser.refresh_token = refreshToken;
-    await isUser.save()
-
-    configureAndSendCookie(res, accessToken, refreshToken)
-
+    const newUser = await User.create({
+      username: userName,
+      email: email,
+      password: password,
+    });
     return res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          isUser,
-          "Signed in successfully"
+          newUser,
+          "Account created successfully, please login"
         )
       );
   }
 );
+const signIn = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userName, password } = req.body as SignInAuth;
+    //check if account exist
+    const isUser = await User.findOne({ where: { username: userName } });
+
+    if (!isUser)
+      return next(
+        ApiError.notFound(
+          404,
+          req.originalUrl,
+          "Account doesnt exist, kindly create an account"
+        )
+      );
+
+    //verify password
+    const isValidPassword = await compare(password, isUser.get("password"));
+
+    if (!isValidPassword)
+      return next(
+        ApiError.unAuthorizedRequest(
+          403,
+          req.originalUrl,
+          "Invalid username or password"
+        )
+      );
+
+    //generate token for user session
+    const { accessToken, refreshToken } = generateToken(
+      isUser.id as string,
+      isUser.email
+    );
+
+    //save refresh token in database
+    isUser.refresh_token = refreshToken;
+    await isUser.save();
+
+    configureAndSendCookie(res, accessToken, refreshToken);
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, isUser, "Signed in successfully"));
+  }
+);
 const signOut = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    
-   
-    const user = await User.findOne({where: {id: req.user.id}});
+    const user = await User.findOne({ where: { id: req.user.id } });
     if (!user)
       return next(
         ApiError.notFound(
@@ -74,15 +105,13 @@ const signOut = asyncHandler(
       .status(200)
       .clearCookie("AccessToken")
       .clearCookie("RefreshToken")
-      .json(
-        new ApiResponse(200, null, "Signed out successfully")
-      );
+      .json(new ApiResponse(200, null, "Signed out successfully"));
   }
 );
 
 const tokenRefresh = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { RefreshToken, AccessToken }  = req.cookies;
+    const { RefreshToken, AccessToken } = req.cookies;
     // if(AccessToken) return
 
     if (!RefreshToken) {
@@ -100,10 +129,14 @@ const tokenRefresh = asyncHandler(
       process.env.REFRESH_TOKEN_SECRET as string
     ) as JwtPayload;
 
-    const user = await User.findOne({where: {id: decodeToken.userId}})
+    const user = await User.findOne({ where: { id: decodeToken.userId } });
     if (!user)
       return next(
-        ApiError.notFound(404, `${req.originalUrl}`, "Account  doesn't not exist")
+        ApiError.notFound(
+          404,
+          `${req.originalUrl}`,
+          "Account  doesn't not exist"
+        )
       );
     // if (user.refresh_token !== RefreshToken) {
     //   return next(
@@ -135,18 +168,13 @@ const tokenRefresh = asyncHandler(
           "Access token refreshed successfully"
         )
       );
-
-    
   }
-)
+);
 
-const generateToken = (
-  userId: string,
-  userEmail: string,
-  
-) => {
+const generateToken = (userId: string, userEmail: string) => {
   const jwtAccessTokenSecret: Secret = ACCESS_TOKEN_SECRET as string;
   const jwtRefreshTokenSecret: Secret = REFRESH_TOKEN_SECRET as string;
+
 
   const accessToken = jwt.sign(
     //header -> signing algorithm and token type
@@ -160,20 +188,16 @@ const generateToken = (
     //sign options
     {
       expiresIn: ACCESS_TOKEN_EXPIRY || "15m",
-      issuer: APP_NAME,
+      issuer: APP_NAME || "Airwave airtime",
       subject: "Authentication",
-    } as JwtPayload
+    } as SignOptions
   );
 
-  const refreshToken = jwt.sign(
-    { userId },
-    jwtRefreshTokenSecret,
-    {
-      expiresIn: REFRESH_TOKEN_EXPIRY || "1d",
-      issuer: APP_NAME,
-      subject: "Authentication",
-    } as JwtPayload
-  );
+  const refreshToken = jwt.sign({ userId, userEmail }, jwtRefreshTokenSecret, {
+    expiresIn: REFRESH_TOKEN_EXPIRY || "1d",
+    issuer: APP_NAME || "Airwave airtime",
+    subject: "Authentication",
+  } as SignOptions);
 
   return { accessToken, refreshToken };
 };
@@ -197,9 +221,4 @@ const configureAndSendCookie = (
       maxAge: 24 * 60 * 60 * 1000, //1day
     });
 };
-export {
-    signUp,
-    signIn,
-    signOut,
-    tokenRefresh
-}
+export { signUp, signIn, signOut, tokenRefresh };

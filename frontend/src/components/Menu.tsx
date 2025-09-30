@@ -1,16 +1,14 @@
-import React from "react";
 import ListContainer from "./ListContainer";
 import List from "./List";
 import { Bookmark, LogOut, Settings } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useAuth } from "../context/Authentication/authContext";
+import { useAuth } from "../context/authcontext";
 import Button from "./Button";
 
 const Menu = () => {
     const {logOut} = useAuth()
 
     const handleLogOut = async() => {
-      console.log("hi")
         await logOut()
     }
   return (

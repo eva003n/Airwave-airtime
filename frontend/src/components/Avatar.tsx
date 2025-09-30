@@ -1,9 +1,15 @@
-import { CircleUserRound, User, UserCircle } from "lucide-react";
+import type { HTMLAttributes } from "react";
 import { useAuth } from "../context/authcontext";
 import LoaderComponent from "./Loader";
 
+interface AvatarProps extends HTMLAttributes<HTMLElement> {
+  width: number;
+  loading?: boolean;
 
-const Avatar = ({ width = 24, loading = false, ...props }: { width: number, loading?: boolean }) => {
+}
+
+
+const Avatar = ({ width = 24, loading = false, ...props }: AvatarProps) => {
   const { user } = useAuth();
 
   return (

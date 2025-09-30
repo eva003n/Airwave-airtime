@@ -1,11 +1,10 @@
-version: "3.9"
 name: airwave-airtime
 services:
  backend: 
   build:
     context: ./backend
     # include the image 
-    dockerfile: ./backend/backend.Dockerfile
+    dockerfile: ./backend/Dockerfile
   container_name: airwave_api
   environment:
     - NODE_ENV=development
@@ -23,7 +22,7 @@ services:
     - app-net
 
   
-  db:
+ db:
     image: mcr.microsoft.com/mssql/server:2022-latest 
     container_name: mssql_db
     environment:
@@ -35,12 +34,12 @@ services:
     volumes:
        - mssql_data:/var/opt/mssql
     networks: 
-       -app-net
+       - app-net
 
-  frontend:
+ frontend:
     build:
       context: ./frontend
-      dockerfile: ./frontend/frontend.Dockerfile
+      dockerfile: ./frontend/Dockerfile
     container_name: airwave_web
     depends_on:
        - backend
@@ -51,8 +50,9 @@ services:
 
 
 volumes:
-  mssql-data
+  mssql_data:
 networks:
-   app-net
+   app-net:
+     driver: bridge
         
          

@@ -83,7 +83,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(response.data)
         setItem("user", JSON.stringify(response.data))
         setLoading(false);
-        toast.success(response.message)
+        // toast.success(response.message)
 
 
 

@@ -1,5 +1,4 @@
 import List from './List';
-import React from 'react'
 import { Link } from 'react-router-dom';
 import ListContainer from './ListContainer';
 

@@ -10,7 +10,7 @@ import type {
   IVerifyOtp,
 } from "../interfaces/auth.interface";
 import type { IUser } from "../interfaces/user.interface";
-import type { SignInAuth, SignUpAuth } from "@/validation/validators";
+import type { SignInAuth, SignUpAuth } from "../validation/validators";
 
 const AuthContext = createContext<{
   user: null | IUser;
