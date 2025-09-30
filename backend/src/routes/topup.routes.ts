@@ -1,13 +1,14 @@
 import { Router, type RequestHandler } from "express";
-import { getTopUps } from "../controllers/topup.controller.js";
+import { bulkTopUps, getTopUps, singleTopUp } from "../controllers/topup.controller.js";
 
 const router = Router()
 
 //Enable single topups
-router.route("/").post(getTopUps);
-
+router.route("/").get(getTopUps);
+//Perform single top up
+router.route("/top-up").post(singleTopUp);
 //Enable bulk topups
-router.route("/bulk").post(getTopUps)
+router.route("/bulk").post(bulkTopUps)
 
 
 

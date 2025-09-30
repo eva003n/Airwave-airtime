@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "nodemon",
+    "docker build": "docker buildx build -f ./backend.Dockerfile",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

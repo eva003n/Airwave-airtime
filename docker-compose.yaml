@@ -1,28 +1,58 @@
-version: "3.8"
-
+version: "3.9"
+name: airwave-airtime
 services:
- app: 
+ backend: 
   build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: 
-      NODE_ENV: production
-    depends_on:
-      - db
-    ports:
-      - "3000:3000"
+    context: ./backend
+    # include the image 
+    dockerfile: ./backend/backend.Dockerfile
+  container_name: airwave_api
+  environment:
+    - NODE_ENV=development
+    - DB_USER=airwaveairtimeadmin
+    - DB_PASSWORD=n157IbXGpE8C2US2L08h6I+bl+YbaN4qpps450eQM0
+    - DB_DIALECT=mssql
+    - DB_HOST=localhost
+    - DB_NAME=Airwave-airtime-app-development
+    - DB_PORT=1433 
+  depends_on:
+    - db
+  ports:
+    - 8000:8000
+  networks:
+    - app-net
+
   
   db:
-    image: 
+    image: mcr.microsoft.com/mssql/server:2022-latest 
+    container_name: mssql_db
     environment:
-      MSSQL_PASSWORD:
-      MSSQL_DATABASE:
+        - ACCEPT_EULA=Y
+        - MSSQL_SA_PASSWORD=n157IbXGpE8C2US2L08h6I+bl+YbaN4qpps450eQM0
+   
     ports:
-      #  - "33061:3306"
+       - 1333:1433
     volumes:
+       - mssql_data:/var/opt/mssql
+    networks: 
+       -app-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./frontend/frontend.Dockerfile
+    container_name: airwave_web
+    depends_on:
+       - backend
+    ports:
+       - 3000:3000
+    networks:
+       - app-net
+
 
 volumes:
-  db-data:
+  mssql-data
+networks:
+   app-net
         
          

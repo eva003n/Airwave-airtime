@@ -5,4 +5,13 @@ const getTopUps = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {}
 );
 
-export { getTopUps };
+const bulkTopUps = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {}
+
+)
+const singleTopUp = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {}
+
+)
+
+export { singleTopUp, bulkTopUps, getTopUps };
