@@ -38,6 +38,6 @@
     // "allowImportingTsExtensions": true,
     // "noEmit": true
   },
-  "include": ["src/**/*", "tests/**/*", "types"],
+  "include": ["src/**/*", "tests/**/*", "models/**/*",  "types"],
   "exclude": ["node_modules"]
 }

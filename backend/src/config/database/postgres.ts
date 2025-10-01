@@ -1,6 +1,5 @@
 import { Sequelize } from "sequelize-typescript";
-import path from "path"
-import { fileURLToPath } from "url";
+
 import {
   DB_DIALECT,
   DB_HOST,
@@ -13,23 +12,21 @@ import {
 import logger from "../../logger/logger.winston.js";
 import User from "../../models/User.js";
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-// console.log(process.cwd() + "/src/models");
+
 
 const sequelize = new Sequelize({
   host: "db",
-  dialect: "mssql",
-  port: Number(DB_PORT),
-  database: DB_NAME,
-  username: DB_USER,
-  password: DB_PASSWORD,
+  dialect: "postgres",
+  port: parseInt(DB_PORT || "5432"),
+  database: DB_NAME || "airwave-airtime",
+  username: DB_USER || "pg_admin",
+  password: DB_PASSWORD || "airwave@2925airtime",
   dialectOptions: {
-     options: {
-        encrypt: false,
-        trustServerCertificate: true
-
-      },
+    /* --production-- */
+    // ssl: {
+    //   require: true,
+    //   rejectUnauthorized: false,
+    // },
   },
   logging: logger.info.bind(logger),
   models: [User],
@@ -40,13 +37,12 @@ const sequelize = new Sequelize({
 });
 const connectDatabase = async () => {
   try {
-    sequelize.authenticate();
-    logger.info("Connected to MSsql server successfully");
-    await syncModels()
+   await sequelize.authenticate();
+    logger.info("Connected to Postgres server successfully");
+    // await syncModels()
   } catch (error) {
-    logger.error(`Failed to connect to MSsql server with error ${error}`);
-    await sequelize.close();
-    logger.info("Connection to MSsql server closed");
+    logger.error(`Failed to connect to Postgres server with error ${error}`);
+    process.exit(1)
   }
 };
 

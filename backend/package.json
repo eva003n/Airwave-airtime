@@ -7,8 +7,10 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "nodemon",
+    "migrate": "sequekuze-cli db:migrate",
     "docker build": "docker buildx build -f ./backend.Dockerfile",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "sequelize-cli db:seed:all"
   },
   "repository": {
     "type": "git",
@@ -27,7 +29,6 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.3.1",
-    "@types/tedious": "^18.0.0",
     "@types/validator": "^13.15.3",
     "@types/winston": "^2.4.4",
     "dotenv": "^17.2.2",
@@ -41,19 +42,18 @@
   "dependencies": {
     "@reloadly/reloadly.airtime": "^1.0.6",
     "@reloadly/reloadly.authentication": "^1.0.6",
-    "@sequelize/core": "7.0.0-alpha.46",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "esbuild": "^0.25.10",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.7",
     "sequelize-typescript": "^2.1.6",
-    "tedious": "^18.6.1",
     "winston": "^3.17.0",
     "zod": "^4.1.9"
   }
