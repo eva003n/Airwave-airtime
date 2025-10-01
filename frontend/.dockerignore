@@ -7,10 +7,10 @@ dist
 **/dist
 
 # Ignore env files
-.env
-.env.*
-**/.env
-**/.env.*
+# .env
+# .env.*
+# **/.env
+# **/.env.*
 
 # IDE and git stuff
 .vscode

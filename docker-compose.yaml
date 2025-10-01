@@ -8,14 +8,17 @@ services:
   container_name: airwave_api
   environment:
     - NODE_ENV=development
-    - DB_USER=airwaveairtimeadmin
-    - DB_PASSWORD=n157IbXGpE8C2US2L08h6I+bl+YbaN4qpps450eQM0
+    - PORT=8000
+    - SERVER_URL=http://localhost
+    - DB_USER=sa
+    - DB_PASSWORD=Pass@2025!!
     - DB_DIALECT=mssql
-    - DB_HOST=localhost
+    - DB_HOST=db
     - DB_NAME=Airwave-airtime-app-development
-    - DB_PORT=1433 
+    - DB_PORT=1433
   depends_on:
     - db
+  # command: [ "./wait-for", "db:1433", "--", "node ./index.js" ]
   ports:
     - 8000:8000
   networks:
@@ -27,10 +30,11 @@ services:
     container_name: mssql_db
     environment:
         - ACCEPT_EULA=Y
-        - MSSQL_SA_PASSWORD=n157IbXGpE8C2US2L08h6I+bl+YbaN4qpps450eQM0
+        - MSSQL_PID=Express
+        - SA_PASSWORD=Pass@2025!!
    
     ports:
-       - 1333:1433
+       - 1433:1433
     volumes:
        - mssql_data:/var/opt/mssql
     networks: 
@@ -44,7 +48,7 @@ services:
     depends_on:
        - backend
     ports:
-       - 3000:3000
+       - 3000:80
     networks:
        - app-net
 

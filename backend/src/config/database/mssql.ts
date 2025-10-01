@@ -13,23 +13,23 @@ import {
 import logger from "../../logger/logger.winston.js";
 import User from "../../models/User.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-console.log(process.cwd() + "/src/models");
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+// console.log(process.cwd() + "/src/models");
 
 const sequelize = new Sequelize({
-  host: DB_HOST,
+  host: "db",
   dialect: "mssql",
   port: Number(DB_PORT),
   database: DB_NAME,
+  username: DB_USER,
+  password: DB_PASSWORD,
   dialectOptions: {
-    authentication: {
-      type: "default",
-      options: {
-        userName: DB_USER,
-        password: DB_PASSWORD,
+     options: {
+        encrypt: false,
+        trustServerCertificate: true
+
       },
-    },
   },
   logging: logger.info.bind(logger),
   models: [User],
@@ -52,13 +52,11 @@ const connectDatabase = async () => {
 
 const syncModels = async () => {
   try {
-    console.log(Object.keys(sequelize.models))
-    console.log(Object.keys(sequelize.isDefined(User.name)))
   await sequelize.sync({ alter: true });
     logger.info("All models synchronized with database successfully");
   
   } catch (error) {
-    logger.error(`Faiked to synchronized all models with database ${error}`);
+    logger.error(`Failed to synchronized all models with database ${error}`);
   }
 }
 export { sequelize, connectDatabase, syncModels };

@@ -14,13 +14,13 @@ FROM deps AS builder
 COPY . .
 RUN pnpm run build
 
-FROM deps AS runner
+FROM nginx:stable-alpine
 WORKDIR /app
 # Copy only necessary files
-COPY --from=builder /app/dist ./
-
+COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 3000
 
-CMD ["pnpm", "run",  "dev"]
+
+CMD ["nginx", "-g",  "daemon off;"]
 
 
