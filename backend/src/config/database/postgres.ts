@@ -15,11 +15,11 @@ import User from "../../models/User.js";
 
 
 const sequelize = new Sequelize({
-  host: "db",
+  host: DB_HOST || "db",
   dialect: "postgres",
-  port: parseInt(DB_PORT || "5432"),
-  database: DB_NAME || "airwave-airtime",
-  username: DB_USER || "pg_admin",
+  port: parseInt(DB_PORT  || "5432"),
+  database: DB_NAME || "airwave_development",
+  username: DB_USER || "airwave_admin",
   password: DB_PASSWORD || "airwave@2925airtime",
   dialectOptions: {
     /* --production-- */
@@ -30,10 +30,7 @@ const sequelize = new Sequelize({
   },
   logging: logger.info.bind(logger),
   models: [User],
-  // models: [process.cwd() + "/src/models"],
-  // modelMatch: (filename, member) => {
-  //   return filename.substring(0, filename.indexOf('.model')) === member.toLowerCase();
-  // },
+
 });
 const connectDatabase = async () => {
   try {

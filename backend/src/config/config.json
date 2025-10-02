@@ -1,20 +1,20 @@
 {
   "development": {
-    "username": "pg_admin",
+    "username": "airwave_admin",
     "password": "airwave@2925airtime",
     "database": "airwave_development",
     "host": "db",
     "dialect": "postgres"
   },
   "test": {
-    "username": "pg_admin",
+    "username": "airwave_admin",
     "password": "airwave@2925airtime",
     "database": "airwave_test",
     "host": "db",
     "dialect": "postgres"
   },
   "production": {
-    "username": "pg_admin",
+    "username": "airwave_admin",
     "password": "airwave@2925airtime",
     "database": "airwave_production",
     "host": "db",

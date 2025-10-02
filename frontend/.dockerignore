@@ -2,15 +2,7 @@
 node_modules
 **/node_modules
 
-# Ignore build outputs
-dist
-**/dist
 
-# Ignore env files
-# .env
-# .env.*
-# **/.env
-# **/.env.*
 
 # IDE and git stuff
 .vscode

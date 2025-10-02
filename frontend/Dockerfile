@@ -18,6 +18,8 @@ FROM nginx:stable-alpine
 WORKDIR /app
 # Copy only necessary files
 COPY --from=builder /app/dist /usr/share/nginx/html
+# Prevent $)$ page not foud error when serving single page frontend apps
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 3000
 
 
