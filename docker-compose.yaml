@@ -1,5 +1,15 @@
 name: airwave-airtime
 services:
+  
+ migrate: 
+   build: 
+     context: ./backend
+   container_name: db_migrations
+   depends_on: 
+      db: 
+        condition: service_healthy
+   command: pnpm run migrate
+
  backend: 
   build:
     context: ./backend
@@ -8,8 +18,21 @@ services:
   container_name: airwave_api
   environment: 
     - NODE_ENV=development
+    - PORT=8000
     - SERVER_URL=http://localhost
-    - 
+    - CORS_ORIGIN_URLS=http://localhost:3000
+    - APP_NAME=airwaveairtime
+    - DB_USER=airwave_admin
+    - DB_PASSWORD=airwave@2925airtime
+    - DB_HOST=db
+    - DB_NAME=airwave_development
+    - DB_PORT=5432
+    - ACCESS_TOKEN_EXPIRY=15m
+    - REFRESH_TOKEN_EXPIRY=1d
+    - ACCESS_TOKEN_SECRET=54ac65ce338b2cf894706dd039c9331365deaf9c561b42eeeccbe27f71e70618f8864a305581e52299aca213735c315e3db9
+    -
+     REFRESH_TOKEN_SECRET=c60038605be8ff84f933d55b880c1daaf8b6ac4618568a2306533dbeae137d032b54c02c683ab8a4330739d85f3b8cab36a6z
+
   depends_on:
     - db
   # command: ["./wait-for-db.sh", "db", "5432", "sh", "-c", "pnpm run migrate" , " pnpm run dev"]

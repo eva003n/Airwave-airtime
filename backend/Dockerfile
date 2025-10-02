@@ -37,7 +37,7 @@ USER expressjs
 # Copy only necessary files
 COPY --from=builder /app/dist ./
 COPY --from=builder /app/package.json ./
-COPY --from=builder /app/wait-for-db.sh ./
+# COPY --from=builder /app/wait-for-db.sh ./
 COPY --from=deps /app/node_modules ./node_modules
 
 EXPOSE 8000

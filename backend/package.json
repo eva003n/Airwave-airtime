@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "nodemon",
-    "migrate": "sequekuze-cli db:migrate",
+    "migrate": "sequelize-cli db:migrate",
     "docker build": "docker buildx build -f ./backend.Dockerfile",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "sequelize-cli db:seed:all"
