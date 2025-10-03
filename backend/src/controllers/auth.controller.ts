@@ -27,6 +27,17 @@ const signUp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { userName, email, password } = req.body as SignUpAuth;
 
+      const isUser = await User.findOne({ where: { email: email } });
+
+    if (!isUser)
+      return next(
+        ApiError.conflictRequest(
+          409,
+          req.originalUrl,
+          "Account already exist, kindly sign in to your account"
+        )
+      );
+
     const newUser = await User.create({
       username: userName,
       email: email,

@@ -1,14 +1,18 @@
 name: airwave-airtime
 services:
   
- migrate: 
-   build: 
-     context: ./backend
-   container_name: db_migrations
-   depends_on: 
-      db: 
-        condition: service_healthy
-   command: pnpm run migrate
+#  migrate: 
+#    build: 
+#      context: ./backend
+#    container_name: db_migrations
+#    depends_on: 
+#       db: 
+#         condition: service_healthy
+#    ports:
+#       - 8100:8100
+#    networks:
+#        - app-net
+#    command: sh -c "pnpm run migrate"
 
  backend: 
   build:
@@ -34,14 +38,17 @@ services:
      REFRESH_TOKEN_SECRET=c60038605be8ff84f933d55b880c1daaf8b6ac4618568a2306533dbeae137d032b54c02c683ab8a4330739d85f3b8cab36a6z
 
   depends_on:
-    - db
+     db:
+        condition: service_healthy
+        restart: true
   # command: ["./wait-for-db.sh", "db", "5432", "sh", "-c", "pnpm run migrate" , " pnpm run dev"]
 
   ports:
     - 8000:8000
   networks:
     - app-net
-
+  # command: sh -c "pnpm run migrate"
+  
 
 
   
@@ -53,7 +60,12 @@ services:
          - POSTGRES_USER=airwave_admin
          - POSTGRES_PASSWORD=airwave@2925airtime
          - POSTGRES_DB=airwave_development
-   
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     ports:
        - 5432:5432
     volumes:

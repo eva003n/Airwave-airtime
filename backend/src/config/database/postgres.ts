@@ -36,7 +36,7 @@ const connectDatabase = async () => {
   try {
    await sequelize.authenticate();
     logger.info("Connected to Postgres server successfully");
-    // await syncModels()
+    await syncModels()
   } catch (error) {
     logger.error(`Failed to connect to Postgres server with error ${error}`);
     process.exit(1)

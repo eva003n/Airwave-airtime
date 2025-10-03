@@ -44,13 +44,13 @@ The system shall allow users to manage (view, edit, delete) existing recipient l
 
 ### 3.3 Airtime Distribution
 
-The system shall allow a user to select a recipient list for distribution.
+The system shall allow a user to select or upload  a recipient list for distribution.
 
 The system shall allow a user to specify a fixed amount of airtime to be sent to each recipient in the selected list.
 
 The system shall allow users to select the mobile network operator (MNO) if the system supports multiple providers.
 
-The system shall geberate a confirmation report summary of the distribution details (number of recipients, total cost) before execution.
+The system shall generate a confirmation report summary of the distribution details (number of recipients, total cost) before execution.
 
 The system shall process bulk distribution requests asynchronously to handle high loads and prevent overloading the server.
 

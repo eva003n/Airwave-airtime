@@ -8,9 +8,11 @@
     "build": "tsc -b",
     "dev": "nodemon",
     "migrate": "sequelize-cli db:migrate",
+    "migrate:undo": "sequelize-cli db:migrate:undo",
     "docker build": "docker buildx build -f ./backend.Dockerfile",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "sequelize-cli db:seed:all"
+
   },
   "repository": {
     "type": "git",

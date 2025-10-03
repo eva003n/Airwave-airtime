@@ -60,7 +60,7 @@ export default class User extends Model<
   declare role?: UserRole;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.STRING(512),
     allowNull: true,
   })
   declare refresh_token?: string;
