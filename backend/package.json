@@ -21,6 +21,7 @@
   "author": "Evan ngugi",
   "license": "ISC",
   "devDependencies": {
+    "@types/axios": "^0.14.4",
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
@@ -44,6 +45,7 @@
   "dependencies": {
     "@reloadly/reloadly.airtime": "^1.0.6",
     "@reloadly/reloadly.authentication": "^1.0.6",
+    "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

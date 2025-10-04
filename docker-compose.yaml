@@ -36,7 +36,11 @@ services:
     - ACCESS_TOKEN_SECRET=54ac65ce338b2cf894706dd039c9331365deaf9c561b42eeeccbe27f71e70618f8864a305581e52299aca213735c315e3db9
     -
      REFRESH_TOKEN_SECRET=c60038605be8ff84f933d55b880c1daaf8b6ac4618568a2306533dbeae137d032b54c02c683ab8a4330739d85f3b8cab36a6z
-
+    
+    -
+     RELOADLY_CLIENT_SECRET=O6YbOCr2B6-vgt9UWa43JJ93XPmLU4-9nNMrjXIxRP71dGikjYZGy6KOPgRexAk
+    - RELOADLY_AUDIENCE=https://topups-sandbox.reloadly.com
+    - RELOADLY_AUTH_URL=https://auth.reloadly.com/oauth/token
   depends_on:
      db:
         condition: service_healthy
@@ -80,8 +84,8 @@ services:
     container_name: airwave_web
     environment:
       - VITE_API_BASE_URI=http://localhost:8000/api/v1
-    depends_on:
-       - backend
+    # depends_on:
+    #    - backend
     ports:
        - 3000:80
     networks:

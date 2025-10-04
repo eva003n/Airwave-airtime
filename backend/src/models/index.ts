@@ -14,7 +14,7 @@ const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || "development";
 
 // Import config (make sure config/config.json or config/config.ts exists)
-import configFile from "../config/config.json" with { type: "json" };
+import configFile from "../config/database/config.json" with { type: "json" };
 const config = (configFile as any)[env];
 
 interface DB {
