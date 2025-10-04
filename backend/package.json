@@ -1,5 +1,5 @@
 {
-  "name": "airtymflow",
+  "name": "airwave-airtime",
   "version": "1.0.0",
   "description": "\"An Airtime distribution automation tool API designed using Node js,Exprees\"",
   "main": "index.js",
@@ -12,7 +12,6 @@
     "docker build": "docker buildx build -f ./backend.Dockerfile",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seed": "sequelize-cli db:seed:all"
-
   },
   "repository": {
     "type": "git",
@@ -43,8 +42,6 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@reloadly/reloadly.airtime": "^1.0.6",
-    "@reloadly/reloadly.authentication": "^1.0.6",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",

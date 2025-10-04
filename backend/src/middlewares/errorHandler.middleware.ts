@@ -20,7 +20,7 @@ const errorHandlerMiddleware = async (
   }
   else {
     logger.error(err.message)
-    console.log(err)
+    console.dir(err)
     return res
       .type("application/problem+json")
       .status(500)

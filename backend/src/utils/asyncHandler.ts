@@ -10,7 +10,6 @@ type requestFunc = (
 const asyncHandler = (requestHandler: requestFunc) => {
   return (req: Request , res: Response, next: NextFunction) => {
   Promise.resolve(requestHandler(req, res, next)).catch((err) => {
-    console.log(err.message)
     return next(err);
   });
   };

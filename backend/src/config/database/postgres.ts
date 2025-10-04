@@ -1,26 +1,25 @@
 import { Sequelize } from "sequelize-typescript";
 
 import {
-  DB_DIALECT,
-  DB_HOST,
-  DB_NAME,
-  DB_PASSWORD,
-  DB_PORT,
-  DB_USER,
   NODE_ENV,
 } from "../env.js";
 import logger from "../../logger/logger.winston.js";
 import User from "../../models/User.js";
+import config, { type ConfigEnv } from "./config.js"
 
+
+
+const env = (NODE_ENV as keyof ConfigEnv) || "development"
+const dbConfig = config[env]
 
 
 const sequelize = new Sequelize({
-  host: DB_HOST || "db",
-  dialect: "postgres",
-  port: parseInt(DB_PORT  || "5432"),
-  database: DB_NAME || "airwave_development",
-  username: DB_USER || "airwave_admin",
-  password: DB_PASSWORD || "airwave@2925airtime",
+  host: dbConfig.host,
+  dialect: dbConfig.dialect,
+  port: dbConfig.port,
+  database: dbConfig.database,
+  username: dbConfig.username,
+  password: dbConfig.password,
   dialectOptions: {
     /* --production-- */
     // ssl: {
@@ -36,7 +35,7 @@ const connectDatabase = async () => {
   try {
    await sequelize.authenticate();
     logger.info("Connected to Postgres server successfully");
-    await syncModels()
+    // await syncModels()
   } catch (error) {
     logger.error(`Failed to connect to Postgres server with error ${error}`);
     process.exit(1)

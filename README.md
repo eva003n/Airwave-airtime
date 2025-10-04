@@ -132,6 +132,12 @@ Technology Stack: The backend can be built with modern framework Node.js The fro
 This will serve as a virtual wallet but its purposes are the same as a physical wallet where we can perform debit and credit
 This virtual wallert serves as a value manager, a quick lock up of money balance but in order to manage this balances we need some kind of source of truth like a virtual ledger that keeeps track of all the transactions in the system eg waller recharge/topups airtime purchase, wallet widthdraws and wallet holds that where the transactions management component comes in
 
+#### Functions the wallet will enable
+1. Enable getting the current wallet balance
+2. Notify users when a wallet balace ranges btw a certain upper threshold and lower threshold
+3. Enable adding a payment method eg bank transfer, card payment
+4. Auto-recharge a certain amount when wallet balance goes below certain amount(payment api)
+
 ### Transaction management component
 
 Thsi serves as the source of truth

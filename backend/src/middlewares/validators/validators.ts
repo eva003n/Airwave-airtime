@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { minLength, z } from "zod";
 
 const signUpSchema = z.object({
   userName: z
@@ -23,6 +23,30 @@ const signInSchema = z.object({
     .max(30),
 });
 
+//validate top up requests
+const topUpSchema = z.object({
+  amount: z
+    .number()
+    .min(5, "Top up cannot be below 5")
+    .max(10000, "Top up cannot exceed 10,000"),
+  operatorId: z
+    .number()
+    .refine((val) => val == 265 || val == 266, {
+      message: "Operators ID supported are either 265 or 266",
+    })
+    .default(266),
+  recipientPhone: z.object({
+    countryCode: z.string()
+    .min(1, "Country code too short").max(5, "Country code too long").default("KE"),
+    number: z.string().min(12, "Phone number too short").max(12, "Phone number too long"),
+  }),
+});
+
+const IdSchema =  z.object({
+  transactionId: z.string()
+})
+
+
 //validate access token
 const tokenSchema = z.jwt({ alg: "HS256" });
 
@@ -30,5 +54,6 @@ const tokenSchema = z.jwt({ alg: "HS256" });
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
 export type Token = z.infer<typeof tokenSchema>;
-
-export { signUpSchema, signInSchema, tokenSchema };
+export type TopUp = z.infer<typeof topUpSchema>
+export type Id = z.infer<typeof IdSchema>
+export { signUpSchema, signInSchema, tokenSchema, topUpSchema, IdSchema };

@@ -1,2 +1,7 @@
 /.history
 /**/*/node_modules
+/responses
+
+.env
+/**/*/.env.*
+/**/*/*.log

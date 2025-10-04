@@ -29,7 +29,7 @@ const signUp = asyncHandler(
 
       const isUser = await User.findOne({ where: { email: email } });
 
-    if (!isUser)
+    if (isUser)
       return next(
         ApiError.conflictRequest(
           409,

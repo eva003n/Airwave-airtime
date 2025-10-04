@@ -6,9 +6,7 @@ config();
 const mode = process.env.NODE_ENV;
 
 //the conditionally load the the correct .env based on mode
-config({
-  path: `./.env.${mode || "development"}`,
-});
+console.log(mode)
 
 export const {
   NODE_ENV,
