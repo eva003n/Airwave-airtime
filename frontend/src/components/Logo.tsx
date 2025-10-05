@@ -9,10 +9,10 @@ const Logo = () => {
   
       <Link
         to="/"
-        className={` text-3xl font-bold text-color tracking-wider`}
+        className={` text-2xl font-bold text-color tracking-wider`}
       >
         Airwave
-        <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 pl-2 bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
           airtime
         </span>
       </Link>
