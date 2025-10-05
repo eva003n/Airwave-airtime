@@ -54,7 +54,7 @@ export function AppSidebar() {
   return (
     <Sidebar  collapsible="icon">
       <SidebarContent>
-        <SidebarHeader className="p-0">
+        <SidebarHeader className="px-0 py-4">
           <div className="flex gap-1 items-center">
             <div>
               <img src={logoImage} width={50} />
@@ -79,10 +79,10 @@ export function AppSidebar() {
             {items.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
-                  <a href={item.url}>
+                  <Link to={item.url}>
                     <item.icon />
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ))}

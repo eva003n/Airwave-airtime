@@ -10,7 +10,7 @@ const AppLayout = () => {
     <SidebarProvider className="bg-zinc-950">
       <AppSidebar  />
       <div className="w-full relative isolate ">
-        <Header className="border-2 bg-sidebar px-4">
+        <Header className="border-2 bg-sidebar absolute top-0 px-4 w-full">
             <div>
           <SidebarTrigger className="size-9" />
 

@@ -15,7 +15,7 @@ import { Bell, Plus } from 'lucide-react';
 import ToggleSwitch from '@/components/ToggleSwitch';
 const WalletPage = () => {
   return (
-    <section className="text-color p-4">
+    <section className="text-color px-4 py-14">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card >
           <CardHeader>
