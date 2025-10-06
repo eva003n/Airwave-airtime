@@ -73,7 +73,7 @@ const WalletPage = () => {
           </CardContent>
           <CardFooter></CardFooter>
         </Card>
-        <Card className="">
+        <Card >
           <CardHeader>
             <CardTitle className="text-[1.3rem] font-semibold">
               Auto recharge

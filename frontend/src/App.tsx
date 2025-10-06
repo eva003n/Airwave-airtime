@@ -12,7 +12,8 @@ import AppLayout from "./layout";
 import Recipients from "./pages/Recipients";
 import WalletPage from "./pages/Wallet";
 import TopupsPage from "./pages/Topups";
-import MakeTopUp from "./pages/Topups/Maketopup.tsx";
+import TopUpDetailPage from "./pages/Topups/TopUpDetail.tsx";
+import MakeTopUpPage from "./pages/Topups/Maketopup.tsx";
 
 const App = () => {
   return (
@@ -20,47 +21,38 @@ const App = () => {
       <Routes>
         .{/* Authentication management  */}
         {/* <Route element={<PublicRoute />}> */}
-          <Route element={<AuthLayout />}>
-            <Route index path="/log-in" element={<SignIn />} />
+        <Route element={<AuthLayout />}>
+          <Route index path="/log-in" element={<SignIn />} />
 
-            <Route path="/sign-up" element={<Signup />} />
-            <Route path="/loader" element={<LoaderPage />} />
-          </Route>
+          <Route path="/sign-up" element={<Signup />} />
+          <Route path="/loader" element={<LoaderPage />} />
+        </Route>
         {/* </Route> */}
         <Route element={<AppLayout />}>
           {/* <Route element={<ProtectedRoute />}> */}
-            {/* Dashboard (Analytics and reports) */}
-            <Route
-              index
-              path="/"
-              element={<h1 className="text-white">Dashboard</h1>}
-            ></Route>
-            {/* Recipient managemant */}
-            <Route
-              path="/recipients"
-              element={<Recipients/>}
-            ></Route>
-            {/* Airtime distribution */}
-            <Route
-              path="/top-ups"
-              element={<TopupsPage/>}
-            >
-              <Route path="make-topup" element={<MakeTopUp/>}/>
-            </Route>
-            
-            {/* Wallet management */}
-            <Route
-              path="/wallet"
-              element={<WalletPage/>}
-            ></Route>
-            {/*Reporting and analytics dashboard  */}
-            <Route
-              path="/transactions"
-              element={<h1 className="text-white">Transactions</h1>}
-            ></Route>
-
-            {/*  User management  */}
-            <Route path="/users"></Route>\{/* 404 page */}
+          {/* Dashboard (Analytics and reports) */}
+          <Route
+            index
+            path="/"
+            element={<h1 className="text-white">Dashboard</h1>}
+          ></Route>
+          {/* Recipient managemant */}
+          <Route path="/recipients" element={<Recipients />}></Route>
+          {/* Airtime distribution */}
+          <Route path="/top-ups">
+            <Route index element={<TopupsPage />} />
+            <Route path="make-topup" element={<MakeTopUpPage />} />
+            <Route path=":topup" element={<TopUpDetailPage />} />
+          </Route>
+          {/* Wallet management */}
+          <Route path="/wallet" element={<WalletPage />}></Route>
+          {/*Reporting and analytics dashboard  */}
+          <Route
+            path="/transactions"
+            element={<h1 className="text-white">Transactions</h1>}
+          ></Route>
+          {/*  User management  */}
+          <Route path="/users"></Route>\{/* 404 page */}
           {/* </Route> */}
         </Route>
         <Route path="*" element={<NotFound />} />
