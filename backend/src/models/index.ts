@@ -14,7 +14,7 @@ const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || "development";
 
 // Import config (make sure config/config.json or config/config.ts exists)
-import configFile from "../config/database/config.json" with { type: "json" };
+import configFile from "../config/database/config.js"
 const config = (configFile as any)[env];
 
 interface DB {
@@ -38,7 +38,7 @@ fs.readdirSync(__dirname)
     return (
       file.indexOf(".") !== 0 &&
       file !== basename &&
-      file.slice(-3) === ".ts" && // 👈 TypeScript files
+      file.slice(-3) === ".ts" && 
       file.indexOf(".test.ts") === -1
     );
   })

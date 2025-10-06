@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import "./App.css";
+import "./App.tsx";
 import Signup from "./pages/Signup";
 import SignIn from "./pages/Signin";
 import NotFound from "./pages/NotFound";
@@ -12,6 +12,7 @@ import AppLayout from "./layout";
 import Recipients from "./pages/Recipients";
 import WalletPage from "./pages/Wallet";
 import TopupsPage from "./pages/Topups";
+import MakeTopUp from "./pages/Topups/Maketopup.tsx";
 
 const App = () => {
   return (
@@ -43,7 +44,10 @@ const App = () => {
             <Route
               path="/top-ups"
               element={<TopupsPage/>}
-            ></Route>
+            >
+              <Route path="make-topup" element={<MakeTopUp/>}/>
+            </Route>
+            
             {/* Wallet management */}
             <Route
               path="/wallet"
@@ -54,6 +58,7 @@ const App = () => {
               path="/transactions"
               element={<h1 className="text-white">Transactions</h1>}
             ></Route>
+
             {/*  User management  */}
             <Route path="/users"></Route>\{/* 404 page */}
           {/* </Route> */}

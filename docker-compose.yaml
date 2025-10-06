@@ -32,9 +32,9 @@ services:
     env_file:
       - backend/.env.development
     environment:
-          POSTGRES_USER: ${DB_USER}
-          POSTGRES_PASSWORD: ${DB_PASSWORD}
-          POSTGRES_DB: ${DB_NAME}
+          - POSTGRES_USER=airwave_admin
+          - POSTGRES_PASSWORD=airwave@2925airtime
+          - POSTGRES_DB=airwave_development
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
