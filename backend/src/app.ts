@@ -45,6 +45,7 @@ import recipientRouter from "./routes/recipient.routes.js";
 import topUpRouter from "./routes/topup.routes.js";
 import userRouter from "./routes/user.routes.js";
 import walletRouter from "./routes/wallet.routes.js";
+import transactionRouter from "./routes/transaction.routes.js"
 import reportRouter from "./routes/report.routes.js";
 import notFoundRouter from "./routes/not-found.routes.js";
 import healthCheckRouter from "./routes/health.routes.js";
@@ -59,6 +60,8 @@ app.use("/api/v1/top-ups", topUpRouter);
 app.use("/api/v1/users", userRouter);
 /*-- Wallet management -- */
 app.use("/api/v1/wallet", walletRouter);
+/*-- Transaction management -- */
+app.use("/api/v1/transactions", transactionRouter);
 /* -- Reports and analytics -- */
 app.use("/api/v1/reports", reportRouter);
 /*-- API monotoring -- */

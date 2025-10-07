@@ -46,9 +46,15 @@ const IdSchema =  z.object({
   transactionId: z.string()
 })
 
+const OperatorDetailsSchema = z.object({
+  phoneNumber: z.string().min(12).max(12),
+  countryIsoCode: z.string().min(2).max(2).default("KE")
+
+})
 
 //validate access token
 const tokenSchema = z.jwt({ alg: "HS256" });
+
 
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
@@ -56,4 +62,5 @@ export type SignInAuth = z.infer<typeof signInSchema>;
 export type Token = z.infer<typeof tokenSchema>;
 export type TopUp = z.infer<typeof topUpSchema>
 export type Id = z.infer<typeof IdSchema>
-export { signUpSchema, signInSchema, tokenSchema, topUpSchema, IdSchema };
+export type OperatorDatail = z.infer<typeof OperatorDetailsSchema >
+export { signUpSchema, signInSchema, tokenSchema, topUpSchema, IdSchema, OperatorDetailsSchema };

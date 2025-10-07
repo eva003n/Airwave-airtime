@@ -10,10 +10,10 @@ const options = {
   },
   //traverses the each and every uploaded file if many and evaluates the mimetype
   fileFilter: (req: Request, file: any, cb: any) => {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|avif)$/)) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|avif|csv)$/)) {
       //reject file
       cb(
-        new Error("File mimetype not supported, allowed [jpeg,jpg,png,avif]"),
+        new Error("File mimetype not supported, allowed [jpeg,jpg,png,avif,csv]"),
         false
       );
     }
