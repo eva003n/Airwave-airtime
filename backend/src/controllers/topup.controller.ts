@@ -9,13 +9,26 @@ import type { Request, Response, NextFunction } from "express";
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
 
 const getTopUps = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+
+    return res.status(200).json(new ApiResponse(200, null, "Top up fetched successfully "))
+
+
+  }
 );
 
 //to enable bulk to ups we need firts to read a file that uploaded in csv format
 /*
 csv parser to prse csv files -> https://www.npmjs.com/package/csv-parser
-//Validate each top ups operator 
+
+----initiate background jobs------ 
+Validate each top ups operators 
+send top ups to multiple recipients
+article-> https://medium.com/@sujakhu.umesh/how-i-handled-background-jobs-in-node-js-with-bullmq-and-redis-95a0f17027ff
+article -> https://dev.to/mohsenkamrani/nodejs-background-job-processing-with-bull-basics-4633
+
+
+
 
 */
 const sendBulkTopUps = asyncHandler(
@@ -107,65 +120,3 @@ const getMnpDetails = asyncHandler(
 
 export { sendTopUp, sendBulkTopUps, getTopUps, getTopUpStatus, autoDetectOperator, getOperators, getMnpDetails };
 
-/*
-phone uato detection response
-{
-  "success": true,
-  "status": 200,
-  "data": {
-    "id": 266,
-    "operatorId": 266,
-    "name": "Safaricom Kenya",
-    "bundle": false,
-    "data": false,
-    "pin": false,
-    "comboProduct": false,
-    "supportsLocalAmounts": true,
-    "supportsGeographicalRechargePlans": false,
-    "denominationType": "RANGE",
-    "senderCurrencyCode": "KES",
-    "senderCurrencySymbol": "Ksh",
-    "destinationCurrencyCode": "KES",
-    "destinationCurrencySymbol": "Ksh",
-    "commission": 5,
-    "internationalDiscount": 5,
-    "localDiscount": 0,
-    "mostPopularAmount": null,
-    "mostPopularLocalAmount": null,
-    "minAmount": 5,
-    "maxAmount": 10000,
-    "localMinAmount": null,
-    "localMaxAmount": null,
-    "country": {
-      "isoName": "KE",
-      "name": "Kenya"
-    },
-    "fx": {
-      "rate": 1,
-      "currencyCode": "KES"
-    },
-    "logoUrls": [
-      "https://s3.amazonaws.com/rld-operator/ce0886d4-1143-4ab1-88c4-4df1e8093653-size-3.png",
-      "https://s3.amazonaws.com/rld-operator/ce0886d4-1143-4ab1-88c4-4df1e8093653-size-1.png",
-      "https://s3.amazonaws.com/rld-operator/ce0886d4-1143-4ab1-88c4-4df1e8093653-size-2.png"
-    ],
-    "fixedAmounts": [],
-    "fixedAmountsDescriptions": {},
-    "localFixedAmounts": [],
-    "localFixedAmountsDescriptions": {},
-    "suggestedAmounts": [],
-    "suggestedAmountsMap": {},
-    "fees": {
-      "international": 0,
-      "local": 0,
-      "localPercentage": 0,
-      "internationalPercentage": 0
-    },
-    "geographicalRechargePlans": [],
-    "promotions": [],
-    "status": "ACTIVE"
-  },
-  "message": "Successfully auto detected operator"
-}
-
-*/
