@@ -10,10 +10,9 @@ import type {
 import {
   logInUser,
   logOutUser,
-  multiFactorAuthentication,
+
   refreshToken,
   signUpUser,
-  verify_email,
 } from "../api";
 import { useNavigate } from "react-router-dom";
 import type { AxiosResponse } from "axios";
@@ -52,26 +51,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     );
   };
 
-  const verifyEmail = async (data: IVerifyEmail) => {
-    console.log(data);
 
-    setLoading(true);
-    return requestHandler(
-      async () => await verify_email(data),
-      (response: AxiosResponse) => {
-        if (response.data.isEmailVerified) {
-          navigate("/log-in");
-          setLoading(false);
-        }
-        return response;
-      },
-      (error: Error) => {
-        setLoading(false);
-
-        return error;
-      }
-    );
-  };
   const logIn = async (data: SignInAuth) => {
     setLoading(true);
     return requestHandler(
@@ -96,26 +76,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     );
   };
-  const twoFactorAuth = async (data: IVerifyOtp) => {
-    setLoading(true);
-    return requestHandler(
-      async () => await multiFactorAuthentication(data),
-      (response: AxiosResponse) => {
-        setToken(response.data.accessToken);
-        setUser(response.data.user);
 
-        setItem("token", response.data.accessToken);
-        setItem("user", JSON.stringify(response.data.user));
-        setLoading(false);
-        navigate("/dashboard");
-        return response;
-      },
-      (error: Error) => {
-        setLoading(false);
-        return error;
-      }
-    );
-  };
 
   const refreshAuthToken = async () => {
     return requestHandler(
@@ -166,8 +127,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         signUp,
         logOut,
         logIn,
-        verifyEmail,
-        twoFactorAuth,
         refreshAuthToken,
       }}
     >

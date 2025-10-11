@@ -22,6 +22,7 @@ const SignIn = () => {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<SignInAuth>({
     //validation using zod schema
     resolver: zodResolver(signInSchema)
@@ -36,15 +37,11 @@ const SignIn = () => {
       const response = await logIn(data);
       console.log(response.message)
 
-      response.errors
-        ? response.error.forEach((error: any) =>
-            setError(error.path, { message: error.message })
-          )
-        : setError("root", response.message);
-      console.log(response);
   } catch (error) {
     console.log(error.message)
     
+  }finally{
+    reset()
   }
   };
         

@@ -39,6 +39,8 @@ COPY --from=builder /app/dist ./
 COPY --from=builder /app/package.json ./
 # COPY --from=builder /app/wait-for-db.sh ./
 COPY --from=deps /app/node_modules ./node_modules
+USER root
+RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 
 EXPOSE 8000
 

@@ -56,7 +56,7 @@ function StyledDropzone() {
         {({ getRootProps, getInputProps }) => (
           <div>
             <div {...getRootProps(style)}>
-              <input {...getInputProps()} />
+              <input {...getInputProps()} type="file" name="recipient" />
             </div>
           </div>
         )}

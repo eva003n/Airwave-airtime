@@ -9,11 +9,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoaderComponent from "./components/Loader";
 import LoaderPage from "./components/LoaderComponent";
 import AppLayout from "./layout";
-import Recipients from "./pages/Recipients";
 import WalletPage from "./pages/Wallet";
 import TopupsPage from "./pages/Topups";
 import TopUpDetailPage from "./pages/Topups/TopUpDetail.tsx";
 import MakeTopUpPage from "./pages/Topups/Maketopup.tsx";
+import CreateRecipientPage from "./pages/Recipients/Createrecipient.tsx";
+import EditRecipientPage from "./pages/Recipients/Editrecipient.tsx";
+import RecipientManagementPage from "./pages/Recipients/Recipients.tsx";
+import RecipientLayout from "./layouts/RecipientLayout.tsx";
 
 const App = () => {
   return (
@@ -37,7 +40,11 @@ const App = () => {
             element={<h1 className="text-white">Dashboard</h1>}
           ></Route>
           {/* Recipient managemant */}
-          <Route path="/recipients" element={<Recipients />}></Route>
+          <Route path="/recipients" element={<RecipientLayout />}>
+            <Route index element={<RecipientManagementPage />} />
+            <Route path="recipient" element={<CreateRecipientPage />} />
+            <Route path=":recipient" element={<EditRecipientPage />} />
+          </Route>
           {/* Airtime distribution */}
           <Route path="/top-ups">
             <Route index element={<TopupsPage />} />

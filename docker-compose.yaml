@@ -20,7 +20,6 @@ services:
     - 8000:8000
   networks:
     - app-net
-  # command: sh -c "pnpm run migrate"
   
 
 
@@ -47,6 +46,17 @@ services:
        - postgres_data:/var/lib/postgresql/data
     networks: 
        - app-net
+ redis:
+   image: redis:8
+   container_name: redis_server
+   restart: always
+   ports:
+      - 6379:6379
+   volumes:
+      - ./data/redis:/data
+   networks:
+      - app-net
+   command: ["redis-server", "--appendonly", "yes"]
 
  frontend:
     build:

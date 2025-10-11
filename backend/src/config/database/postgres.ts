@@ -1,11 +1,13 @@
 import { Sequelize } from "sequelize-typescript";
 
 import {
+
   NODE_ENV,
 } from "../env.js";
 import logger from "../../logger/logger.winston.js";
 import User from "../../models/User.js";
 import config, { type ConfigEnv } from "./config.js"
+import Recipient from "../../models/Recipients.js";
 
 
 
@@ -28,14 +30,14 @@ const sequelize = new Sequelize({
     // },
   },
   logging: logger.info.bind(logger),
-  models: [User],
+  models: [User, Recipient],
 
 });
 const connectDatabase = async () => {
   try {
    await sequelize.authenticate();
     logger.info("Connected to Postgres server successfully");
-    // await syncModels()
+    await syncModels()
   } catch (error) {
     logger.error(`Failed to connect to Postgres server with error ${error}`);
     process.exit(1)

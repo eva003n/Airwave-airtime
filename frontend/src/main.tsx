@@ -12,13 +12,21 @@ createRoot(document.getElementById("root")!).render(
       <ToastContainer
         limit={1}
         transition={Slide}
-        position="top-center"
-        autoClose={3000}
-        className="bg-color"
-     />
-        <AuthProvider>
-          <App />
-        </AuthProvider>
+        position="bottom-center"
+        autoClose={4000}
+        hideProgressBar={true}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        toastClassName="rounded-2xl shadow-lg font-medium "
+      />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>
 );

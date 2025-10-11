@@ -4,9 +4,10 @@ import { config } from "dotenv";
 //first load the main .env file and get the mode
 config();
 const mode = process.env.NODE_ENV;
-
 //the conditionally load the the correct .env based on mode
-console.log(mode)
+config({
+  path: `./.env.${mode}`
+})
 
 export const {
   NODE_ENV,
@@ -29,4 +30,7 @@ export const {
   RELOADLY_CLIENT_SECRET,
   RELOADLY_AUDIENCE,
   RELOADLY_AUTH_URL,
+  REDIS_HOST,
+  REDIS_PORT
 } = process.env;
+

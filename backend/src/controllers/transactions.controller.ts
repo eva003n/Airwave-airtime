@@ -17,9 +17,9 @@ const getTransactionHistory = asyncHandler(
 
 const getTransactionDetails = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const {transactionId} = req.params as Id
+    const {id} = req.params as Id 
 
-    const transactionDetails = await reloadlyClient.request("GET", `/topups/reports/transactions/${transactionId}`)     
+    const transactionDetails = await reloadlyClient.request("GET", `/topups/reports/transactions/${id}`)     
 
     return res.status(200).json(
         new ApiResponse(200, transactionDetails.data, "Transaction detail fetched successfully")

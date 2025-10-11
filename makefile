@@ -35,7 +35,8 @@ install:
 	@docker compose --env-file $(BACKEND_ENV_FILE) build
 	@docker compose --env-file $(BACKEND_ENV_FILE) up --build -d
 	# Backend setup'
-	@docker exec -it airwave_api cp $(BACKEND_ENV_FILE) .env
+	@docker exec -it airwave_api cp .backend/.env  .env
+	@docker exec -it airwave_api cp $(BACKEND_ENV_FILE) .env.${ENV}
 # 	@docker exec -it airwave_api pnpm migrate
 # 	@docker exec -it airwave_api pnpm seed
 	# Frontend setup

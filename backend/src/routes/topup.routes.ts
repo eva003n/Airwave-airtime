@@ -1,5 +1,5 @@
 import { Router, type RequestHandler } from "express";
-import {  autoDetectOperator, getMnpDetails, getOperators, getTopUps, getTopUpStatus, sendBulkTopUps, sendTopUp,} from "../controllers/topup.controller.js";
+import {  autoDetectOperator, createBulkTopUps, getMnpDetails, getOperators, getTopUps, getTopUpStatus, sendBulkTopUps, sendTopUp,} from "../controllers/topup.controller.js";
 import { validate } from "../middlewares/validators/validator.middleware.js";
 import { IdSchema, OperatorDetailsSchema, topUpSchema } from "../middlewares/validators/validators.js";
 import { uploadSingleFile } from "../middlewares/multer.middleware.js";
@@ -11,7 +11,7 @@ router.route("/").get(getTopUps);
 //Perform single top up
 router.route("/").post(validate(topUpSchema), sendTopUp);
 //Enable bulk topups
-router.route("/bulk").post(uploadSingleFile("recipient"), sendBulkTopUps)
+router.route("/bulk").post(uploadSingleFile("recipient"), createBulkTopUps)
 //get top status
 router
   .route("/:transactionId/status")

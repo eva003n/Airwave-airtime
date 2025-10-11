@@ -175,7 +175,7 @@ const tokenRefresh = asyncHandler(
       .json(
         new ApiResponse(
           201,
-          { accessToken },
+          { access_token:accessToken, expires_in: 86400, token_type: "" },
           "Access token refreshed successfully"
         )
       );

@@ -7,19 +7,36 @@ import { z } from "zod";
 const validate = <T>(schema: z.ZodType<T>) =>
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     // const {error } = schema.safeParse(req.params || req.query)
-    const { error } = schema.safeParse(
-      Object.assign({}, req.body, req.params, req.query)
-    );
-    //validation error exit with bad request
-    if (error)
-      return next(
-        ApiError.badRequest(
-          400,
-          req.originalUrl,
-          "Invalid input",
-          formatError(error.issues)
-        )
-      );
+    console.log(Array.isArray(req.body));
+    if(Array.isArray(req.body)) {
+      const {error} = schema.safeParse(req.body)
+
+        if (error)
+          return next(
+            ApiError.badRequest(
+              400,
+              req.originalUrl,
+              "Invalid input",
+              formatError(error.issues)
+            )
+          );
+    }else {
+       const { error } = schema.safeParse(
+         Object.assign({}, req.body, req.params, req.query)
+       );
+       //validation error exit with bad request
+       if (error)
+         return next(
+           ApiError.badRequest(
+             400,
+             req.originalUrl,
+             "Invalid input",
+             formatError(error.issues)
+           )
+         )
+
+    }
+   
     //validation success move to next function in the stack
     next();
   });

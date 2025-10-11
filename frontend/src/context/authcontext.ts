@@ -20,8 +20,6 @@ const AuthContext = createContext<{
   signUp: (data: SignUpAuth) => Promise<any>;
   logOut: () => Promise<any>;
   logIn: (data: SignInAuth) => Promise<any>;
-  verifyEmail: (data: IVerifyOtp) => Promise<any>;
-  twoFactorAuth: (data: IVerifyOtp) => Promise<any>;
   refreshAuthToken: () => Promise<any>;
 }>({
   user: null,
@@ -31,8 +29,6 @@ const AuthContext = createContext<{
   signUp: async () => {},
   logOut: async () => {},
   logIn: async () => {},
-  verifyEmail: async () => {},
-  twoFactorAuth: async () => {},
   refreshAuthToken: async () => {},
 });
 

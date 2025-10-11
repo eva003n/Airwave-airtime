@@ -12,8 +12,7 @@ const Button = ({ value, icon: Icon , isLoading = false, children, ...props }: B
   return (
     <button
       {...props}
-      className={`w-full flex bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 items-center justify-center gap-2 py-1 rounded-sm   disabled:brightness-80 text-gray-200  ${props.className} cursor-pointer`}
-      
+      className={`px-4 py-1.5 flex bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 items-center justify-center gap-2 rounded-sm   disabled:brightness-80 text-white  ${props.className} cursor-pointer`}
     >
       {Icon && (
         <Icon

@@ -33,11 +33,11 @@
     "noFallthroughCasesInSwitch": true,
     "useUnknownInCatchVariables": true /* Default catch clause variables as 'unknown' instead of 'any'. */,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "emitDecoratorMetadata": true
     // "typeRoots": ["./types", "./node_modules/@types"]
     // "allowImportingTsExtensions": true,
     // "noEmit": true
   },
-  "include": ["src/**/*", "tests/**/*", "types"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*", "types/**/*"],
+  "exclude": ["node_modules", "tests/**/*"]
 }

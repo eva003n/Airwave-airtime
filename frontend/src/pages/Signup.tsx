@@ -26,31 +26,24 @@ const Signup = () => {
   const {
     register,
     handleSubmit,
-    watch,
-    setError,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<SignUpAuth>({
     //validation using zod schema
     resolver: zodResolver(signUpSchema)
   });
 
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setData({
-  //     ...data,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
-  
   //Api communication
   const onSubmit: SubmitHandler<SignUpAuth> = async (data) => {
-    
+    try {
     const response = await signUp(data);
-    // response.error
-    //   ? response.error.forEach((error: any) =>
-    //       setError(error.path, { message: error.message })
-    //     )
-    //   : "";
-    console.log(response)
+    toast.success(response.data.message)
+    } catch (error) {
+      toast.error(error.message)
+      
+    }finally{
+      reset()
+    }
   };
 
   return (
