@@ -26,8 +26,8 @@ const signUpUser = async (data: SignUpAuth) => {
 const logInUser = async (data: SignInAuth) => {
   return apiClient.request("POST", "/auth/sign-in", data);
 };
-const logOutUser = async () => {
-  return apiClient.request("DELETE", "/auth/sign-out");
+const logOutUser = async (id: string) => {
+  return apiClient.request("DELETE", `/auth/sign-out/${id}`);
 };
 
 const refreshToken = async () => {

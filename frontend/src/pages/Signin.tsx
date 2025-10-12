@@ -35,7 +35,6 @@ const SignIn = () => {
   try {
 
       const response = await logIn(data);
-      console.log(response.message)
 
   } catch (error) {
     console.log(error.message)
@@ -45,7 +44,7 @@ const SignIn = () => {
   }
   };
         
-  console.log(errors.root);
+  // console.log(errors.root);
         
   
 

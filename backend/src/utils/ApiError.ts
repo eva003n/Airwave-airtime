@@ -119,7 +119,7 @@ class ApiError extends Error {
     statusCode: number = 500,
     instance: string,
     message: string = "Something went wrong",
-    errors: string | object[] | null = null,
+    errors: object[] | null | any = null,
     type: string = "probs/internal-error",
     title: string = "InternalError"
   ) {

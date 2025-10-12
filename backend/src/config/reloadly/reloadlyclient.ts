@@ -1,6 +1,17 @@
-import axios,  {AxiosError, type AxiosInstance, type AxiosResponse } from "axios";
-import { RELOADLY_CLIENT_ID, RELOADLY_CLIENT_SECRET, RELOADLY_AUDIENCE, RELOADLY_AUTH_URL } from "../env.js";
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type AxiosResponse,
+} from "axios";
+import {
+  RELOADLY_CLIENT_ID,
+  RELOADLY_CLIENT_SECRET,
+  RELOADLY_AUDIENCE,
+  RELOADLY_AUTH_URL,
+} from "../env.js";
 import logger from "../../logger/logger.winston.js";
+import ApiError from "../../utils/ApiError.js";
+import ReloadlyError from "../../utils/ReloadlyError.js";
 
 interface TokenResponse {
   access_token: string;
@@ -21,27 +32,58 @@ class ReloadlyClient {
     this.clientId = RELOADLY_CLIENT_ID || "";
     this.clientSecret = RELOADLY_CLIENT_SECRET || "";
     this.audience = RELOADLY_AUDIENCE || "https://topups-sandbox.reloadly.com";
-    this.authUrl = RELOADLY_AUTH_URL || "https://auth.reloadly.com/oauth/token ";
+    this.authUrl =
+      RELOADLY_AUTH_URL || "https://auth.reloadly.com/oauth/token ";
 
     this.api = axios.create({
       baseURL: RELOADLY_AUDIENCE || "https://topups-sandbox.reloadly.com", // Change if using other Reloadly APIs
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      timeout: 120000 // 2mins
+      timeout: 120000, // 2mins
     });
-  this.api.interceptors.response.use(
-    (response: AxiosResponse) => response,
-    (error: AxiosError<{message: string}>) => {
-      return Promise.reject({
-        ststus: error.status,
-        message: error.response?.data.message || error.message || "Something went wrong",
-        url: error.config?.url,
-        method: error.config?.method
-      });
+    this.api.interceptors.response.use(
+      (response: AxiosResponse) => response,
+      (error: AxiosError<{ message: string }>) => {
 
-  })
+        const reloadlyError = new ReloadlyError(
+          error.config?.url || "/topups",
+          "Airtime api error",
+          error.status || 500
 
+        );
+        if(error.status && error.status === 400) {
+           return Promise.reject(
+             ApiError.badRequest(
+               error?.status || 500,
+               error.config?.url || "/topups",
+               error.response?.data.message ||
+                 error.message ||
+                 "Something went wrong",
+               reloadlyError
+             )
+           );
+
+        }else {
+           return Promise.reject(
+             ApiError.internalServerError(
+               error?.status || 500,
+               error.config?.url || "/topups",
+               error.response?.data.message ||
+                 error.message ||
+                 "Something went wrong",
+               reloadlyError
+             )
+           );
+        }
+        // return Promise.reject({
+        //   ststus: error.status,
+        //   message: error.response?.data.message || error.message || "Something went wrong",
+        //   url: error.config?.url,
+        //   method: error.config?.method
+        // });
+      }
+    );
   }
 
   private async getAccessToken(): Promise<string> {
@@ -75,7 +117,6 @@ class ReloadlyClient {
       },
     });
   }
-
 }
 
 export const reloadlyClient = new ReloadlyClient();

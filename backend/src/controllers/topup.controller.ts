@@ -1,7 +1,9 @@
 import { reloadlyClient } from "../config/reloadly/reloadlyclient.js";
 import type {
+  BulkTopUpData,
   Id,
   OperatorDatail,
+  ReloadlyTopUp,
   TopUp,
 } from "../middlewares/validators/validators.js";
 import ApiError from "../utils/ApiError.js";
@@ -13,9 +15,13 @@ import csvParser from "csv-parser";
 import { uploadsRoot } from "../middlewares/multer.middleware.js";
 import path from "path";
 import User from "../models/User.js";
-import Topup from "../models/Topups.js";
+import Topup, { TopStatus } from "../models/Topups.js";
 import { topUpQueue } from "../queues/topup.queue.js";
 import logger from "../logger/logger.winston.js";
+import Recipient, { MobileOperator } from "../models/Recipients.js";
+import { error } from "console";
+import parseCsv from "../utils/parsecsv.js";
+import { Index } from "sequelize-typescript";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
@@ -60,23 +66,75 @@ const sendBulkTopUps = asyncHandler(
 const createBulkTopUps = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     //read csv and add top up job to queue
-    await readTopUpsFile(req)
-    res.status(201).json(new ApiResponse(201, null, "Successfully uploaded file"))
 
+    if (!req.file)
+      return next(
+        ApiError.badRequest(400, req.originalUrl, "No file was uploaded")
+      );
+    let data: BulkTopUpData = [];
+    if (req.file && req.file.path) {
+      data = await parseCsv(req.file?.path);
+      await enqueueTopUps(data);
+      logger.info(`Successfully added ${data.length} to the top ups queue`)
+    }
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, null, `Successfully uploaded ${data.length} topups for processing`));
   }
 );
 const sendTopUp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { amount, recipientPhone, operatorId }: TopUp = req.body;
-    const topResponse = await reloadlyClient.request<TopUp>("POST", "/topups", {
-      operatorId,
-      amount,
-      recipientPhone,
+    const { airtime_amount, operator_code, phone_number }: TopUp = req.body;
+
+    const recipient = await Recipient.findOne({ where: { phone_number } });
+
+    if (!recipient)
+      return next(
+        ApiError.notFound(
+          404,
+          req.originalUrl,
+          "Airtime recipient does not exist"
+        )
+      );
+
+    const topResponse = await reloadlyClient.request<ReloadlyTopUp>(
+      "POST",
+      "/topups",
+      //payload send to reloadly airtime api
+      {
+        amount: airtime_amount,
+        operatorId: operator_code,
+        recipientPhone: {
+          countryCode: "KE",
+          number: phone_number,
+        },
+      }
+    );
+
+    // console.log(topResponse.data)
+    const operator =
+      topResponse.data.operatorId === 266
+        ? MobileOperator.Safaricom
+        : MobileOperator.Airtel;
+    const status =
+      topResponse.data.status === "SUCCESSFUL"
+        ? TopStatus.Successful
+        : TopStatus.Failed;
+
+    const topUp = await Topup.create({
+      transaction_id: topResponse.data.transactionId,
+      phone_number: topResponse.data.recipientPhone,
+      operator,
+      status,
+      airtime_amount: topResponse.data.deliveredAmount,
+      recipient_id: recipient.id || "",
+      user_id: req.user.id,
     });
 
     return res
       .status(200)
-      .json(new ApiResponse(200, topResponse.data, "Successfully topped up "));
+      .json(new ApiResponse(200, topUp, "Successfully topped up "));
   }
 );
 
@@ -84,10 +142,7 @@ const getTopUpStatus = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params as Id;
 
-    const topUp = await reloadlyClient.request(
-      "GET",
-      `/${id}/status`
-    );
+    const topUp = await reloadlyClient.request("GET", `/${id}/status`);
 
     return res
       .status(200)
@@ -148,26 +203,26 @@ const getMnpDetails = asyncHandler(
   }
 );
 
-const readTopUpsFile = async (req: Request) => {
-  if (req.file && req.file.path) {
-   const filePath = path.resolve(req.file.path);
-
-    fs.createReadStream(filePath)
-      .pipe(csvParser())
-      .on("data", async (data) => await topUpQueue.addBulk([data]))
-      .on("end", async () => {
-        logger.info("Top up jobs successfully added to job queue");
-      });
-  }
+const autoDetect = async (phoneNumber: string, countryIsoCode: string) => {
+  const operatorDetails = await reloadlyClient.request(
+    "GET",
+    `/operators/auto-detect/phone/${phoneNumber}/countries/${countryIsoCode}`
+  );
+  return operatorDetails;
 };
 
-const autoDetect = async (phoneNumber: string, countryIsoCode: string) => {
-   const operatorDetails = await reloadlyClient.request(
-     "GET",
-     `/operators/auto-detect/phone/${phoneNumber}/countries/${countryIsoCode}`
-   );
-   return operatorDetails
-}
+const enqueueTopUps = async (data: BulkTopUpData) => {
+  const jogs = data.map((dataItem, Index) => ({
+    name: `top-up-job-${Index + 1}`,
+    data: dataItem,
+    options: {
+      attemps: 3,
+      removeOnComplete: true,
+      removeOnFail: false,
+    },
+  }));
+  return await topUpQueue.addBulk(jogs);
+};
 
 export {
   sendTopUp,
@@ -178,5 +233,5 @@ export {
   autoDetectOperator,
   getOperators,
   getMnpDetails,
-  autoDetect
+  autoDetect,
 };

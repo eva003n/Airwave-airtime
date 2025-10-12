@@ -26,23 +26,68 @@ const signInSchema = z.object({
 
 //validate top up requests
 const topUpSchema = z.object({
-  amount: z
+  airtime_amount: z
     .number()
-    .min(5, "Top up cannot be below 5")
-    .max(10000, "Top up cannot exceed 10,000"),
-  operatorId: z
+    .min(5, "Top up cannot be below 5 ksh")
+    .max(10000, "Top up cannot exceed 10,000 ksh"),
+  operator_code: z
     .number()
     .refine((val) => val == 265 || val == 266, {
-      message: "Operators ID supported are either 265 or 266",
+      message: "Operator code supported are either 265 or 266",
     })
     .default(266),
-  recipientPhone: z.object({
-    countryCode: z.string()
-    .min(1, "Country code too short").max(5, "Country code too long").default("KE"),
-    number: z.string().min(12, "Phone number too short").max(12, "Phone number too long"),
-  }),
+  phone_number: z
+    .string()
+    .regex(
+      /^2547\d{8}$/,
+      "Phone number must start with 2547 and be 12 digits long"
+    ),
 });
 
+const topUpCsvSchema = z.object({
+  airtime_amount: z
+    .number()
+    .min(5, "Top up cannot be below 5 ksh")
+    .max(10000, "Top up cannot exceed 10,000 ksh"),
+  phone_number: z
+    .string()
+    .regex(
+      /^2547\d{8}$/,
+      "Phone number must start with 2547 and be 12 digits long"
+    ),
+
+  branch: z.enum(
+    [
+      "Head office",
+      "Kiambu",
+      "Limuru",
+      "Githunguri",
+      "Kiriita",
+      "Kagwe",
+      "Kikuyu",
+      "Wangige",
+      "Banana",
+      "Mai mahiu",
+      "Suswa",
+      "Gikomba",
+      "Ruaka",
+      "Wakimbo",
+      "Gikambura",
+      "Nairekia",
+    ],
+    { error: "Branch is required" }
+  ),
+  operator: z.enum(Object.values(MobileOperator)),
+});
+const bulkTopUpDataSchema = z.array(topUpCsvSchema)
+
+const reloadlyTopResponseSchema = z.object({
+      transactionId: z.number(),
+      recipientPhone: z.string(),
+      operatorId: z.number(),
+      status: z.string(),
+      deliveredAmount: z.number()
+    })
 const IdSchema =  z.object({
   id: z.string()
 })
@@ -82,7 +127,7 @@ const recipientSchema = z.object({
       "Gikambura",
       "Nairekia",
     ],
-    "Branch is required"
+    { error: "Branch is required" }
   ),
 
   phone_number: z
@@ -97,7 +142,7 @@ const recipientSchema = z.object({
   // operator_code: z
   // .coerce
   //   .number()
-    
+
   //   .refine((val) => [265, 266].includes(val), {
   //     message: "Operator code must be one of 265 or 266",
   //   }),
@@ -111,6 +156,7 @@ const recipientSchema = z.object({
     .string()
     .min(3, "Designation must be at least 3 characters long")
     .max(50, "Designation too long"),
+  user_id: z.uuidv4(),
 });
 
 const multipleRecipientSchema = z.array(recipientSchema).min(1).max(100)
@@ -131,5 +177,9 @@ export type OperatorDatail = z.infer<typeof OperatorDetailsSchema >
 export type RecipientData = z.infer<typeof recipientSchema>;
 export type BulkRecipientData = z.infer<typeof multipleRecipientSchema>;
 export type PaginateData = z.infer<typeof paginateSchema>
+export type BulkTopUpData = z.infer<typeof bulkTopUpDataSchema>
 
-export { signUpSchema, signInSchema, tokenSchema, topUpSchema, IdSchema, OperatorDetailsSchema, recipientSchema, paginateSchema, multipleRecipientSchema };
+
+//reloadly api response types
+export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>
+export { signUpSchema, signInSchema, tokenSchema, topUpSchema, IdSchema, OperatorDetailsSchema, recipientSchema, paginateSchema, multipleRecipientSchema, bulkTopUpDataSchema };

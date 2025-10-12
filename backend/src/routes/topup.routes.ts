@@ -3,8 +3,12 @@ import {  autoDetectOperator, createBulkTopUps, getMnpDetails, getOperators, get
 import { validate } from "../middlewares/validators/validator.middleware.js";
 import { IdSchema, OperatorDetailsSchema, topUpSchema } from "../middlewares/validators/validators.js";
 import { uploadSingleFile } from "../middlewares/multer.middleware.js";
+import { protectRoute } from "../middlewares/auth.middleware.js";
 
 const router = Router()
+
+//protect route from unauthorized access
+router.use(protectRoute)
 
 //Enable single topups
 router.route("/").get(getTopUps);

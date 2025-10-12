@@ -1,6 +1,7 @@
 import type {CreationAttributes, InferCreationAttributes, InferAttributes } from "sequelize";
 
 import { Table, Column, DataType, Model, Unique, BeforeCreate, BeforeUpdate } from "sequelize-typescript";
+import { MobileOperator } from "./Recipients.js";
 
 
 export enum TopStatus {
@@ -18,12 +19,12 @@ export enum OperatorType {
 @Table({
   tableName: "topups",
   modelName: "Topup",
-  // indexes: [
-  //   {
-  //     unique: true,
-  //     fields: ["email", "username"],
-  //   },
-  // ],
+  indexes: [
+    {
+      unique: true,
+      fields: ["transaction_id"],
+    },
+  ],
 })
 
 // sequelize model name | sql table name
@@ -35,48 +36,64 @@ export default class Topup extends Model<
     type: DataType.UUID,
     primaryKey: true,
     allowNull: false,
-    defaultValue: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
   })
   declare id?: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.INTEGER,
     allowNull: false,
   })
-  declare phoneNumber: string;
+  declare transaction_id: number;
 
   @Column({
     type: DataType.STRING,
+    allowNull: false,
+  })
+  declare phone_number: string;
+
+  @Column({
+    type: DataType.ENUM(...Object.values(MobileOperator)),
     allowNull: false,
     // unique: true
   })
-  declare operator: string;
+  declare operator: MobileOperator;
 
   @Column({
-    type: DataType.NUMBER,
-    allowNull: true,
-  
+    type: DataType.INTEGER,
+    allowNull: false,
   })
-  declare amount: string;
- 
+  declare airtime_amount: number;
+
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
+  declare recipient_id: string;
+
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
+  declare user_id: string;
 
   @Column({
     type: DataType.ENUM(...Object.values(TopStatus)),
+    allowNull: false,
     defaultValue: "Pending",
   })
   declare status?: TopStatus;
 
-//   @BeforeCreate
-//   @BeforeUpdate
+  // @BeforeCreate
 
 
-//   public override toJSON(): object  {
-//     const attributes = {...this.get()} as any
-//     delete attributes.password
-//     delete attributes.verification_secret
-//     delete attributes.refresh_token
-//     delete attributes.email
-//     return attributes;
-//   }
+  //   public override toJSON(): object  {
+  //     const attributes = {...this.get()} as any
+  //     delete attributes.password
+  //     delete attributes.verification_secret
+  //     delete attributes.refresh_token
+  //     delete attributes.email
+  //     return attributes;
+  //   }
 }
 

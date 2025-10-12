@@ -2,20 +2,22 @@
 import React from "react";
 
 import {
- type ColumnDef,
+  type ColumnDef,
+  type VisibilityState,
   flexRender,
+  type SortingState,
+  type ColumnFiltersState,
   getCoreRowModel,
   getPaginationRowModel,
-  useReactTable,
- type SortingState,
   getSortedRowModel,
-  type ColumnFiltersState,
-   getFilteredRowModel,
+  getFilteredRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -23,21 +25,46 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, Grid } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import type { RecipientData } from "@/validation/validators";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pages: number;
+  page: number;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  setRecipients: React.Dispatch<React.SetStateAction<RecipientData[]>>;
+  recipients: RecipientData[];
 }
 
 const DataTable = <TData, TValue>({
   columns,
   data,
+  pages,
+  page,
+  setPage,
 }: DataTableProps<TData, TValue>) => {
-const [sorting, setSorting] = React.useState<SortingState>([]);
- const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-   []
- );
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
   const table = useReactTable({
     data,
     columns,
@@ -53,86 +80,132 @@ const [sorting, setSorting] = React.useState<SortingState>([]);
   });
 
   return (
-    <div>
-      <div className="flex items-center py-4">
+    <div className="overflow-hidden">
+      <div className="flex items-center justify-end gap-2">
         <Input
-          placeholder="Search phone numbers..."
-          value={(table.getColumn("phonenumber")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("phonenumber")?.setFilterValue(event.target.value)
+          placeholder="Search by name or phone"
+          value={
+            (table.getColumn("name")?.getFilterValue() as string) ?? ""
+            // (table.getColumn("phone")?.getFilterValue() as string)
           }
+          onChange={(e) => {
+            table.getColumn("name")?.setFilterValue(e.target.value);
+            // table.getColumn("phone")?.setFilterValue(e.target.value);
+          }}
           className="max-w-sm"
         />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" title="Format Columns">
+              <Grid strokeWidth={2} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-white">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+      <Table>
+        {/* <TableCaption>List of airtime recipients.</TableCaption> */}
+
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
               </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No recipients.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <div className="flex items-center justify-center space-x-2 py-4 m-0 p-9  ">
+        <Pagination className="">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                className={
+                  page === 1
+                    ? "pointer-events-none opacity-30"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+            {[...Array(pages)].map((_, i) => (
+              <PaginationItem key={i}>
+                <PaginationLink
+                  isActive={page === i + 1}
+                  onClick={() => setPage(i + 1)}
+                >
+                  {i + 1}
+                </PaginationLink>
+              </PaginationItem>
             ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setPage((prev) => Math.min(pages, prev + 1))}
+                className={
+                  page === pages
+                    ? "pointer-events-none  opacity-30"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );
-}
+};
 export default DataTable

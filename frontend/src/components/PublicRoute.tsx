@@ -1,8 +1,10 @@
+import { getItem } from "@/utils";
 import { useAuth } from "../context/authcontext";
 import { Navigate, Outlet } from "react-router-dom";
+import type { IUser } from "@/interfaces/user.interface";
 
 const PublicRoute = () => {
-  const { user } = useAuth();
+  const user = getItem<IUser>("user")
   let isNew = false;
 if(user) {
   const createdAt = new Date(user.createdAt);
@@ -15,7 +17,7 @@ if(user) {
 
 
   if (user ) {
-    return  <Navigate to="/" replace />
+    return  <Navigate to="/dashboard" replace />
     
   } else {
     return <Outlet />;

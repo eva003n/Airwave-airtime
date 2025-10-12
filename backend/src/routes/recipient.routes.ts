@@ -2,8 +2,12 @@ import { Router } from "express";
 import { createRecipient, createRecipients, deleteRecipient, getAllrecipients, getRecipient, updateRecipient } from "../controllers/recipient.controller.js";
 import { IdSchema, multipleRecipientSchema, paginateSchema, recipientSchema } from "../middlewares/validators/validators.js";
 import { validate } from "../middlewares/validators/validator.middleware.js";
+import { protectRoute } from "../middlewares/auth.middleware.js";
 
 const router = Router();
+
+//protect recipients routes from un authorized access
+router.use(protectRoute)
 
 //create an airtime recipient
 router.route("/").post(validate(recipientSchema), createRecipient)

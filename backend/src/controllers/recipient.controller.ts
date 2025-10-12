@@ -19,6 +19,7 @@ const createRecipient = asyncHandler(
       branch,
       airtime_amount,
       phone_number,
+      user_id
     }: RecipientData = req.body;
 
     const operatorCode = operator === "Safaricom" ? 266 : 265;
@@ -41,7 +42,7 @@ const createRecipient = asyncHandler(
       branch,
       airtime_amount,
       phone_number,
-      // user_id: req.user.id
+      user_id: user_id || req.user.if
     });
 
     return res
@@ -65,7 +66,7 @@ const createRecipients = asyncHandler(
       );
     });
 
-    if (isDuplicate)
+    if (isDuplicate.length)
       return next(
         ApiError.conflictRequest(
           409,

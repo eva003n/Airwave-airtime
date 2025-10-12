@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
 import type {
+  Id,
   SignInAuth,
   SignUpAuth,
   Token,
@@ -100,7 +101,8 @@ const signIn = asyncHandler(
 );
 const signOut = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = await User.findOne({ where: { id: req.user.id } });
+    const {id } = req.params as Id
+    const user = await User.findOne({ where: { id} });
     if (!user)
       return next(
         ApiError.notFound(
@@ -127,8 +129,8 @@ const tokenRefresh = asyncHandler(
 
     if (!RefreshToken) {
       return next(
-        ApiError.badRequest(
-          400,
+        ApiError.unAuthorizedRequest(
+          401,
           `${req.originalUrl}`,
           "No refresh token provided"
         )
@@ -175,7 +177,7 @@ const tokenRefresh = asyncHandler(
       .json(
         new ApiResponse(
           201,
-          { access_token:accessToken, expires_in: 86400, token_type: "" },
+          { access_token:accessToken, expires_in: 900, token_type: "Bearer" },
           "Access token refreshed successfully"
         )
       );
@@ -218,7 +220,7 @@ const configureAndSendCookie = (
   accessToken: string,
   refreshToken: string
 ) => {
-  res
+  return res
     .cookie("AccessToken", accessToken, {
       httpOnly: true, //prevent xss attacks
       maxAge: 15 * 60 * 1000, //15min

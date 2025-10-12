@@ -16,7 +16,7 @@ if (!fs.existsSync(uploadsRoot)) {
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Create a subfolder dynamically (e.g., csv or images)
-    const type = file.mimetype.includes("csv") ? "csv" : "images";
+    const type = file.mimetype.includes("csv") ? "csv" : "xlsx";
     const folder = path.join(uploadsRoot, type);
 
     if (!fs.existsSync(folder)) fs.mkdirSync(folder, { recursive: true });
@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
 
 const options: Options = {
   limits: {
-    fileSize: 5 * 1024 * 1024, //5MB
+    fileSize: 10 * 1024 * 1024, //10MB
     files: 1, //max no of file fileds
   },
   storage: storage,

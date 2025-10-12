@@ -63,6 +63,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(response.data)
         setItem("user", JSON.stringify(response.data))
         setLoading(false);
+        navigate("/dashboard")
         // toast.success(response.message)
 
 
@@ -94,7 +95,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logOut = async () => {
     setLoading(true);
     return requestHandler(
-      async () => await logOutUser(),
+      async () => await logOutUser(getItem<IUser>("user").id),
       (response: AxiosResponse<{ message: string }>) => {
         setLoading(false);
         setUser(null);
@@ -112,7 +113,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    const _user = getItem("user");
+    const _user = getItem<IUser>("user");
     if (_user) {
       setUser(_user);
     }

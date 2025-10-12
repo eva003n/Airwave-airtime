@@ -55,11 +55,11 @@ export default class Recipient extends Model<
   })
   declare branch: string;
 
-  //   @Column({
-  //     type: DataType.UUID,
-  //     allowNull: false,
-  //   })
-  //   declare user_id: string;
+    @Column({
+      type: DataType.UUID,
+      allowNull: false,
+    })
+    declare user_id: string;
 
   @Column({
     type: DataType.STRING,

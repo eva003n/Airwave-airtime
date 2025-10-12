@@ -1,7 +1,10 @@
 import { PORT, SERVER_URL, NODE_ENV } from "./config/env.js";
 import { app } from "./app.js";
 import logger from "./logger/logger.winston.js";
-import { connectDatabase, syncModels } from "./config/database/postgres.js";
+import {
+  connectDatabase,
+  syncModels,
+} from "./config/database/postgres/postgres.js";
 
 const port = PORT;
 
