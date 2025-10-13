@@ -88,9 +88,17 @@ const reloadlyTopResponseSchema = z.object({
       status: z.string(),
       deliveredAmount: z.number()
     })
-const IdSchema =  z.object({
-  id: z.string()
-})
+const IdSchema = z.object({
+  id: z
+    .uuid()
+    .refine(
+      (val) =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          val
+        ),
+      { message: "ID must be  valid" }
+    ),
+});
 
 const OperatorDetailsSchema = z.object({
   phoneNumber: z.string().min(12).max(12),

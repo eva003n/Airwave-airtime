@@ -7,7 +7,6 @@ import { z } from "zod";
 const validate = <T>(schema: z.ZodType<T>) =>
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     // const {error } = schema.safeParse(req.params || req.query)
-    console.log(Array.isArray(req.body));
     if(Array.isArray(req.body)) {
       const {error} = schema.safeParse(req.body)
 

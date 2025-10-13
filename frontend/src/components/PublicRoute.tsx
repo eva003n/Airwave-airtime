@@ -2,9 +2,10 @@ import { getItem } from "@/utils";
 import { useAuth } from "../context/authcontext";
 import { Navigate, Outlet } from "react-router-dom";
 import type { IUser } from "@/interfaces/user.interface";
+import type { UserData } from "@/validation/validators";
 
 const PublicRoute = () => {
-  const user = getItem<IUser>("user")
+  const user = getItem<UserData>("user")
   let isNew = false;
 if(user) {
   const createdAt = new Date(user.createdAt);

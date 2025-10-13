@@ -3,5 +3,6 @@
 /responses
 
 .env
+/**/*/.env
 /**/*/.env.*
 /**/*/*.log

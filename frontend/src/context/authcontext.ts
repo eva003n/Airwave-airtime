@@ -10,11 +10,11 @@ import type {
   IVerifyOtp,
 } from "../interfaces/auth.interface";
 import type { IUser } from "../interfaces/user.interface";
-import type { SignInAuth, SignUpAuth } from "../validation/validators";
+import type { SignInAuth, SignUpAuth, UserData, UserDataApi } from "../validation/validators";
 
 const AuthContext = createContext<{
-  user: null | IUser;
-  setUser: Dispatch<SetStateAction<IUser | null>>;
+  user: null | UserData;
+  setUser: Dispatch<SetStateAction<UserData | null>>;
   token: null | string;
   loading: boolean;
   signUp: (data: SignUpAuth) => Promise<any>;

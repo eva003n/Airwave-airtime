@@ -96,7 +96,7 @@ const signIn = asyncHandler(
 
     return res
       .status(200)
-      .json(new ApiResponse(200, isUser, "Signed in successfully"));
+      .json(new ApiResponse(200, { user: isUser }, "Signed in successfully"));
   }
 );
 const signOut = asyncHandler(
@@ -111,6 +111,9 @@ const signOut = asyncHandler(
           "Account doesn't not exist"
         )
       );
+//make request idempotent
+    if(!user.refresh_token) return next(ApiError.unprocessable(422, req.originalUrl, "Already signed out"))
+
     user.refresh_token = "";
     await user.save();
 
@@ -126,7 +129,8 @@ const tokenRefresh = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { RefreshToken, AccessToken } = req.cookies;
     // if(AccessToken) return
-
+console.log(req.cookies)
+console.log(req.headers.cookie)
     if (!RefreshToken) {
       return next(
         ApiError.unAuthorizedRequest(

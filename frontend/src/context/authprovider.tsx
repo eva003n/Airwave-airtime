@@ -19,7 +19,7 @@ import type { AxiosResponse } from "axios";
 import type { IUser } from "../interfaces/user.interface";
 import { setItem, removeItem, getItem } from "../utils";
 import requestHandler from "../utils/requestHandler";
-import type { SignInAuth, SignUpAuth } from "../validation/validators";
+import type { SignInAuth, SignUpAuth, UserData, UserDataApi } from "../validation/validators";
 import LoaderPage from "../components/LoaderComponent";
 import { toast } from "react-toastify";
 
@@ -27,7 +27,7 @@ import { toast } from "react-toastify";
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<null | IUser>(null);
+  const [user, setUser] = useState<null | UserData>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -38,14 +38,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return requestHandler(
        () =>  signUpUser(data),
       
-      (res: AxiosResponse) => {
+      (res: AxiosResponse<{message: string}>) => {
         // setItem("user", JSON.stringify(res.data));
         setLoading(false);
         navigate("/");
+        toast.success(res.data.message)
         return res;
       },
       (err: Error) => {
         setLoading(false);
+        console.error(err.message)
         return err;
       }
     );
@@ -57,14 +59,15 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return requestHandler(
        () => logInUser(data),
       (
-        response: AxiosResponse<IUser>
+        response: AxiosResponse<UserDataApi>
 
       ) => {
-        setUser(response.data)
-        setItem("user", JSON.stringify(response.data))
+        setUser(response.data.data.user)
+        setItem("user", JSON.stringify(response.data.data.user))
         setLoading(false);
         navigate("/dashboard")
-        // toast.success(response.message)
+        toast.success(response.data.message)
+  
 
 
 
@@ -72,7 +75,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       },
       (err: Error) => {
         setLoading(false);
-        toast.error(err.message)
+        console.error(err.message)
         return err;
       }
     );
@@ -95,7 +98,10 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logOut = async () => {
     setLoading(true);
     return requestHandler(
-      async () => await logOutUser(getItem<IUser>("user").id),
+      async () => {
+        const user = getItem<IUser>("user")
+        await logOutUser(user.id)
+      },
       (response: AxiosResponse<{ message: string }>) => {
         setLoading(false);
         setUser(null);
@@ -106,14 +112,14 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       },
       (err: Error) => {
         setLoading(false);
-        toast.error(err.message);
+        console.error(err.message);
         return err;
       }
     );
   };
 
   useEffect(() => {
-    const _user = getItem<IUser>("user");
+    const _user = getItem<UserData>("user");
     if (_user) {
       setUser(_user);
     }
@@ -131,7 +137,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         refreshAuthToken,
       }}
     >
-      {loading? <LoaderPage/> : <div>{children}</div>}
+      {children}
     </AuthContext.Provider>
   );
 };

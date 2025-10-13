@@ -14,6 +14,7 @@ import type {
   Recipientupdate,
   SignInAuth,
   SignUpAuth,
+  UserDataApi,
 } from "../validation/validators";
 import { apiClient } from "./apiclient";
 
@@ -21,13 +22,13 @@ import { apiClient } from "./apiclient";
 
 //authentication endpoints
 const signUpUser = async (data: SignUpAuth) => {
-  return apiClient.request("POST", "/auth/sign-up", data);
+  return apiClient.request<{message: string}>("POST", "/auth/sign-up", data);
 };
 const logInUser = async (data: SignInAuth) => {
-  return apiClient.request("POST", "/auth/sign-in", data);
+  return apiClient.request<UserDataApi>("POST", "/auth/sign-in", data);
 };
 const logOutUser = async (id: string) => {
-  return apiClient.request("DELETE", `/auth/sign-out/${id}`);
+  return apiClient.request<{message: string}>("DELETE", `/auth/sign-out/${id}`);
 };
 
 const refreshToken = async () => {

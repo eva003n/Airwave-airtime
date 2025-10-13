@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, Users, Phone, Network, Signal } from "lucide-react";
+import { Wallet, Users, Phone, Network, Signal, CardSim } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -12,6 +12,8 @@ import {
   Bar,
   CartesianGrid,
 } from "recharts";
+import ListContainer from "@/components/ListContainer";
+import List from "@/components/List";
 
 const recipientData = [
   { month: "May", recipients: 600 },
@@ -48,7 +50,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-gray-700">1,254</p>
-            <p className="text-sm text-gray-500">Active contacts</p>
+            <p className="text-sm text-gray-500">Active recipients</p>
           </CardContent>
         </Card>
 
@@ -61,7 +63,7 @@ export default function Dashboard() {
             <Phone className="text-gray-500 w-5 h-5" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-700">3,890</p>
+            <p className="text-2xl font-bold text-gray-700">1,000</p>
             <p className="text-sm text-gray-500">All-time distributions</p>
           </CardContent>
         </Card>
@@ -76,7 +78,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-gray-700">KES 12,450</p>
-            <p className="text-sm text-gray-500">Read-only</p>
+            <p className="text-sm text-gray-500">Float balance</p>
           </CardContent>
         </Card>
 
@@ -84,13 +86,22 @@ export default function Dashboard() {
         <Card className="transition-all duration-300 border-gray-200 hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-gray-700 text-sm font-medium">
-             Operators
+              Operators
             </CardTitle>
             <Signal className="text-gray-500 w-5 h-5" />
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-2xl font-bold text-gray-700">2</p>
-            <p className="text-sm text-gray-500">Safaricom, Airtel</p>
+            <ListContainer className="flex gap-4 items-center">
+              <List className="flex gap-1 items-center">
+                <CardSim size={16} className="text-green-400" />
+                Safaricom
+              </List>
+              <List className="flex gap-1 items-center">
+                <CardSim size={16} className="text-red-400" />
+                Airtel
+              </List>
+            </ListContainer>
           </CardContent>
         </Card>
       </div>

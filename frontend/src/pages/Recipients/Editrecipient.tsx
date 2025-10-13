@@ -14,8 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { KUNITY_BRANCHES, OPERATORS } from "../../constants";
 import { createRecipient, getRecipient, updateRecipient } from "@/api";
-import { handleValidationError } from "@/utils";
-import { type RecipientForm, recipientSchema } from "@/validation/validators";
+import { getItem, handleValidationError } from "@/utils";
+import { type RecipientForm, recipientSchema, type UserData } from "@/validation/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -34,6 +34,7 @@ const EditRecipientPage = () => {
       phone_number: "254",
       airtime_amount: 0,
       designation: "",
+      user_id: getItem<UserData>("user").id
     },
     //validation using zod schema
   });

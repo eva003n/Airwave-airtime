@@ -16,8 +16,8 @@ import { Input } from "@/components/ui/input";
 import { KUNITY_BRANCHES, OPERATORS } from "../../constants";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { recipientSchema, type RecipientForm } from "@/validation/validators";
-import { handleValidationError } from "@/utils";
+import { recipientSchema, type RecipientForm, type UserData } from "@/validation/validators";
+import { getItem, handleValidationError } from "@/utils";
 import { createRecipient } from "@/api";
 import { toast } from "react-toastify";
 
@@ -32,6 +32,7 @@ const CreateRecipientPage = () => {
     resolver: zodResolver(recipientSchema),
     defaultValues: {
       phone_number: "254",
+      user_id: getItem<UserData>("user").id
     },
     //validation using zod schema
   });

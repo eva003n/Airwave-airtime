@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DataTable from "./Topups/Datatable";
-import { columns } from "./Topups/Columns";
+// import { columns } from "./Topups/Columns";
 
 export type TopUpData = {
   id: string;

@@ -17,7 +17,7 @@ router.route("/:id").put(validate(IdSchema), validate(recipientSchema), updateRe
 router.route("/:id").delete(validate(IdSchema), deleteRecipient)
 //create recipients in bulk
 router.route("/bulk").post(validate(multipleRecipientSchema), createRecipients)
-//get all airtime recipients by search, filter
+//get all airtime recipients
 router.route("/").get(validate(paginateSchema), getAllrecipients)
 router.route("/:id").get(validate(IdSchema), getRecipient)
 
