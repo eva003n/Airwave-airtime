@@ -6,7 +6,6 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import type { boolean, string } from "zod";
 import { logOutUser } from ".";
 import type { IUser } from "@/interfaces/user.interface";
 
@@ -23,7 +22,7 @@ class ApiClient {
   private authUrl: string;
   private token: string | null = null;
   private tokenExpiry: number = 0;
-  private isRefreshing = false;
+  private isRefreshing: boolean;
   private refreshQueue: (() => void)[] = [];
 
   private api: AxiosInstance;
@@ -33,6 +32,7 @@ class ApiClient {
     this.clientSecret = "";
     this.audience = import.meta.env.VITE_API_BASE_URI;
     this.authUrl = import.meta.env.VITE_API_AUTH_URL;
+    this.isRefreshing = false;
 
     this.api = axios.create({
       baseURL:
@@ -65,10 +65,9 @@ class ApiClient {
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
               this.refreshQueue.push(() => {
-                this.api(failedRequest as AxiosRequestConfig)
                 this.api
                   .request(failedRequest as AxiosRequestConfig)
-                  .then((response: AxiosResponse) => resolve(response))
+                  .then((response: AxiosResponse) => resolve(response.data))
                   .catch((error: AxiosError) => reject(error));
               });
             });
@@ -80,7 +79,7 @@ class ApiClient {
             const newToken = await this.getAccessToken();
 
             // retry all queued requests
-            this.refreshQueue.forEach((cb) => cb());
+            this.refreshQueue.forEach((cb: any) => cb());
             this.refreshQueue = [];
 
             failedRequest.headers = {

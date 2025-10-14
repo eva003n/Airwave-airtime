@@ -318,8 +318,8 @@ export default function MakeTopUpPage() {
                 <div>
                   <Label className="text-sm text-gray-700">Operator</Label>
                   <Select
-                    onValueChange={(val) =>
-                      singleForm.setValue("operator", val)
+                    onValueChange={() =>{}
+                      // singleForm.setValue("operator", val)
                     }
                   >
                     <SelectTrigger className="w-[180px]">
@@ -395,7 +395,7 @@ export default function MakeTopUpPage() {
                 <div>
                   <Label className="text-sm text-gray-700">Operator</Label>
                   <Select
-                    onValueChange={(val) => bulkForm.setValue("operator", val)}
+                    // onValueChange={(val) => bulkForm.setValue("operator", val)}
                   >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Select operator" />

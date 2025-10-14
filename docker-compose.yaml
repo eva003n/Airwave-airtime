@@ -1,4 +1,4 @@
-name: airwave-airtime
+# name: airwave-airtime
 services:
   
  backend: 
@@ -11,15 +11,15 @@ services:
      - backend/.env.development
 
   depends_on:
-     db:
-        condition: service_healthy
-        restart: true
-  # command: ["./wait-for-db.sh", "db", "5432", "sh", "-c", "pnpm run migrate" , " pnpm run dev"]
+     - db 
+     - redis 
+    
 
   ports:
     - 8000:8000
   networks:
     - app-net
+  restart: always
   
 
 
@@ -49,7 +49,7 @@ services:
  redis:
    image: redis:8
    container_name: redis_server
-   restart: always
+   # restart: always
    ports:
       - 6379:6379
    volumes:

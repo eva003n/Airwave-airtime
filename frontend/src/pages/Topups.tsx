@@ -113,7 +113,7 @@ const TopupsPage = () => {
   }, []);
   return (
     <section className="container mx-auto py-10 px-4">
-      <DataTable columns={columns} data={data} />
+      {/* <DataTable columns={columns} data={data} /> */}
     </section>
   );
 };

@@ -3,7 +3,7 @@ import { config } from "dotenv";
 
 //first load the main .env file and get the mode
 config();
-const mode = process.env.NODE_ENV;
+const mode = process.env.NODE_ENV || "development";
 //the conditionally load the the correct .env based on mode
 config({
   path: `./.env.${mode}`
