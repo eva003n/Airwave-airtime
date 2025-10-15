@@ -152,11 +152,11 @@ const getTopUpStatus = asyncHandler(
 
 const autoDetectOperator = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { phoneNumber, countryIsoCode }: OperatorDatail = req.body;
+    const { phone_number, countryIsoCode }: OperatorDatail = req.body;
 
     const operatorDetails = await reloadlyClient.request(
       "GET",
-      `/operators/auto-detect/phone/${phoneNumber}/countries/${countryIsoCode}`
+      `/operators/auto-detect/phone/${phone_number}/countries/${countryIsoCode}`
     );
 
     return res

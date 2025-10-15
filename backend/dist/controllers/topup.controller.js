@@ -59,8 +59,8 @@ const getTopUpStatus = asyncHandler(async (req, res, next) => {
         .json(new ApiResponse(200, topUp.data, "Top up fetched successfully"));
 });
 const autoDetectOperator = asyncHandler(async (req, res, next) => {
-    const { phoneNumber, countryIsoCode } = req.body;
-    const operatorDetails = await reloadlyClient.request("GET", `/operators/auto-detect/phone/${phoneNumber}/countries/${countryIsoCode}`);
+    const { phone_number, countryIsoCode } = req.body;
+    const operatorDetails = await reloadlyClient.request("GET", `/operators/auto-detect/phone/${phone_number}/countries/${countryIsoCode}`);
     return res
         .status(200)
         .json(new ApiResponse(200, operatorDetails.data, "Successfully auto detected operator"));

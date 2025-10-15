@@ -7,6 +7,8 @@ import type {
 
 import type {
   Id,
+  OperatorDatail,
+  OperatorDetect,
   PaginateData,
   RecipientData,
   RecipientDataApi,
@@ -57,6 +59,13 @@ const getAllRecipients = async (params: PaginateData) => {
   return apiClient.request<RecipientDataApi>("GET", `/recipients`, null, params);
 };
 
+//Top up management
+const autoDetectOperator = async(data: OperatorDatail) => {
+  return apiClient.request<OperatorDetect>("POST", "/top-ups/operators/autodetect", data)
+
+}
+
+
 export {
   signUpUser,
   logInUser,
@@ -67,4 +76,6 @@ export {
   deleteRecipient,
   getRecipient,
   getAllRecipients,
+
+  autoDetectOperator
 };

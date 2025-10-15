@@ -17,8 +17,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { UploadCloud, Trash2, FileText, User2 } from "lucide-react";
-import safaricomLogo from "/images/safaricom-logo.png"
-import airtelLogo from "/images/airtel-logo.png"
+import safaricomLogo from "/images/safaricom-logo.png";
+import airtelLogo from "/images/airtel-logo.png";
+import { autoDetectOperator } from "@/api";
+import type { OperatorDetect } from "@/validation/validators";
 
 // --- Validation Schemas ---
 const phoneRegex = /^\+?[0-9]{7,15}$/;
@@ -33,6 +35,7 @@ const singleTopUpSchema = z.object({
     .refine((v) => !Number.isNaN(Number(v)) && Number(v) > 0, {
       message: "Amount must be a positive number",
     }),
+  operator_code: z.number(),
   operator: z.enum(["Safaricom", "Airtel"]),
 });
 
@@ -221,10 +224,20 @@ export default function MakeTopUpPage() {
   const [bulkParsed, setBulkParsed] = useState<ParsedRecipient[]>([]);
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [detectibg, setDetecting] = useState(false);
+  const [next, setNext] = useState(false);
+  const [operatorData, setOperatorData] = useState<OperatorDetect>({
+    data: { operatorId: 288, name: "" },
+  });
 
   const singleForm = useForm<SingleTopUpForm>({
     resolver: zodResolver(singleTopUpSchema),
-    defaultValues: { phone_number: "254", airtime_amount: "", operator: "Safaricom"},
+    defaultValues: {
+      phone_number: "254",
+      airtime_amount: "",
+      operator: "Safaricom",
+      operator_code: 288,
+    },
   });
   const bulkForm = useForm<BulkTopUpForm>({
     resolver: zodResolver(bulkTopUpSchema),
@@ -233,6 +246,8 @@ export default function MakeTopUpPage() {
 
   const onSingleSubmit = singleForm.handleSubmit((data) => {
     setStatusMessage(null);
+    singleForm.setValue("operator_code", operatorData.data.operatorId);
+
     console.log("Single top-up payload:", data);
     setStatusMessage("Single top-up queued (console.log)");
   });
@@ -260,12 +275,33 @@ export default function MakeTopUpPage() {
     );
   });
 
+  const handleOperatorAutoDetection = async () => {
+    setDetecting(true);
+    try {
+      const isValid = await singleForm.trigger("phone_number");
+      if (isValid) {
+        const operator = await autoDetectOperator({
+          phone_number: singleForm.getValues("phone_number"),
+          countryIsoCode: "KE",
+        });
+
+        setOperatorData(operator.data);
+
+        setDetecting(false);
+        setNext(true);
+      }
+    } catch (error) {
+      setDetecting(false);
+      setNext(false);
+      singleForm.formState.errors.phone_number = error.message;
+      console.log(error.message);
+    }
+  };
   return (
     <div className="p-6 ">
       <div className="max-w-5xl mx-auto space-y-6">
         <header>
           <h1 className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
-        
             Make top up
           </h1>
         </header>
@@ -296,46 +332,66 @@ export default function MakeTopUpPage() {
                     {...singleForm.register("phone_number")}
                     placeholder="e.g. +254712345678"
                   />
-                  {singleForm.formState.errors.phone_number&& (
+                  <Button
+                    variant={"outline"}
+                    className=" my-2 text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+                    onClick={handleOperatorAutoDetection}
+                  >
+                    {detectibg ? "Detecting" : "Next"}
+                  </Button>
+                  {singleForm.formState.errors.phone_number && (
                     <div className="text-xs text-red-600 mt-1">
                       {singleForm.formState.errors.phone_number.message}
                     </div>
                   )}
                 </div>
-                <div className="flex gap-4 items-center justify-center">
-                  {/* <img src={safaricomLogo} width={80} height={20}/> */}
-                </div>
-
-                <div>
-                  <Label className="text-sm text-gray-700">Amount (KES)</Label>
-                  <Input
-                    {...singleForm.register("airtime_amount")}
-                    placeholder="Amount"
-                  />
-                  {singleForm.formState.errors.airtime_amount && (
-                    <div className="text-xs text-red-600 mt-1">
-                      {singleForm.formState.errors.airtime_amount?.message}
-                    </div>
+                <div className="flex gap-4 bg-gray-100 items-center justify-between px-2 ">
+                  {operatorData.data.operatorId == 266 && (
+                    <img src={safaricomLogo} width={100} height={5} />
+                  )}
+                  {operatorData.data.operatorId == 265 && (
+                    <img src={airtelLogo} width={100} height={5} />
+                  )}
+                  {next && operatorData && (
+                    <p className="max-w-[12rem]">Detected operator {operatorData?.data.name}</p>
                   )}
                 </div>
 
-                <div>
-                  <Label className="text-sm text-gray-700">Operator</Label>
-                  <Select
-                    onValueChange={
-                      () => {}
-                      // singleForm.setValue("operator", val)
-                    }
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select operator" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Safaricom">Safaricom</SelectItem>
-                      <SelectItem value="Airtel">Airtel</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                {next && operatorData && (
+                  <>
+                    <div>
+                      <Label className="text-sm text-gray-700">
+                        Amount (KES)
+                      </Label>
+                      <Input
+                        {...singleForm.register("airtime_amount")}
+                        placeholder="Amount"
+                      />
+                      {singleForm.formState.errors.airtime_amount && (
+                        <div className="text-xs text-red-600 mt-1">
+                          {singleForm.formState.errors.airtime_amount?.message}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Label className="text-sm text-gray-700">Operator</Label>
+                      <Select
+                        onValueChange={
+                          () => {}
+                          // singleForm.setValue("operator", val)
+                        }
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select operator" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Safaricom">Safaricom</SelectItem>
+                          <SelectItem value="Airtel">Airtel</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                )}
 
                 <div className="flex items-center justify-end gap-2">
                   <Button

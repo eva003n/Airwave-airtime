@@ -90,7 +90,6 @@ export function AppSidebar() {
         </SidebarGroupContent>
         <SidebarGroup />
         <SidebarMenuAction>
-          <LogOut /> <span className="sr-only ">Add Project</span>
         </SidebarMenuAction>
       </SidebarContent>
     </Sidebar>

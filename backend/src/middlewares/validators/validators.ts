@@ -101,7 +101,7 @@ const IdSchema = z.object({
 });
 
 const OperatorDetailsSchema = z.object({
-  phoneNumber: z.string().min(12).max(12),
+  phone_number: z.string().min(12).max(12),
   countryIsoCode: z.string().min(2).max(2).default("KE")
 
 })

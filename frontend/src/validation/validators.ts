@@ -282,12 +282,26 @@ const recipientDataApiSchema = z.object({
   }),
 });
 
+const operatorDetailsSchema = z.object({
+  phone_number: z.string().min(12).max(12),
+  countryIsoCode: z.string().min(2).max(2).default("KE"),
+});
+
+const operatorDetailsSchemaApi = z.object({
+  data: z.object({
+    operatorId: z.number(),
+    name: z.string(),
+  }),
+});
+
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
 export type RecipientForm = z.infer<typeof recipientSchema>;
 export { signUpSchema, signInSchema, recipientSchema };
 export type PaginateData = z.infer<typeof paginateSchema>;
 export type Id = z.infer<typeof IdSchema>;
+export type OperatorDatail = z.infer<typeof operatorDetailsSchema>;
+
 
 //Api responses types
 export type RecipientData = z.infer<typeof recipientDataSchema>;
@@ -296,3 +310,4 @@ export type Recipientupdate = z.infer<typeof recipientUpdateSchema>;
 export type UserDataApi = z.infer<typeof userDataApiSchema>
 export type UserData = z.infer<typeof userSchema>
 export type TokenResponse = z.infer<typeof refreshTokenSchema>
+export type OperatorDetect = z.infer<typeof operatorDetailsSchemaApi>

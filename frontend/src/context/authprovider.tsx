@@ -99,15 +99,16 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setLoading(true);
     return requestHandler(
       async () => {
-        const user = getItem<IUser>("user")
-        await logOutUser(user.id)
+        const user = getItem<UserData>("user");
+        await logOutUser(user.id);
       },
-      (response: AxiosResponse<{ message: string }>) => {
+      (response: AxiosResponse<{ message: string  }>) => {
         setLoading(false);
         setUser(null);
-        removeItem("user")
-        navigate("/log-in");
-        toast.success(response.data.message)
+        removeItem("user");
+        navigate("/");
+        console.log(response)
+        toast.success(response.data.message);
         return response;
       },
       (err: Error) => {
