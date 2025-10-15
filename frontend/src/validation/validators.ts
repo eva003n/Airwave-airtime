@@ -124,6 +124,14 @@ const paginateSchema = z.object({
   limit: z.coerce.number({ error: "Limit is not a number" }),
 });
 
+const refreshTokenSchema = z.object({
+  data: z.object( {
+    access_token: z.string(),
+    expires_in: z.number(),
+    token_type: z.string()
+  })
+})
+
 const IdSchema = z
     .uuid()
     .refine(
@@ -287,3 +295,4 @@ export type RecipientDataApi = z.infer<typeof recipientDataApiSchema>;
 export type Recipientupdate = z.infer<typeof recipientUpdateSchema>;
 export type UserDataApi = z.infer<typeof userDataApiSchema>
 export type UserData = z.infer<typeof userSchema>
+export type TokenResponse = z.infer<typeof refreshTokenSchema>

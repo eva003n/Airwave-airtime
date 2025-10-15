@@ -50,8 +50,8 @@ interface DataTableProps<TData, TValue> {
   pages: number;
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
-  setRecipients: React.Dispatch<React.SetStateAction<RecipientData[]>>;
-  recipients: RecipientData[];
+  setTopUp: React.Dispatch<React.SetStateAction<RecipientData[]>>;
+  topUps: RecipientData[];
 }
 
 const DataTable = <TData, TValue>({

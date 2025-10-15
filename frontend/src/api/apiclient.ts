@@ -8,12 +8,7 @@ import axios, {
 } from "axios";
 import { logOutUser } from ".";
 import type { IUser } from "@/interfaces/user.interface";
-
-interface TokenResponse {
-  access_token: string;
-  expires_in: number;
-  token_type: string;
-}
+import type { TokenResponse, UserData } from "@/validation/validators";
 
 class ApiClient {
   private clientId: string;
@@ -45,9 +40,6 @@ class ApiClient {
     });
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
-        //   const token = await this.getAccessToken()
-        // config.headers.Authorization= `Bearer ${token}`
-
         return config;
       },
       (error) => Promise.reject(error)
@@ -61,10 +53,11 @@ class ApiClient {
 
         if (error.response?.status == 401 && !failedRequest._retry) {
           failedRequest._retry = true;
-          // 🪄 If refresh already in progress, queue this request
+          console.log(error.response.status)
+          //If refresh already in progress, queue this request
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
-              this.refreshQueue.push(() => {
+              return this.refreshQueue.push(() => {
                 this.api
                   .request(failedRequest as AxiosRequestConfig)
                   .then((response: AxiosResponse) => resolve(response.data))
@@ -75,9 +68,9 @@ class ApiClient {
           this.isRefreshing = true;
 
           try {
-            //force token refresh
+            //force token refresh]
             const newToken = await this.getAccessToken();
-
+console.log(newToken)
             // retry all queued requests
             this.refreshQueue.forEach((cb: any) => cb());
             this.refreshQueue = [];
@@ -89,15 +82,14 @@ class ApiClient {
 
             return this.api(failedRequest); // retry once
           } catch (error) {
+            console.log("wirking");
+
             const confirmed = await showSessionExpiredAlert();
-              const user = getItem<IUser>("user");
-
+            const user = getItem<UserData>("user");
             if (confirmed) {
-
               await logOutUser(user.id);
               this.clearAuthAndLogout();
             } else {
-
               await logOutUser(user.id);
               this.clearAuthAndLogout();
             }
@@ -105,42 +97,34 @@ class ApiClient {
             this.isRefreshing = false;
           }
         }
-         return Promise.reject(error);
-
+        return Promise.reject(error);
       }
     );
   }
 
   private async getAccessToken(): Promise<string> {
-    //get current data in milliseconds and convert to seconds
-    const now = Math.floor(Date.now() / 1000);
-    if (this.token && now < this.tokenExpiry) {
-      return this.token;
-    }
+   try {
+     //get current data in milliseconds and convert to seconds
+     const now = Math.floor(Date.now() / 1000);
+     if (this.token && now < this.tokenExpiry) {
+       return this.token;
+     }
 
-    const res = await axios.get<TokenResponse>(this.authUrl);
+     const res = await this.api.get<TokenResponse>(this.authUrl);
 
-    this.token = res.data.access_token;
-    this.tokenExpiry = now + res.data.expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request
-    return this.token;
-  }
-
-  private async refreshAccessToken(): Promise<string> {
-    try {
-      const response = await axios.get<{ access_token: string }>(
-        `${import.meta.env.VITE_API_AUTH_URL}`,
-        { withCredentials: true }
-      );
-      const token = response.data.access_token;
-      this.api.defaults.headers.Authorization = `Bearer ${token}`;
-      return token;
-    } catch (err) {
-      throw new Error("Token refresh failed");
-    }
+     this.token = res.data.data.access_token;
+     this.tokenExpiry = now + res.data.data.expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request
+     console.log(this.token);
+     console.log(this.tokenExpiry);
+     return this.token;
+   } catch (error) {
+    throw new Error("Failed to refresh token")
+    
+   }
   }
 
   private clearAuthAndLogout() {
-    // Clear cookies, localStorage, and redirect
+    // Clear localStorage, and redirect
     removeItem("user");
     window.location.href = "/";
   }
@@ -160,7 +144,6 @@ class ApiClient {
         // Authorization: `Bearer ${token}`,
         "Content-Type": contentType || "application/json",
       },
-      withCredentials: true,
       params,
     });
   }

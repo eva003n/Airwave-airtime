@@ -17,21 +17,23 @@ import {
 import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { UploadCloud, Trash2, FileText, User2 } from "lucide-react";
+import safaricomLogo from "/images/safaricom-logo.png"
+import airtelLogo from "/images/airtel-logo.png"
 
 // --- Validation Schemas ---
 const phoneRegex = /^\+?[0-9]{7,15}$/;
 const singleTopUpSchema = z.object({
-  phone: z
+  phone_number: z
     .string()
     .min(1, "Phone is required")
     .regex(phoneRegex, "Invalid phone number"),
-  amount: z
+  airtime_amount: z
     .string()
     .min(1, "Amount is required")
     .refine((v) => !Number.isNaN(Number(v)) && Number(v) > 0, {
       message: "Amount must be a positive number",
     }),
-  operator: z.enum(["Safaricom", "Airtel", "Telkom"]),
+  operator: z.enum(["Safaricom", "Airtel"]),
 });
 
 type SingleTopUpForm = z.infer<typeof singleTopUpSchema>;
@@ -222,7 +224,7 @@ export default function MakeTopUpPage() {
 
   const singleForm = useForm<SingleTopUpForm>({
     resolver: zodResolver(singleTopUpSchema),
-    defaultValues: { phone: "", amount: "", operator: "Safaricom" },
+    defaultValues: { phone_number: "254", airtime_amount: "", operator: "Safaricom"},
   });
   const bulkForm = useForm<BulkTopUpForm>({
     resolver: zodResolver(bulkTopUpSchema),
@@ -259,14 +261,13 @@ export default function MakeTopUpPage() {
   });
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 ">
       <div className="max-w-5xl mx-auto space-y-6">
         <header>
-          <h1 className="text-2xl font-semibold text-gray-700">Make Top-Up</h1>
-          <p className="text-sm text-gray-500">
-            Single or bulk top-ups. Bulk CSV sample:{" "}
-            <span className="font-mono">name,phone,amount</span>
-          </p>
+          <h1 className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
+        
+            Make top up
+          </h1>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -292,25 +293,28 @@ export default function MakeTopUpPage() {
                     Recipient phone
                   </Label>
                   <Input
-                    {...singleForm.register("phone")}
+                    {...singleForm.register("phone_number")}
                     placeholder="e.g. +254712345678"
                   />
-                  {singleForm.formState.errors.phone && (
+                  {singleForm.formState.errors.phone_number&& (
                     <div className="text-xs text-red-600 mt-1">
-                      {singleForm.formState.errors.phone.message}
+                      {singleForm.formState.errors.phone_number.message}
                     </div>
                   )}
+                </div>
+                <div className="flex gap-4 items-center justify-center">
+                  {/* <img src={safaricomLogo} width={80} height={20}/> */}
                 </div>
 
                 <div>
                   <Label className="text-sm text-gray-700">Amount (KES)</Label>
                   <Input
-                    {...singleForm.register("amount")}
+                    {...singleForm.register("airtime_amount")}
                     placeholder="Amount"
                   />
-                  {singleForm.formState.errors.amount && (
+                  {singleForm.formState.errors.airtime_amount && (
                     <div className="text-xs text-red-600 mt-1">
-                      {singleForm.formState.errors.amount.message}
+                      {singleForm.formState.errors.airtime_amount?.message}
                     </div>
                   )}
                 </div>
@@ -318,7 +322,8 @@ export default function MakeTopUpPage() {
                 <div>
                   <Label className="text-sm text-gray-700">Operator</Label>
                   <Select
-                    onValueChange={() =>{}
+                    onValueChange={
+                      () => {}
                       // singleForm.setValue("operator", val)
                     }
                   >
@@ -395,7 +400,7 @@ export default function MakeTopUpPage() {
                 <div>
                   <Label className="text-sm text-gray-700">Operator</Label>
                   <Select
-                    // onValueChange={(val) => bulkForm.setValue("operator", val)}
+                  // onValueChange={(val) => bulkForm.setValue("operator", val)}
                   >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Select operator" />

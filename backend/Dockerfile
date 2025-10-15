@@ -15,7 +15,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm fetch
 RUN pnpm install --frozen-lockfile
 # install dotenvx
-RUN curl -sfS https://dotenvx.sh/install.sh | sh
+# RUN curl -sfS https://dotenvx.sh/install.sh | sh
 
 # Builder
 FROM deps AS builder
@@ -48,6 +48,6 @@ RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 EXPOSE 8000
 
 # CMD ["./wait-for-db.sh"]
-CMD ["dotenvx", "run", "--", "node", "index.js"]
+CMD [ "node", "index.js"]
 
 

@@ -10,20 +10,30 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 // Mock job queue data
 const jobQueue = [
   {
     phone: "+254712345678",
-    branch: "Nairobi HQ",
+    branch: "Head Office",
     operator: "Safaricom",
     amount: 100,
     status: "completed",
     time: "2 minutes ago",
   },
   {
+    phone: "+254742345678",
+    branch: "Kagwe",
+    operator: "Safaricom",
+    amount: 100,
+    status: "processing",
+    time: "2 minutes ago",
+  },
+  {
     phone: "+254722334455",
-    branch: "Kisumu",
+    branch: "Kiriita",
     operator: "Airtel",
     amount: 200,
     status: "processing",
@@ -31,18 +41,42 @@ const jobQueue = [
   },
   {
     phone: "+254733112233",
-    branch: "Mombasa",
-    operator: "Telkom",
-    amount: 50,
+    branch: "Limuru",
+    operator: "Airtel",
+    amount: 500,
     status: "failed",
     time: "5 minutes ago",
   },
   {
-    phone: "+254711223344",
-    branch: "Nakuru",
+    phone: "+254716723344",
+    branch: "Kiambu",
     operator: "Safaricom",
     amount: 150,
     status: "queued",
+    time: "1 minute ago",
+  },
+  {
+    phone: "+254713333344",
+    branch: "Suswa",
+    operator: "Safaricom",
+    amount: 150,
+    status: "queued",
+    time: "1 minute ago",
+  },
+  {
+    phone: "+254750223344",
+    branch: "Mai mahiu",
+    operator: "Safaricom",
+    amount: 150,
+    status: "queued",
+    time: "1 minute ago",
+  },
+  {
+    phone: "+254750223451",
+    branch: "Githunguri",
+    operator: "Safaricom",
+    amount: 150,
+    status: "failed",
     time: "1 minute ago",
   },
 ];
@@ -80,16 +114,21 @@ export default function BulkTopUpQueue() {
   return (
     <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-700 flex items-center gap-2">
-          <Phone className="w-6 h-6 text-gray-500" />
-          Bulk Top-Up Queue
+        <h1 className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
+          <Phone size={24} className="" />
+          Top up management
         </h1>
       </div>
 
       <Card className="shadow-sm border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gray-700">
-            Current Top-Up Job Status
+          <CardTitle className="text-gray-700 flex justify-between">
+            Current Top up job status
+            <Link to={"/top-ups/make-topup"}>
+              <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+                Make topup
+              </Button>
+            </Link>
           </CardTitle>
         </CardHeader>
         <CardContent>

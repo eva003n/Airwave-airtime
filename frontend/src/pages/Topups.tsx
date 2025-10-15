@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import DataTable from "./Topups/Datatable";
+import DataTable from "./Topups/topupstatus/Datatable";
 // import { columns } from "./Topups/Columns";
 
 export type TopUpData = {

@@ -1,10 +1,11 @@
 
 import { ArrowUpDown, Link, MoreHorizontal, Pen, Trash2 } from "lucide-react";
-import type { TopUpData } from "../Topups";
+
 import  type {ColumnDef} from "@tanstack/react-table"
 import { Button } from "@/components/ui/button";
 import  { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import type { TopUpData } from "@/pages/Topups";
 
 
  const topUpQueuecolumns: ColumnDef<TopUpData>[] = [
