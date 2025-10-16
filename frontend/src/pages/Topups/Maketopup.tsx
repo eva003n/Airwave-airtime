@@ -246,7 +246,7 @@ export default function MakeTopUpPage() {
 
   const onSingleSubmit = singleForm.handleSubmit((data) => {
     setStatusMessage(null);
-    singleForm.setValue("operator_code", operatorData.data.operatorId);
+    singleForm.setValue("operator_code", operatorData?.data.operatorId);
 
     console.log("Single top-up payload:", data);
     setStatusMessage("Single top-up queued (console.log)");
@@ -284,6 +284,7 @@ export default function MakeTopUpPage() {
           phone_number: singleForm.getValues("phone_number"),
           countryIsoCode: "KE",
         });
+        console.log(operator.data)
 
         setOperatorData(operator.data);
 
@@ -361,7 +362,7 @@ export default function MakeTopUpPage() {
                   <>
                     <div>
                       <Label className="text-sm text-gray-700">
-                        Amount (KES)
+                        Amount (KES) eg 5-10000
                       </Label>
                       <Input
                         {...singleForm.register("airtime_amount")}
@@ -406,7 +407,7 @@ export default function MakeTopUpPage() {
                     className="bg-gray-500 hover:bg-gray-600 text-white"
                     type="submit"
                   >
-                    Send Top-Up
+                    {singleForm.formState.isSubmitting? "Sending" : "Top up"}
                   </Button>
                 </div>
               </form>

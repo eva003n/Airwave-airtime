@@ -60,20 +60,20 @@ const createRecipients = asyncHandler(
     //check for duplicates
     const existingRecipients = await Recipient.findAll();
 
-    const isDuplicate = existingRecipients.filter((recipient) => {
+    const isDuplicate = existingRecipients.filter((recipient)  => {
       return recipients.filter(
-        (newRecipient) => recipient.phone_number === newRecipient.phone_number
+        (newRecipient: RecipientData): boolean => recipient.phone_number === newRecipient.phone_number
       );
     });
 
-    if (isDuplicate.length)
-      return next(
-        ApiError.conflictRequest(
-          409,
-          req.originalUrl,
-          "Failed to create duplicate recipients"
-        )
-      );
+    // if (!isDuplicate.length)
+    //   return next(
+    //     ApiError.conflictRequest(
+    //       409,
+    //       req.originalUrl,
+    //       "Failed to create duplicate recipients"
+    //     )
+    //   );
 
     const newReipients = await Recipient.bulkCreate(recipients);
 
