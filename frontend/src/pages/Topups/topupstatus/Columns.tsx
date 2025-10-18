@@ -5,8 +5,15 @@ import  type {ColumnDef} from "@tanstack/react-table"
 import { Button } from "@/components/ui/button";
 import  { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import type { TopUpData } from "@/pages/Topups";
+// import type { TopUpData } from "@/pages/Topups";
 
+export type TopUpData = {
+  id: string;
+  phonenumber: string;
+  amount: number;
+  operator: string;
+  status: "pending" | "processing" | "success" | "failed";
+};
 
  const topUpQueuecolumns: ColumnDef<TopUpData>[] = [
   {

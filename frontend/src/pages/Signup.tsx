@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import Button from "../components/Button";
-import Input from "../components/Input";
+import { Input } from "../components/ui/input";
 import Logo from "../components/Logo";
 import { useAuth } from "../context/authcontext";
 import { useForm, type SubmitHandler } from "react-hook-form";

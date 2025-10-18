@@ -57,7 +57,7 @@ const CreateRecipientPage = () => {
       </Link>
       <Card className="w-full max-w-[65rem] mx-auto   border-0 rounded-2xl backdrop-blur-sm">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-2xl font-semibold text-gray-800">
+          <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Add Airtime Recipient
           </CardTitle>
           <p className="text-sm text-gray-500 mt-1">

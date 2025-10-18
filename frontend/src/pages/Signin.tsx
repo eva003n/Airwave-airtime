@@ -1,7 +1,7 @@
 // import { Loader } from "lucide-react";
 import { Link } from "react-router-dom";
 import Button from "../components/Button";
-import Input from "../components/Input";
+import { Input } from "../components/ui/input";
 import Logo from "../components/Logo";
 import { useAuth } from "../context/authcontext";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -34,19 +34,16 @@ const SignIn = () => {
   const onSubmit: SubmitHandler<SignInAuth> = async (data) => {
   try {
 
-      const response = await logIn(data);
+      await logIn(data);
 
   } catch (error) {
-    console.log(error.message)
+    console.log(error.response.data.message || error.message)
     
   }finally{
     reset()
   }
   };
         
-  // console.log(errors.root);
-        
-  
 
   return (
     <form

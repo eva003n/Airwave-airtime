@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -19,27 +19,17 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { UploadCloud, Trash2, FileText, User2 } from "lucide-react";
 import safaricomLogo from "/images/safaricom-logo.png";
 import airtelLogo from "/images/airtel-logo.png";
-import { autoDetectOperator } from "@/api";
-import type { OperatorDetect } from "@/validation/validators";
+import { autoDetectOperator, sendTopUp } from "@/api";
+import {
+  phoneRegex,
+  singleTopUpSchema,
+  type OperatorDetect,
+  type SingleTopUpForm,
+} from "@/validation/validators";
+import { OPERATORS } from "@/constants";
+import { toast } from "react-toastify";
 
 // --- Validation Schemas ---
-const phoneRegex = /^\+?[0-9]{7,15}$/;
-const singleTopUpSchema = z.object({
-  phone_number: z
-    .string()
-    .min(1, "Phone is required")
-    .regex(phoneRegex, "Invalid phone number"),
-  airtime_amount: z
-    .string()
-    .min(1, "Amount is required")
-    .refine((v) => !Number.isNaN(Number(v)) && Number(v) > 0, {
-      message: "Amount must be a positive number",
-    }),
-  operator_code: z.number(),
-  operator: z.enum(["Safaricom", "Airtel"]),
-});
-
-type SingleTopUpForm = z.infer<typeof singleTopUpSchema>;
 
 const bulkTopUpSchema = z.object({
   fixedAmount: z
@@ -228,28 +218,49 @@ export default function MakeTopUpPage() {
   const [next, setNext] = useState(false);
   const [operatorData, setOperatorData] = useState<OperatorDetect>({
     data: { operatorId: 288, name: "" },
+    message: "",
   });
 
   const singleForm = useForm<SingleTopUpForm>({
     resolver: zodResolver(singleTopUpSchema),
     defaultValues: {
       phone_number: "254",
-      airtime_amount: "",
-      operator: "Safaricom",
-      operator_code: 288,
+      airtime_amount: 5,
+      operator_code: 0,
+      countryIsoCode: "KE",
+      operator: "Safaricom"
     },
   });
+
+  useEffect(() => {
+    if (operatorData?.data?.operatorId) {
+      singleForm.setValue("operator_code", operatorData.data.operatorId);
+      singleForm.setValue(
+        "operator",
+        operatorData.data.operatorId == 266 ? "Safaricom" : "Airtel",
+        {
+          shouldValidate: true,
+          shouldDirty: true,
+          shouldTouch: true,
+        }
+      );
+    }
+  }, [operatorData]);
+
   const bulkForm = useForm<BulkTopUpForm>({
     resolver: zodResolver(bulkTopUpSchema),
     defaultValues: { fixedAmount: "", operator: "Safaricom" },
   });
 
-  const onSingleSubmit = singleForm.handleSubmit((data) => {
-    setStatusMessage(null);
-    singleForm.setValue("operator_code", operatorData?.data.operatorId);
-
-    console.log("Single top-up payload:", data);
-    setStatusMessage("Single top-up queued (console.log)");
+  const onSingleSubmit = singleForm.handleSubmit(async (data) => {
+    try {
+      // setStatusMessage(null);
+      const response = await sendTopUp(data);
+      toast.success(response.data.message);
+      // setStatusMessage("Single top-up queued (console.log)");
+    } catch (error) {
+      toast.error(error.response?.data.message);
+    }
   });
 
   const onBulkSubmit = bulkForm.handleSubmit((data) => {
@@ -276,17 +287,18 @@ export default function MakeTopUpPage() {
   });
 
   const handleOperatorAutoDetection = async () => {
-    setDetecting(true);
     try {
       const isValid = await singleForm.trigger("phone_number");
       if (isValid) {
+        setDetecting(true);
+
         const operator = await autoDetectOperator({
           phone_number: singleForm.getValues("phone_number"),
           countryIsoCode: "KE",
         });
-        console.log(operator.data)
 
         setOperatorData(operator.data);
+        toast.success(operator.data.message);
 
         setDetecting(false);
         setNext(true);
@@ -299,12 +311,12 @@ export default function MakeTopUpPage() {
     }
   };
   return (
-    <div className="p-6 ">
+    <div className="">
       <div className="max-w-5xl mx-auto space-y-6">
         <header>
-          <h1 className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
+          <p className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
             Make top up
-          </h1>
+          </p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -318,13 +330,7 @@ export default function MakeTopUpPage() {
               <div className="text-xs text-gray-500">Instant</div>
             </CardHeader>
             <CardContent>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  onSingleSubmit();
-                }}
-                className="space-y-4"
-              >
+              <form onSubmit={onSingleSubmit} className="space-y-4">
                 <div>
                   <Label className="text-sm text-gray-700">
                     Recipient phone
@@ -332,13 +338,16 @@ export default function MakeTopUpPage() {
                   <Input
                     {...singleForm.register("phone_number")}
                     placeholder="e.g. +254712345678"
+                    minLength={12}
+                    maxLength={12}
                   />
                   <Button
                     variant={"outline"}
                     className=" my-2 text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
                     onClick={handleOperatorAutoDetection}
+                    type="button"
                   >
-                    {detectibg ? "Detecting" : "Next"}
+                    {detectibg ? "Detecting..." : "Next"}
                   </Button>
                   {singleForm.formState.errors.phone_number && (
                     <div className="text-xs text-red-600 mt-1">
@@ -346,27 +355,32 @@ export default function MakeTopUpPage() {
                     </div>
                   )}
                 </div>
-                <div className="flex gap-4 bg-gray-100 items-center justify-between px-2 ">
-                  {operatorData.data.operatorId == 266 && (
-                    <img src={safaricomLogo} width={100} height={5} />
-                  )}
-                  {operatorData.data.operatorId == 265 && (
-                    <img src={airtelLogo} width={100} height={5} />
-                  )}
-                  {next && operatorData && (
-                    <p className="max-w-[12rem]">Detected operator {operatorData?.data.name}</p>
-                  )}
-                </div>
+                {next && operatorData && (
+                  <div className="flex gap-4 bg-gray-100 items-center justify-between px-2 ">
+                    {operatorData.data.operatorId == 266 && (
+                      <img src={safaricomLogo} width={100} height={5} />
+                    )}
+                    {operatorData.data.operatorId == 265 && (
+                      <img src={airtelLogo} width={100} height={5} />
+                    )}
+                    <p className="max-w-[12rem]">
+                      Detected operator {operatorData?.data.name}
+                    </p>
+                  </div>
+                )}
 
                 {next && operatorData && (
                   <>
                     <div>
                       <Label className="text-sm text-gray-700">
-                        Amount (KES) eg 5-10000
+                        Amount (KES) eg 5 - 10000
                       </Label>
                       <Input
                         {...singleForm.register("airtime_amount")}
                         placeholder="Amount"
+                        type="number"
+                        max={10000}
+                        min={5}
                       />
                       {singleForm.formState.errors.airtime_amount && (
                         <div className="text-xs text-red-600 mt-1">
@@ -376,20 +390,40 @@ export default function MakeTopUpPage() {
                     </div>
                     <div>
                       <Label className="text-sm text-gray-700">Operator</Label>
-                      <Select
-                        onValueChange={
-                          () => {}
-                          // singleForm.setValue("operator", val)
-                        }
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select operator" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Safaricom">Safaricom</SelectItem>
-                          <SelectItem value="Airtel">Airtel</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Controller
+                        name="operator"
+                        control={singleForm.control}
+                        rules={{ required: "Operator is required" }}
+                        render={({ field }) => (
+                          <>
+                            <Select
+                              onValueChange={(val) => field.onChange(val)}
+                              value={field.value}
+                            >
+                              <SelectTrigger
+                                className=" focus:ring-2 focus:ring-gray-500"
+                                // attach ref and onBlur to the trigger (interactive element)
+                                ref={field.ref}
+                                onBlur={field.onBlur}
+                              >
+                                <SelectValue placeholder={"Select operator"} />
+                              </SelectTrigger>
+                              <SelectContent className="bg-white">
+                                {OPERATORS.map((operator) => (
+                                  <SelectItem key={operator} value={operator}>
+                                    {operator}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {singleForm.formState.errors.operator && (
+                              <div className="text-rose-500 text-[.8rem]">
+                                {singleForm.formState.errors.operator.message}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      />
                     </div>
                   </>
                 )}
@@ -398,16 +432,19 @@ export default function MakeTopUpPage() {
                   <Button
                     variant="outline"
                     className="border-gray-200 text-gray-500 hover:bg-gray-100"
-                    onClick={() => singleForm.reset()}
+                    onClick={() => {
+                      setNext(false);
+                      singleForm.reset();
+                    }}
                     type="button"
                   >
                     Reset
                   </Button>
                   <Button
-                    className="bg-gray-500 hover:bg-gray-600 text-white"
+                    className="text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
                     type="submit"
                   >
-                    {singleForm.formState.isSubmitting? "Sending" : "Top up"}
+                    {singleForm.formState.isSubmitting ? "Sending" : "Top up"}
                   </Button>
                 </div>
               </form>
@@ -439,7 +476,7 @@ export default function MakeTopUpPage() {
                   setFile={setCsvFile}
                 />
 
-                <div>
+                {/* <div>
                   <Label className="text-sm text-gray-700">
                     Fixed Amount (KES)
                   </Label>
@@ -452,7 +489,7 @@ export default function MakeTopUpPage() {
                       {bulkForm.formState.errors.fixedAmount.message}
                     </div>
                   )}
-                </div>
+                </div> */}
 
                 <div>
                   <Label className="text-sm text-gray-700">Operator</Label>

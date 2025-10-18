@@ -234,19 +234,19 @@ const RecipientManagementPage = () => {
          // instantly reflect change
          toast.success(response.data.message)
       } catch (error) {
-        toast.error(error.message);
+        toast.error(error.response.data.message || error.message);
       }
     };
 
   return (
     <Card className="p-4 shadow-md">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="md:text-2xl font-medium tracking-wide">
+        <CardTitle className="md:text-2xl font-medium tracking-wide bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
           Recipient Management
         </CardTitle>
         <Link to={"/recipients/recipient"}>
           <Button
-        //   variant={"link"}
+            //   variant={"link"}
 
             className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
           >
@@ -255,16 +255,16 @@ const RecipientManagementPage = () => {
         </Link>
       </CardHeader>
       <CardContent>
-        <DataTable  columns={recipientColumns(handleDelete)}
-         data={recipients} 
-         pages={pages}
-         page={page}
-         setPage={setPage}
-         recipients={recipients}
-         setRecipients={setRecipients}
-         />
+        <DataTable
+          columns={recipientColumns(handleDelete)}
+          data={recipients}
+          pages={pages}
+          page={page}
+          setPage={setPage}
+          recipients={recipients}
+          setRecipients={setRecipients}
+        />
       </CardContent>
-      
     </Card>
   );
 }

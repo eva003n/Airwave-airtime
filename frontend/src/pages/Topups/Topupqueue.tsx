@@ -112,24 +112,29 @@ const getStatusBadge = (status: string) => {
 
 export default function BulkTopUpQueue() {
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
+    <div className=" space-y-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
           <Phone size={24} className="" />
-          Top up management
+          Top up queue
         </h1>
+        <Link to={"/top-ups/make-topup"}>
+          <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+            Make topup
+          </Button>
+        </Link>
       </div>
 
       <Card className="shadow-sm border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gray-700 flex justify-between">
+          {/* <CardTitle className="text-gray-700 flex justify-between">
             Current Top up job status
             <Link to={"/top-ups/make-topup"}>
               <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
                 Make topup
               </Button>
             </Link>
-          </CardTitle>
+          </CardTitle> */}
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">

@@ -11,27 +11,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import { ArrowUpDown, MoreHorizontal, Pen, Trash2 } from "lucide-react";
-export type RecipientColumn = {
-    id: string
-    name: string,
-    phone: string,
-    branch: string,
-    operator: string,
-    airtime_amount: number,
-    createdAt: string,
-    updatedAt: string
-}
+
+export type TopupStatus = "Pending" | "Processing" | "Success" | "Failed";
+export type TopUpColumn = {
+  name: string;
+  phone_number: string;
+  airtime_amount: number;
+  operator: string;
+  branch: string;
+  status: TopupStatus;
+  createdAt: string;
+};
 import { Link, useNavigate } from "react-router-dom";
-import type { RecipientData } from "@/validation/validators";
+import type { RecipientData, RecipientForm, TopUpData } from "@/validation/validators";
 import type { AxiosResponse } from "axios";
 import { getDateByDay } from "@/utils/formatdate";
 import { deleteRecipient } from "@/api";
 import { toast } from "react-toastify";
 
-const recipientColumns = (
-   handleDelete: (id: string) => void,
 
-): ColumnDef<RecipientData>[] => [
+const topUpColumns = (
+  handleDelete: (id: string) => void
+): ColumnDef<TopUpData>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -57,13 +58,13 @@ const recipientColumns = (
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "recipient.name",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          title="Sort by name"
+          title="Sort by recipient"
           className="text-left"
         >
           Recipient
@@ -74,11 +75,7 @@ const recipientColumns = (
   },
   {
     accessorKey: "phone_number",
-    header: "Phone",
-  },
-  {
-    accessorKey: "operator",
-    header: "Operator",
+    header: "Phone number",
   },
   {
     accessorKey: "airtime_amount",
@@ -93,8 +90,14 @@ const recipientColumns = (
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
+
   {
-    accessorKey: "branch",
+    accessorKey: "operator",
+    header: "Operator",
+  },
+
+  {
+    accessorKey: "recipient.branch",
     header: "Branch",
   },
   {
@@ -106,18 +109,25 @@ const recipientColumns = (
     },
   },
   {
-    accessorKey: "updatedAt",
-    header: "Updated at",
+    accessorKey: "status",
+    header: "Status",
     cell: ({ row }) => {
-      const formattedDate = getDateByDay(row.getValue("updatedAt"));
-      return <div className="">{formattedDate}</div>;
+      const status = row.getValue("status") as string;
+      const color =
+        status === "Success"
+          ? "bg-green-100 text-green-700"
+          : status === "Pending"
+          ? "bg-yellow-100 text-yellow-700"
+          : "bg-red-100 text-red-700";
+      return (
+        <Badge className={`${color} px-3 py-1 rounded-full`}>{status}</Badge>
+      );
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const recipient = row.original;
-      
+      const topUp = row.original;
 
       return (
         <DropdownMenu>
@@ -129,20 +139,12 @@ const recipientColumns = (
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-white">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-            // onClick={() => navigator.clipboard.writeText(recipient?.id)}
-            >
-              <Link to={`/recipients/${recipient.id}`} className="flex gap-2">
-                <Pen /> Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem>
               <button
-              className="flex gap-2 items-center"
-              onClick={() => handleDelete(recipient.id)}
+                className="flex gap-2 items-center"
+                onClick={() => {handleDelete(topUp.id)}}
               >
-              <Trash2 /> Delete
+                <Trash2 /> Delete
               </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -151,4 +153,4 @@ const recipientColumns = (
     },
   },
 ];
-export default recipientColumns
+export default topUpColumns

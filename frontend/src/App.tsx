@@ -10,7 +10,6 @@ import LoaderComponent from "./components/Loader";
 import LoaderPage from "./components/LoaderComponent";
 import AppLayout from "./layout";
 import WalletPage from "./pages/Wallet";
-import TopupsPage from "./pages/Topups";
 import MakeTopUpPage from "./pages/Topups/Maketopup.tsx";
 import CreateRecipientPage from "./pages/Recipients/Createrecipient.tsx";
 import EditRecipientPage from "./pages/Recipients/Editrecipient.tsx";
@@ -18,6 +17,8 @@ import RecipientManagementPage from "./pages/Recipients/Recipients.tsx";
 import RecipientLayout from "./layouts/RecipientLayout.tsx";
 import Dashboard from "./pages/Dashboard/Dashboard.tsx";
 import BulkTopUpQueue from "./pages/Topups/Topupqueue.tsx";
+import TopupLayout from "./layouts/TopupLayout.tsx";
+import TopUpsPage from "./pages/Topups/Topups.tsx";
 
 const App = () => {
   return (
@@ -34,11 +35,7 @@ const App = () => {
         <Route element={<AppLayout />}>
           <Route element={<ProtectedRoute />}>
             {/* Dashboard (Analytics and reports) */}
-            <Route
-              index
-              path="/dashboard"
-              element={<Dashboard/>}
-            ></Route>
+            <Route index path="/dashboard" element={<Dashboard />}></Route>
             {/* Recipient managemant */}
             <Route path="/recipients" element={<RecipientLayout />}>
               <Route index element={<RecipientManagementPage />} />
@@ -47,8 +44,11 @@ const App = () => {
             </Route>
             {/* Airtime distribution */}
             <Route path="/top-ups">
-              <Route index element={<BulkTopUpQueue/>} />
-              <Route path="make-topup" element={<MakeTopUpPage />} />
+              <Route index element={<TopUpsPage />} />
+              <Route element={<TopupLayout />}>
+                <Route path="make-topup" element={<MakeTopUpPage />} />
+                <Route path="bulk" element={<BulkTopUpQueue />} />
+              </Route>
             </Route>
             {/* Wallet management */}
             <Route path="/wallet" element={<WalletPage />}></Route>

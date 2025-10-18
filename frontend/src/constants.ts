@@ -18,7 +18,8 @@ const KUNITY_BRANCHES = [
 ]
 const OPERATORS = ["Safaricom", "Airtel"]
 
+ 
 export {
 KUNITY_BRANCHES,
-OPERATORS
+OPERATORS,
 }

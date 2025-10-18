@@ -16,6 +16,8 @@ import type {
   Recipientupdate,
   SignInAuth,
   SignUpAuth,
+  SingleTopUpForm,
+  TopUpDataApi,
   UserDataApi,
 } from "../validation/validators";
 import { apiClient } from "./apiclient";
@@ -64,7 +66,19 @@ const autoDetectOperator = async(data: OperatorDatail) => {
   return apiClient.request<OperatorDetect>("POST", "/top-ups/operators/autodetect", data)
 
 }
+const sendTopUp = async (data: SingleTopUpForm) => {
+  return apiClient.request<{message: string}>("POST", "/top-ups", data)
 
+}
+const getAllTopUps = async(params: PaginateData) => {
+  return apiClient.request<TopUpDataApi>("GET", "/top-ups", null, params)
+
+}
+
+const deleteTopUp = async (id: string) => {
+  return apiClient.request<{message: string}>("DELETE", `/top-ups/${id}`)
+
+}
 
 export {
   signUpUser,
@@ -76,6 +90,9 @@ export {
   deleteRecipient,
   getRecipient,
   getAllRecipients,
-
-  autoDetectOperator
+/*Top ups */
+  autoDetectOperator,
+  sendTopUp,
+  getAllTopUps,
+  deleteTopUp
 };
