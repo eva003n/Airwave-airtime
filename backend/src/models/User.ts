@@ -1,7 +1,9 @@
 import type {CreationAttributes, InferCreationAttributes, InferAttributes } from "sequelize";
 
-import { Table, Column, DataType, Model, Unique, BeforeCreate, BeforeUpdate } from "sequelize-typescript";
+import { Table, Column, DataType, Model, Unique, BeforeCreate, BeforeUpdate, HasMany } from "sequelize-typescript";
 import { hash } from "bcryptjs";
+import Recipient from "./Recipients.js";
+import Topup from "./Topups.js";
 
 
 export enum UserRole {
@@ -99,6 +101,12 @@ export default class User extends Model<
     
   }
 
+  // @HasMany(() => Recipient)
+  // recipients?: Recipient[];
+
+  // @HasMany(() => Topup)
+  // topups?: Topup[];
+
   public override toJSON(): object  {
     const attributes = {...this.get()} as any
     delete attributes.password
@@ -108,4 +116,3 @@ export default class User extends Model<
     return attributes;
   }
 }
-

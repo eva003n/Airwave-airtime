@@ -6,6 +6,7 @@ import User from "../../../models/User.js";
 import config, { type ConfigEnv } from "./config.js";
 import Recipient from "../../../models/Recipients.js";
 import Topup from "../../../models/Topups.js";
+import { defineAssociations } from "../../../models/Associations.js";
 
 const env = (NODE_ENV as keyof ConfigEnv) || "development";
 const dbConfig = config[env];
@@ -31,6 +32,7 @@ const connectDatabase = async () => {
   try {
     await sequelize.authenticate();
     logger.info("Connected to Postgres server successfully");
+    defineAssociations()
     await syncModels();
   } catch (error) {
     logger.error(`Failed to connect to Postgres server with error ${error}`);

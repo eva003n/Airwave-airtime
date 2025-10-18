@@ -7,11 +7,13 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "nodemon",
+    "pm2-start": "tsc -b && pm2 start ecosystem.config.js",
     "migrate": "tsc -b && sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo",
     "docker build": "docker buildx build -f ./backend.Dockerfile",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seed": "sequelize-cli db:seed:all"
+    "seed": "sequelize-cli db:seed:all",
+    "logs": "pm2 logs"
   },
   "repository": {
     "type": "git",
@@ -42,6 +44,8 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@bull-board/api": "^6.13.1",
+    "@bull-board/express": "^6.13.1",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.61.0",
@@ -55,6 +59,7 @@
     "morgan": "^1.10.1",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
+    "pm2": "^6.0.13",
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.7",
     "sequelize-typescript": "^2.1.6",

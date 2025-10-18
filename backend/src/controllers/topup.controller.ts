@@ -22,15 +22,21 @@ import Recipient, { MobileOperator } from "../models/Recipients.js";
 import { error } from "console";
 import parseCsv from "../utils/parsecsv.js";
 import { Index } from "sequelize-typescript";
+import { validateQueue } from "../queues/validate.queue.js";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
 
 const getTopUps = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+     const page = parseInt(req.query.page as string) || 1;
+     const limit = parseInt(req.query.limit as string) || 10;
+
+     const topUps = await getPaginatedTopUps(page, limit)
+
     return res
       .status(200)
-      .json(new ApiResponse(200, null, "Top up fetched successfully "));
+      .json(new ApiResponse(200, topUps, "Top ups fetched successfully "));
   }
 );
 
@@ -71,16 +77,16 @@ const createBulkTopUps = asyncHandler(
       return next(
         ApiError.badRequest(400, req.originalUrl, "No file was uploaded")
       );
-    let data: BulkTopUpData = [];
+    let data: BulkTopUpData[] = [];
     if (req.file && req.file.path) {
-      data = await parseCsv(req.file?.path);
+      data = await parseCsv(req.file?.path, next);
       await enqueueTopUps(data);
       logger.info(`Successfully added ${data.length} to the top ups queue`)
     }
 
     return res
-      .status(201)
-      .json(new ApiResponse(201, null, `Successfully uploaded ${data.length} topups for processing`));
+      .status(202)
+      .json(new ApiResponse(202, null, `Successfully uploaded ${data.length} topups for processing`));
   }
 );
 const sendTopUp = asyncHandler(
@@ -211,9 +217,25 @@ const autoDetect = async (phoneNumber: string, countryIsoCode: string) => {
   return operatorDetails;
 };
 
-const enqueueTopUps = async (data: BulkTopUpData) => {
-  const jogs = data.map((dataItem, Index) => ({
-    name: `top-up-job-${Index + 1}`,
+const deleteTopUp = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+  const {id } = req.params as Id
+
+  const isTopUp = await Topup.findByPk(id)
+
+  if(!isTopUp) return next(ApiError.notFound(404, req.originalUrl, "Airtime top up doesnt exist or is already deleted")
+  )
+
+  await Topup.destroy({where: {id}})
+
+  return res.status(200).json(new ApiResponse(200, null, "Airtime topup deleted successfully"))
+  }
+
+)
+
+const enqueueTopUps = async (data: BulkTopUpData[]) => {
+  const jobs = data.map((dataItem, Index) => ({
+    name: `validate-job-${Index + 1}`,
     data: dataItem,
     options: {
       attemps: 3,
@@ -221,7 +243,31 @@ const enqueueTopUps = async (data: BulkTopUpData) => {
       removeOnFail: false,
     },
   }));
-  return await topUpQueue.addBulk(jogs);
+  return await validateQueue.addBulk(jobs);
+};
+
+
+const getPaginatedTopUps = async (page = 1, limit = 10) => {
+  //inplements page by page logic
+  const offset = (page - 1) * limit;
+
+  const { rows, count } = await Topup.findAndCountAll({
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+    include: {
+      model: Recipient,
+      as: "recipient",
+      attributes: ["id", "name", "branch", "phone_number"]
+    }
+  });
+
+  return {
+    topups: rows,
+    currentPage: page,
+    totalPages: Math.ceil(count / limit),
+    totalItems: count,
+  };
 };
 
 export {
@@ -234,4 +280,5 @@ export {
   getOperators,
   getMnpDetails,
   autoDetect,
+  deleteTopUp
 };

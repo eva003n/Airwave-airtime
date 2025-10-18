@@ -1,20 +1,38 @@
-import type {CreationAttributes, InferCreationAttributes, InferAttributes } from "sequelize";
+import type {
+  CreationAttributes,
+  InferCreationAttributes,
+  InferAttributes,
+} from "sequelize";
 
-import { Table, Column, DataType, Model, Unique, BeforeCreate, BeforeUpdate } from "sequelize-typescript";
-import { MobileOperator } from "./Recipients.js";
+import {
+  Table,
+  Column,
+  DataType,
+  Model,
+  Unique,
+  BeforeCreate,
+  BeforeUpdate,
+  ForeignKey,
+  BelongsTo,
+} from "sequelize-typescript";
+import Recipient from "./Recipients.js";
+import User, { UserRole } from "./User.js";
 
+export enum MobileOperator {
+  Safaricom = "Safaricom",
+  Airtel = "Airtel",
+}
 
 export enum TopStatus {
   Pending = "Pending",
-  Processing = "Processing",
+  // Processing = "Processing",
   Successful = "Success",
   Failed = "Failed",
 }
 
 export enum OperatorType {
-    Safaricom = "Safaricom Kenya",
-    Airtel = "Airtel Kenya",
-
+  Safaricom = "Safaricom Kenya",
+  Airtel = "Airtel Kenya",
 }
 @Table({
   tableName: "topups",
@@ -53,9 +71,9 @@ export default class Topup extends Model<
   declare phone_number: string;
 
   @Column({
+    // avoid using Object.values(MobileOperator) here to prevent circular import at module initialization
     type: DataType.ENUM(...Object.values(MobileOperator)),
     allowNull: false,
-    // unique: true
   })
   declare operator: MobileOperator;
 
@@ -65,17 +83,32 @@ export default class Topup extends Model<
   })
   declare airtime_amount: number;
 
+  @ForeignKey(() => Recipient)
   @Column({
     type: DataType.UUID,
     allowNull: false,
   })
   declare recipient_id: string;
 
+  //association (separate property)
+  // @BelongsTo(() => Recipient, {
+  //   as: "recipient",
+  //   foreignKey: "recipient_id",
+  // })
+  // declare recipient?: Recipient;
+
+  @ForeignKey(() => User)
   @Column({
     type: DataType.UUID,
     allowNull: false,
   })
   declare user_id: string;
+
+//   @BelongsTo(() => User, {
+//     as: "user",
+//     foreignKey: "user_id"
+//   })
+// declare user?: User
 
   @Column({
     type: DataType.ENUM(...Object.values(TopStatus)),
@@ -86,7 +119,6 @@ export default class Topup extends Model<
 
   // @BeforeCreate
 
-
   //   public override toJSON(): object  {
   //     const attributes = {...this.get()} as any
   //     delete attributes.password
@@ -96,4 +128,3 @@ export default class Topup extends Model<
   //     return attributes;
   //   }
 }
-

@@ -1,7 +1,9 @@
 /.history
 /**/*/node_modules
 /responses
-
+/backend/dist
+/backend/uploads
+/frontend/dist
 .env
 /**/*/.env
 /**/*/.env.p*

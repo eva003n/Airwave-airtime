@@ -50,6 +50,7 @@ import transactionRouter from "./routes/transaction.routes.js"
 import reportRouter from "./routes/report.routes.js";
 import notFoundRouter from "./routes/not-found.routes.js";
 import healthCheckRouter from "./routes/health.routes.js";
+import { serverAdapter } from "./config/Bullmq/bullboard.js";
 
 /*--Authentication--*/
 app.use("/api/v1/auth", authRouter);
@@ -67,6 +68,10 @@ app.use("/api/v1/transactions", transactionRouter);
 app.use("/api/v1/reports", reportRouter);
 /*-- API monotoring -- */
 app.use("/api/v1/health-check", healthCheckRouter);
+
+
+/*--- Admin --- */
+app.use("/admin/queues", serverAdapter.getRouter());
 
 //hanfle 404 Not Found endpoints
 app.use(notFoundRouter);

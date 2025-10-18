@@ -13,7 +13,11 @@ import {
   BeforeCreate,
   BeforeUpdate,
   BeforeBulkCreate,
+  ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
+import Topup from "./Topups.js";
+import User from "./User.js";
 
 export enum MobileOperator {
   Safaricom = "Safaricom",
@@ -54,12 +58,18 @@ export default class Recipient extends Model<
     allowNull: false,
   })
   declare branch: string;
+  @ForeignKey(() => User)
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
+  declare user_id: string;
 
-    @Column({
-      type: DataType.UUID,
-      allowNull: false,
-    })
-    declare user_id: string;
+  //   @BelongsTo(() => User, {
+  //     as: "user",
+  //     foreignKey: "user_id"
+  //   })
+  // declare user?: User
 
   @Column({
     type: DataType.STRING,

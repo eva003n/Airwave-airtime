@@ -154,3 +154,11 @@ A hold (sometimes called a reservation or lock) is a temporary movement of funds
 You use it when money is about to leave a wallet, but you don’t yet know if the operation will succeed.
 
 Instead of immediately deducting, you freeze the funds so they can’t be spent twice
+
+
+# Bulk top ups
+1. Parse csv files into memory and add each object as a top to the queue
+2. Vaidate the data via backfround job
+3. Detect the operator for each top up
+4. Make the top ups via bg kobs
+5 With each step real time prohress tracking is communicated to client

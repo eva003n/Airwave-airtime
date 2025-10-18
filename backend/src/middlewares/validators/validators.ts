@@ -42,44 +42,39 @@ const topUpSchema = z.object({
       /^2547\d{8}$/,
       "Phone number must start with 2547 and be 12 digits long"
     ),
+  operator: z.enum(Object.values(MobileOperator), {message: "Invalid operator, only 'safaricom' or 'Airtel' are allowed"}).optional()
 });
 
 const topUpCsvSchema = z.object({
   airtime_amount: z
-    .number()
-    .min(5, "Top up cannot be below 5 ksh")
-    .max(10000, "Top up cannot exceed 10,000 ksh"),
+    .transform(Number)
+    .pipe(
+      z
+        .number({ error: "Invalid input, not a number" })
+        .min(5, "Minimum airtime topup is KES 5")
+        .max(10000, "Maximum topup is KES 10,000")
+    ),
   phone_number: z
     .string()
     .regex(
       /^2547\d{8}$/,
       "Phone number must start with 2547 and be 12 digits long"
     ),
+  operator: z
+    .enum(Object.values(MobileOperator), {
+      message: "Invalid operator, only 'safaricom' or 'Airtel' are allowed",
+    })
 
-  branch: z.enum(
-    [
-      "Head office",
-      "Kiambu",
-      "Limuru",
-      "Githunguri",
-      "Kiriita",
-      "Kagwe",
-      "Kikuyu",
-      "Wangige",
-      "Banana",
-      "Mai mahiu",
-      "Suswa",
-      "Gikomba",
-      "Ruaka",
-      "Wakimbo",
-      "Gikambura",
-      "Nairekia",
-    ],
-    { error: "Branch is required" }
-  ),
-  operator: z.enum(Object.values(MobileOperator)),
+  // operator_code: z
+  //   .transform(Number)
+  //   .pipe(
+  //     z
+  //       .number({ error: "Invalid input, not a number" })
+  //       .min(265, "Minimum operator code is 265")
+  //       .max(266, "Minimum operator code is 266")
+  //   ),
 });
-const bulkTopUpDataSchema = z.array(topUpCsvSchema)
+// const bulkTopUpDataSchema = topUpCsvSchema
 
 const reloadlyTopResponseSchema = z.object({
       transactionId: z.number(),
@@ -105,6 +100,7 @@ const OperatorDetailsSchema = z.object({
   countryIsoCode: z.string().min(2).max(2).default("KE")
 
 })
+
 
 //validate access token
 const tokenSchema = z.jwt({ alg: "HS256" });
@@ -185,9 +181,9 @@ export type OperatorDatail = z.infer<typeof OperatorDetailsSchema >
 export type RecipientData = z.infer<typeof recipientSchema>;
 export type BulkRecipientData = z.infer<typeof multipleRecipientSchema>;
 export type PaginateData = z.infer<typeof paginateSchema>
-export type BulkTopUpData = z.infer<typeof bulkTopUpDataSchema>
+export type BulkTopUpData = z.infer<typeof topUpCsvSchema>
 
 
 //reloadly api response types
 export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>
-export { signUpSchema, signInSchema, tokenSchema, topUpSchema, IdSchema, OperatorDetailsSchema, recipientSchema, paginateSchema, multipleRecipientSchema, bulkTopUpDataSchema };
+export { signUpSchema, signInSchema, tokenSchema, topUpSchema, IdSchema, OperatorDetailsSchema, recipientSchema, paginateSchema, multipleRecipientSchema,topUpCsvSchema };
