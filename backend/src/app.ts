@@ -71,7 +71,9 @@ app.use("/api/v1/health-check", healthCheckRouter);
 
 
 /*--- Admin --- */
-app.use("/admin/queues", serverAdapter.getRouter());
+if(NODE_ENV === "development") {
+  app.use("/admin/queues", serverAdapter.getRouter());
+}
 
 //hanfle 404 Not Found endpoints
 app.use(notFoundRouter);
