@@ -5,6 +5,7 @@ import App from "./App";
 import "./index.css";
 import { AuthProvider } from "./context/authprovider";
 import { ToastContainer, Slide } from "react-toastify";
+import { TopupProvider } from "./context/topup.provider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -25,7 +26,9 @@ createRoot(document.getElementById("root")!).render(
         toastClassName="rounded-2xl shadow-lg font-medium "
       />
       <AuthProvider>
-        <App />
+        <TopupProvider>
+          <App />
+        </TopupProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

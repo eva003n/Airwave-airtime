@@ -40,6 +40,10 @@ class ApiClient {
     });
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
+        // Always attach the current access token
+        if (this.token) {
+          config.headers.Authorization = `Bearer ${this.token}`;
+        }
         return config;
       },
       (error) => Promise.reject(error)
@@ -50,6 +54,7 @@ class ApiClient {
         const failedRequest = error.config as AxiosRequestConfig & {
           _retry: boolean;
         };
+        //handle 401 unauthorized 
 
         if (error.response?.status == 401 && !failedRequest._retry) {
           failedRequest._retry = true;
@@ -68,13 +73,14 @@ class ApiClient {
           this.isRefreshing = true;
 
           try {
-            //force token refresh]
+            //force token refresh
             const newToken = await this.getAccessToken();
-console.log(newToken)
+
             // retry all queued requests
             this.refreshQueue.forEach((cb: any) => cb());
             this.refreshQueue = [];
 
+            // Retry the origin failed request
             failedRequest.headers = {
               ...failedRequest.headers,
               Authorization: `Bearer ${newToken}`,
@@ -82,17 +88,17 @@ console.log(newToken)
 
             return this.api(failedRequest); // retry once
           } catch (error) {
-            console.log("wirking");
 
             const confirmed = await showSessionExpiredAlert();
             const user = getItem<UserData>("user");
             if (confirmed) {
               await logOutUser(user.id);
               this.clearAuthAndLogout();
-            } else {
-              await logOutUser(user.id);
-              this.clearAuthAndLogout();
-            }
+            } 
+            // else {
+            //   await logOutUser(user.id);
+            //   this.clearAuthAndLogout();
+            // }
           } finally {
             this.isRefreshing = false;
           }
@@ -102,23 +108,27 @@ console.log(newToken)
     );
   }
 
-  private async getAccessToken(): Promise<string> {
+  public async getAccessToken(): Promise<string> {
    try {
+
      //get current data in milliseconds and convert to seconds
      const now = Math.floor(Date.now() / 1000);
-     if (this.token && now < this.tokenExpiry) {
-       return this.token;
-     }
+     if (this.token && now < this.tokenExpiry) return this.token;
+     
 
-     const res = await this.api.get<TokenResponse>(this.authUrl);
+     //use axios to avoid interceptor recursion
+     const res = await axios.get<TokenResponse>(this.authUrl, {
+      withCredentials: true
+     });
 
-     this.token = res.data.data.access_token;
-     this.tokenExpiry = now + res.data.data.expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request
-     console.log(this.token);
-     console.log(this.tokenExpiry);
+     const {access_token, expires_in} = res.data.data
+
+     this.token = access_token;
+     this.tokenExpiry = expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request
      return this.token;
    } catch (error) {
-    throw new Error("Failed to refresh token")
+    // console.log(error)
+    throw error;
     
    }
   }
@@ -126,8 +136,11 @@ console.log(newToken)
   private clearAuthAndLogout() {
     // Clear localStorage, and redirect
     removeItem("user");
+    this.token = null;
+    this.tokenExpiry = 0;
     window.location.href = "/";
   }
+  
   public async request<T>(
     method: string,
     url: string,

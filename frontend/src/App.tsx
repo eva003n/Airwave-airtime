@@ -16,7 +16,7 @@ import EditRecipientPage from "./pages/Recipients/Editrecipient.tsx";
 import RecipientManagementPage from "./pages/Recipients/Recipients.tsx";
 import RecipientLayout from "./layouts/RecipientLayout.tsx";
 import Dashboard from "./pages/Dashboard/Dashboard.tsx";
-import BulkTopUpQueue from "./pages/Topups/Topupqueue.tsx";
+import BulkTopUpQueue from "./pages/Jobs/Topupjobs.tsx";
 import TopupLayout from "./layouts/TopupLayout.tsx";
 import TopUpsPage from "./pages/Topups/Topups.tsx";
 

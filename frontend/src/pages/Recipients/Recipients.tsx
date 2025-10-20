@@ -208,11 +208,15 @@ const RecipientManagementPage = () => {
 
     useEffect(() => {
       const fetchRecipients = async() => {
-        const response = await getAllRecipients({page, limit: 10})
-        const recipientsData = response.data.data.recipients
-        setRecipients(recipientsData)
-        setPage(response.data.data.currentPage)
-        setPages(response.data.data.totalPages)
+        try {
+          const response = await getAllRecipients({ page, limit: 10 });
+          const recipientsData = response.data.data.recipients;
+          setRecipients(recipientsData);
+          setPage(response.data.data.currentPage);
+          setPages(response.data.data.totalPages);
+        } catch (error) {
+          console.log(error.message)
+        }
        
 
       }

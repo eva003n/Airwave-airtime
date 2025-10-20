@@ -15,7 +15,7 @@ import {
   signUpUser,
 } from "../api";
 import { useNavigate } from "react-router-dom";
-import type { AxiosResponse } from "axios";
+import type { AxiosError, AxiosResponse } from "axios";
 import type { IUser } from "../interfaces/user.interface";
 import { setItem, removeItem, getItem } from "../utils";
 import requestHandler from "../utils/requestHandler";
@@ -33,7 +33,6 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const navigate = useNavigate();
 
   const signUp = async (data: SignUpAuth) => {
-    console.log(data)
     setLoading(true);
     return requestHandler(
        () =>  signUpUser(data),
@@ -45,9 +44,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         toast.success(res.data.message)
         return res;
       },
-      (err: Error) => {
+      (err: AxiosError<{message: string}>) => {
         setLoading(false);
-        console.error(err.message)
+        toast.error(err.response?.data.message)
         return err;
       }
     );
@@ -57,25 +56,19 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logIn = async (data: SignInAuth) => {
     setLoading(true);
     return requestHandler(
-       () => logInUser(data),
-      (
-        response: AxiosResponse<UserDataApi>
-
-      ) => {
-        setUser(response.data.data.user)
-        setItem("user", JSON.stringify(response.data.data.user))
+      () => logInUser(data),
+      (response: AxiosResponse<UserDataApi>) => {
+        setUser(response.data.data.user);
+        setItem("user", JSON.stringify(response.data.data.user));
         setLoading(false);
-        navigate("/dashboard")
-        toast.success(response.data.message)
-  
-
-
+        navigate("/dashboard");
+        toast.success(response.data.message);
 
         return response;
       },
-      (err: Error) => {
-        setLoading(false);
-        console.error(err.message)
+      (err: AxiosError<{ message: string }>) => {
+        setLoading(false);       
+         toast.error(err.response?.data.message);
         return err;
       }
     );
@@ -89,9 +82,10 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setItem("token", response.data.accessToken);
         return response;
       },
-      (error: Error) => {
-        console.error(error.message);
-        return error;
+      (err: AxiosError<{ message: string }>) => {
+        setLoading(false);
+        console.error(err.response?.data.message);
+        return err;
       }
     );
   };
@@ -102,18 +96,18 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const user = getItem<UserData>("user");
         await logOutUser(user.id);
       },
-      (response: AxiosResponse<{ message: string  }>) => {
+      (response: AxiosResponse<{ message: string }>) => {
         setLoading(false);
         setUser(null);
         removeItem("user");
         navigate("/");
-        console.log(response)
+        console.log(response);
         toast.success(response.data.message);
         return response;
       },
-      (err: Error) => {
+      (err: AxiosError<{ message: string }>) => {
         setLoading(false);
-        console.error(err.message);
+        console.error(err.response?.data.message);
         return err;
       }
     );

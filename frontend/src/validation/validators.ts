@@ -1,3 +1,4 @@
+import { KUNITY_BRANCHES } from "@/constants";
 import { object, z } from "zod";
 
 const signUpSchema = z.object({
@@ -340,6 +341,38 @@ const topUpDataApiSchema = z.object({
     totalPages: z.number(),
   }),
 });
+
+export const csvDataSchema = z.object({
+  name: z.string("Name is required"),
+  phone: z
+    .string()
+    .regex(
+      /^2547\d{8}$/,
+      "Phone number must start with 2547 and be 12 digits long"
+    ),
+  amount: z
+    .transform(Number) //converts the type to a number
+    .pipe(
+      //revalidates it as a number
+      z
+        .number({ error: "Invalid input, not a number" })
+        .min(5, "Minimum airtime topup is KES 5")
+        .max(10000, "Maximum topup is KES 10,000")
+    ), // ensures it's typed properly
+  branch: z
+    .enum(KUNITY_BRANCHES)
+    .refine((val) => !!val, { message: "Branch is required" }),
+  operator: z
+    .enum(["Safaricom", "Airtel"] as const)
+    .refine((val) => !!val, { message: "Operator is required" }),
+});
+
+export const bulkTopUpSchema = z.object({
+  // operator: z.enum(["Safaricom", "Airtel", "Telkom"]),
+  recipients: z.array(csvDataSchema),
+});
+
+export type BulkTopUpForm = z.infer<typeof bulkTopUpSchema>;
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
 export type RecipientForm = z.infer<typeof recipientSchema>;
@@ -348,6 +381,8 @@ export type PaginateData = z.infer<typeof paginateSchema>;
 export type Id = z.infer<typeof IdSchema>;
 export type OperatorDatail = z.infer<typeof operatorDetailsSchema>;
 export type SingleTopUpForm = z.infer<typeof singleTopUpSchema>;
+export type ParsedRecipient = z.infer<typeof csvDataSchema>;
+
 //Api responses types
 export type RecipientData = z.infer<typeof recipientDataSchema>;
 export type RecipientDataApi = z.infer<typeof recipientDataApiSchema>;

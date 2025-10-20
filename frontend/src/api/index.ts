@@ -10,6 +10,7 @@ import type {
   OperatorDatail,
   OperatorDetect,
   PaginateData,
+  ParsedRecipient,
   RecipientData,
   RecipientDataApi,
   RecipientForm,
@@ -80,6 +81,14 @@ const deleteTopUp = async (id: string) => {
 
 }
 
+const createBulkTopUps = async (id: string, data: any, ) => {
+  return apiClient.request<{message: string}>("POST", `/top-ups/bulk/${id}`, data, null, "multipart/form-data")
+
+}
+
+const getWalletBalance = async() => {
+  return apiClient.request("GET", "/wallet/balance")
+}
 export {
   signUpUser,
   logInUser,
@@ -94,5 +103,9 @@ export {
   autoDetectOperator,
   sendTopUp,
   getAllTopUps,
-  deleteTopUp
+  deleteTopUp,
+  createBulkTopUps,
+
+  //Wallet management
+  getWalletBalance,
 };

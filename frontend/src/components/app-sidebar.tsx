@@ -16,7 +16,7 @@ import {
 
 import logoImage from "/images/Airwave-logo.png";
 
-import { CardSim, LayoutDashboard,LogOut, Plus, Settings, UserPlus, Wallet } from "lucide-react";
+import { AlarmCheckIcon, CardSim, LayoutDashboard,LogOut, Plus, Settings, UserPlus, Wallet } from "lucide-react";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
 
@@ -35,6 +35,11 @@ const items = [
     title: "Top ups",
     url: "/top-ups",
     icon: CardSim,
+  },
+  {
+    title: "Jobs",
+    url: "/top-ups/bulk",
+    icon: AlarmCheckIcon,
   },
   {
     title: "Wallet",

@@ -28,7 +28,7 @@ const TopUpsPage = () => {
 
     };
     fetchData()
-  }, []);
+  }, [page]);
 
   const handleDelete = async (id: string) => {
 if (!confirm("Are you sure you want to delete this airtime topup?")) return;

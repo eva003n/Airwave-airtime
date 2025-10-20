@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -12,6 +12,15 @@ import { Badge } from "@/components/ui/badge";
 import { Phone, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { getItem } from "@/utils";
+import type { UserData } from "@/validation/validators";
+import { db } from "@/db/db";
+import { useLiveQuery } from "dexie-react-hooks";
+import { TopUpService } from "@/db/topup.service";
+import { TopUpDataTable } from "./Datatable";
+import topUpColumns from "./Columns";
+import { apiClient } from "@/api/apiclient";
+import { useTopups } from "@/context/topup.context";
 
 // Mock job queue data
 const jobQueue = [
@@ -81,6 +90,18 @@ const jobQueue = [
   },
 ];
 
+type TopUp = {
+  id: string; // unique ID from backend
+  name:string,
+  phone: string;
+  amount: number;
+  branch: string;
+  operator: string;
+  status: "Pending" | "Success" | "Failed" | "Processing";
+  createdAt: Date;
+  updatedAt?: Date;
+};
+
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "completed":
@@ -99,24 +120,86 @@ const getStatusBadge = (status: string) => {
           Processing
         </Badge>
       );
-    case "queued":
+    case "pending":
+    default:
       return (
         <Badge className="bg-gray-100 text-gray-700 border-gray-300">
-          Queued
+          Pending
         </Badge>
       );
-    default:
-      return <Badge variant="secondary">Unknown</Badge>;
   }
 };
 
 export default function BulkTopUpQueue() {
+// const [topups, setTopups] = useState(
+//   useLiveQuery(() => db.topups.orderBy("createdAt").reverse().toArray(), []) || []
+// )
+  const { topups, isConnected, reconnecting } = useTopups();
+const [pages, setPages] = useState(1);
+const [page, setPage] = useState(1);
+const [token, setToken] = useState("");
+
+// useEffect(() => {
+//   const user = getItem<UserData>("user");
+//   const url = `${import.meta.env.VITE_API_BASE_URI}/top-ups/progress/${user.id}`;
+//   const eventSource: EventSource = new EventSource(url, {
+//     withCredentials: true
+//   })
+
+//   eventSource.onmessage = (event) => {
+
+//     console.log(event.data)
+
+//   }
+
+//   eventSource.addEventListener("topup", (event) => {
+//     const data: TopUp = JSON.parse(event.data)
+//     // setTopups(event.data)
+//      const topup = {
+//        id: data.id,
+//        name: data.name,
+//        phone: data.phone,
+//        amount: data.amount,
+//        branch: data.branch,
+//        operator: data.operator,
+//        status: data.status,
+//        createdAt: data.createdAt ?? new Date(),
+//        updatedAt: new Date(),
+//      };
+//      TopUpService.add(topup)
+
+
+
+//   })
+
+//   eventSource.onerror = async (error) => {
+//     console.error("SSE error:", error);
+
+//     // If the connection closed due to 401
+//     if (eventSource?.readyState === EventSource.CLOSED) {
+      
+//      const newToken= await apiClient.getAccessToken()
+//      setToken(newToken)
+//     }
+//   };
+
+
+
+ 
+//  return () => eventSource.close();
+
+//  },[token])
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this airtime topup?")) return;
+  };
+
   return (
     <div className=" space-y-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
           <Phone size={24} className="" />
-          Top up queue
+          Topup jobs
         </h1>
         <Link to={"/top-ups/make-topup"}>
           <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
@@ -138,56 +221,14 @@ export default function BulkTopUpQueue() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-100">
-                  <TableHead className="text-gray-600 font-medium">
-                    Phone Number
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-medium">
-                    Branch
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-medium">
-                    Operator
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-medium">
-                    Amount (KES)
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-medium">
-                    Status
-                  </TableHead>
-                  <TableHead className="text-gray-600 font-medium flex items-center gap-1">
-                    <Clock className="w-4 h-4 text-gray-500" /> Time
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {jobQueue.map((job, i) => (
-                  <TableRow
-                    key={i}
-                    className="hover:bg-gray-50 transition-all duration-150"
-                  >
-                    <TableCell className="text-gray-700 font-medium">
-                      {job.phone}
-                    </TableCell>
-                    <TableCell className="text-gray-600">
-                      {job.branch}
-                    </TableCell>
-                    <TableCell className="text-gray-600">
-                      {job.operator}
-                    </TableCell>
-                    <TableCell className="text-gray-700 font-semibold">
-                      {job.amount}
-                    </TableCell>
-                    <TableCell>{getStatusBadge(job.status)}</TableCell>
-                    <TableCell className="text-gray-500 text-sm">
-                      {job.time}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <TopUpDataTable
+              columns={topUpColumns(handleDelete)}
+              data={topups}
+              page={page}
+              setPage={setPage}
+              pages={pages}
+              // topUps={}
+            />
           </div>
         </CardContent>
       </Card>

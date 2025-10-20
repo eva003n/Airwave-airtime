@@ -1,6 +1,8 @@
 const LoaderComponent = ({width = 24}: {width?: number}) => {
   return (
-<div className="loader aspect-square" style={{width: `${width}px`}}>
+<div className="loader aspect-square w-[55px]"
+ style={{width: `${width}px`}}
+ >
     <div className="bar1"></div>
     <div className="bar2"></div>
     <div className="bar3"></div>

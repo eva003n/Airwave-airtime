@@ -36,10 +36,10 @@ const Signup = () => {
   //Api communication
   const onSubmit: SubmitHandler<SignUpAuth> = async (data) => {
     try {
-    const response = await signUp(data);
-    toast.success(response.data.message)
+     await signUp(data);
+    // toast.success(response.data.message)
     } catch (error) {
-      toast.error(error.message)
+      // toast.error(error.message)
       
     }finally{
       reset()
@@ -119,7 +119,7 @@ const Signup = () => {
       />
       <div className="text-center dark:border-[1.5px] dark:border-gray-600 border-none py-1.5 rounded-sm">
         <p className=" text-[.9rem] text-gray-500">Have an account?</p>
-        <Link to={"/log-in"} className="text-violet-500 hover:underline font-medium">
+        <Link to={"/"} className="text-violet-500 hover:underline font-medium">
           Log in
         </Link>
       </div>
