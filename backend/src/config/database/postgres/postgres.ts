@@ -25,7 +25,7 @@ const sequelize = new Sequelize({
     //   rejectUnauthorized: false,
     // },
   },
-  logging: logger.info.bind(logger),
+  logging:NODE_ENV === "development"? logger.info.bind(logger) : false,
   models: [User, Recipient, Topup],
 });
 const connectDatabase = async () => {
@@ -33,19 +33,11 @@ const connectDatabase = async () => {
     await sequelize.authenticate();
     logger.info("Connected to Postgres server successfully");
     defineAssociations()
-    await syncModels();
   } catch (error) {
     logger.error(`Failed to connect to Postgres server with error ${error}`);
     process.exit(1);
   }
 };
 
-const syncModels = async () => {
-  try {
-    await sequelize.sync({ alter: true });
-    logger.info("All models synchronized with database successfully");
-  } catch (error) {
-    logger.error(`Failed to synchronized all models with database ${error}`);
-  }
-};
-export { sequelize, connectDatabase, syncModels };
+
+export { sequelize, connectDatabase };
