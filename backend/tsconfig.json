@@ -31,13 +31,13 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
     "noFallthroughCasesInSwitch": true,
-    "useUnknownInCatchVariables": true /* Default catch clause variables as 'unknown' instead of 'any'. */,
+    "useUnknownInCatchVariables": false /* Default catch clause variables as 'unknown' instead of 'any'. */,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
     // "typeRoots": ["./types", "./node_modules/@types"]
     // "allowImportingTsExtensions": true,
     // "noEmit": true
   },
-  "include": ["src/**/*", "types/**/*"],
+  "include": ["src/**/*", "types/**/*", "src/migrations", "src/seeders"],
   "exclude": ["node_modules", "tests/**/*"]
 }

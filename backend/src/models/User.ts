@@ -101,12 +101,6 @@ export default class User extends Model<
     
   }
 
-  // @HasMany(() => Recipient)
-  // recipients?: Recipient[];
-
-  // @HasMany(() => Topup)
-  // topups?: Topup[];
-
   public override toJSON(): object  {
     const attributes = {...this.get()} as any
     delete attributes.password

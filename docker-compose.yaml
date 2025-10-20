@@ -47,7 +47,7 @@ services:
     networks: 
        - app-net
  redis:
-   image: redis:8
+   image: redis:8.2.2-alpine
    container_name: redis_server
    # restart: always
    ports:

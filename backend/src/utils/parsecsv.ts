@@ -13,7 +13,7 @@ const OPERATOR_CODE_MAP: Record<string, number> = {
   Airtel: 265,
 };
 
-const parseCsv = async (filePath: string, next: NextFunction): Promise<BulkTopUpData[]> => {
+const parseCsv = async (filePath: string): Promise<BulkTopUpData[]> => {
   return new Promise((resolve, reject) => {
     const results: BulkTopUpData[] = [];
     return fs

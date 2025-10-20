@@ -90,12 +90,7 @@ export default class Topup extends Model<
   })
   declare recipient_id: string;
 
-  //association (separate property)
-  // @BelongsTo(() => Recipient, {
-  //   as: "recipient",
-  //   foreignKey: "recipient_id",
-  // })
-  // declare recipient?: Recipient;
+
 
   @ForeignKey(() => User)
   @Column({
@@ -103,12 +98,6 @@ export default class Topup extends Model<
     allowNull: false,
   })
   declare user_id: string;
-
-//   @BelongsTo(() => User, {
-//     as: "user",
-//     foreignKey: "user_id"
-//   })
-// declare user?: User
 
   @Column({
     type: DataType.ENUM(...Object.values(TopStatus)),

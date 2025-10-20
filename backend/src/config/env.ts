@@ -31,6 +31,9 @@ export const {
   RELOADLY_AUDIENCE,
   RELOADLY_AUTH_URL,
   REDIS_HOST,
-  REDIS_PORT
+  REDIS_PORT,
+  REDIS_USER,
+  REDIS_PASSWORD,
+  REDIS_DB
 } = process.env;
 

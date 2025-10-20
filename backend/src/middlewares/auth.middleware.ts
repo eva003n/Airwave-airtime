@@ -3,6 +3,8 @@ import Jwt, { type JwtPayload } from "jsonwebtoken";
 import User from "../models/User.js";
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { app } from "../app.js";
+import { NODE_ENV } from "../config/env.js";
 
 
 
@@ -16,7 +18,9 @@ const protectRoute = asyncHandler(
         ApiError.unAuthorizedRequest(
           401,
           req.originalUrl,
-          "Unauthorized request, access token is required"
+          NODE_ENV === "development"
+            ? "Unauthorized request, access token is required"
+            : "Unauthorized please logout"
         )
       );
     //decode accesstoken with token secret to check validity
@@ -39,6 +43,7 @@ const protectRoute = asyncHandler(
 
     // attach the user to request obj
     req.user = user;
+    app.set("user", user)
 
     next();
   }

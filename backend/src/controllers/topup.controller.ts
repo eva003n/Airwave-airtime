@@ -19,20 +19,22 @@ import Topup, { TopStatus } from "../models/Topups.js";
 import { topUpQueue } from "../queues/topup.queue.js";
 import logger from "../logger/logger.winston.js";
 import Recipient, { MobileOperator } from "../models/Recipients.js";
-import { error } from "console";
 import parseCsv from "../utils/parsecsv.js";
 import { Index } from "sequelize-typescript";
-import { validateQueue } from "../queues/validate.queue.js";
+import { redis } from "../config/database/redis/redis.js";
+import { topUpWorkerEvents } from "../workers/topup.worker.js";
+import { da } from "zod/v4/locales";
+import { jobProducer } from "../queues/producer.js";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
 
 const getTopUps = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-     const page = parseInt(req.query.page as string) || 1;
-     const limit = parseInt(req.query.limit as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
-     const topUps = await getPaginatedTopUps(page, limit)
+    const topUps = await getPaginatedTopUps(page, limit);
 
     return res
       .status(200)
@@ -71,22 +73,31 @@ const sendBulkTopUps = asyncHandler(
 
 const createBulkTopUps = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params as Id;
     //read csv and add top up job to queue
 
     if (!req.file)
       return next(
         ApiError.badRequest(400, req.originalUrl, "No file was uploaded")
       );
+
     let data: BulkTopUpData[] = [];
     if (req.file && req.file.path) {
-      data = await parseCsv(req.file?.path, next);
-      await enqueueTopUps(data);
-      logger.info(`Successfully added ${data.length} to the top ups queue`)
+      data = await parseCsv(req.file?.path);
+      await enqueueTopUps(data, id);
+      console.log(data);
+      logger.info(`Successfully added ${data.length} to the top ups queue`);
     }
 
     return res
       .status(202)
-      .json(new ApiResponse(202, null, `Successfully uploaded ${data.length} topups for processing`));
+      .json(
+        new ApiResponse(
+          202,
+          null,
+          `Successfully uploaded ${data.length} topups for processing`
+        )
+      );
   }
 );
 const sendTopUp = asyncHandler(
@@ -219,33 +230,116 @@ const autoDetect = async (phoneNumber: string, countryIsoCode: string) => {
 
 const deleteTopUp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-  const {id } = req.params as Id
+    const { id } = req.params as Id;
 
-  const isTopUp = await Topup.findByPk(id)
+    const isTopUp = await Topup.findByPk(id);
 
-  if(!isTopUp) return next(ApiError.notFound(404, req.originalUrl, "Airtime top up doesnt exist or is already deleted")
-  )
+    if (!isTopUp)
+      return next(
+        ApiError.notFound(
+          404,
+          req.originalUrl,
+          "Airtime top up doesnt exist or is already deleted"
+        )
+      );
 
-  await Topup.destroy({where: {id}})
+    await Topup.destroy({ where: { id } });
 
-  return res.status(200).json(new ApiResponse(200, null, "Airtime topup deleted successfully"))
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "Airtime topup deleted successfully"));
+  }
+);
+
+
+const getBulkTopUpStatus = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params as Id;
+
+    //keep the connection alive
+    const interval = setInterval(() => {
+      res.write(`:ping\n\n`);
+    }, 15000);
+    req.on("close", () => {
+      clearInterval(interval);
+      res.end();
+      //remove the client
+      logger.info(`Server sent events connection closed by ${id}`);
+    });
+    //track open sse connections
+    manageClientConnections(id, res);
+
+    //configure response stream
+    res.status(200).set({
+      "Content-Type": "text/event-stream",
+      "Cache-control": "no-cache",
+      Connection: "keep-alive",
+    });
+    res.flushHeaders();
+
+    const send = (event: string, data: any) =>
+      res.write(
+        `event: ${event}\n` +
+          `data: ${JSON.stringify(data)}\n` +
+          `id: ${req.user.id}\n` +
+          `retry: 5000\n\n`
+      );
+
+    //Status for queued jobs
+    topUpWorkerEvents.on("waiting", async ({ jobId, prev }, id) => {
+      const jobData = await redis.hgetall(`job;${jobId}`);
+      send("topup", { jobId, ...jobData });
+    });
+
+    topUpWorkerEvents.on("active", async ({ jobId, prev }, id) => {
+      const jobData = await redis.hgetall(`job;${jobId}`);
+      send("topup", { jobId, ...jobData });
+    });
+    topUpWorkerEvents.on("failed", async ({ jobId, failedReason }) => {
+      const jobData = await redis.hgetall(`job;${jobId}`);
+      send("topup", {
+        jobId,
+        ...jobData,
+      });
+    });
+    topUpWorkerEvents.on("completed", async ({ jobId }) => {
+      const jobData = await redis.hgetall(`job;${jobId}`);
+      send("topup", { jobId, ...jobData });
+    });
+  }
+);
+
+//key value strore to keep track of client connections
+const connectedClients = new Map();
+
+const manageClientConnections = (clientId: string, res: Response) => {
+  // Make sure uniqye clients are added and prevent overwritting
+
+  if (!connectedClients.has(clientId)) {
+    connectedClients.set(clientId, new Set());
   }
 
-)
+  //if existing connected client and the user has opened another tab or using another device
+  connectedClients.get(clientId).add(res);
 
-const enqueueTopUps = async (data: BulkTopUpData[]) => {
-  const jobs = data.map((dataItem, Index) => ({
-    name: `validate-job-${Index + 1}`,
-    data: dataItem,
-    options: {
-      attemps: 3,
-      removeOnComplete: true,
-      removeOnFail: false,
-    },
-  }));
-  return await validateQueue.addBulk(jobs);
+  //client disconnect remove the response stream
+  res.on("close", () => {
+    connectedClients.get(clientId).delete(res);
+    if (connectedClients.get(clientId).size === 0) {
+      //free up memory, by deletion a client who has no open connections
+      connectedClients.delete(clientId);
+    }
+  });
 };
 
+const enqueueTopUps = async (data: BulkTopUpData[], id: string) => {
+  return await jobProducer.addJobs<BulkTopUpData>(
+    topUpQueue,
+    "topup-job",
+    data,
+    id
+  );
+};
 
 const getPaginatedTopUps = async (page = 1, limit = 10) => {
   //inplements page by page logic
@@ -258,8 +352,8 @@ const getPaginatedTopUps = async (page = 1, limit = 10) => {
     include: {
       model: Recipient,
       as: "recipient",
-      attributes: ["id", "name", "branch", "phone_number"]
-    }
+      attributes: ["id", "name", "branch", "phone_number"],
+    },
   });
 
   return {
@@ -280,5 +374,6 @@ export {
   getOperators,
   getMnpDetails,
   autoDetect,
-  deleteTopUp
+  deleteTopUp,
+  getBulkTopUpStatus,
 };

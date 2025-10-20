@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
 import type {
+  CookieData,
   Id,
   SignInAuth,
   SignUpAuth,
@@ -127,7 +128,7 @@ const signOut = asyncHandler(
 
 const tokenRefresh = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { RefreshToken, AccessToken } = req.cookies;
+    const { RefreshToken } = req.cookies as CookieData;
     // if(AccessToken) return
 console.log(req.cookies)
 console.log(req.headers.cookie)
@@ -136,7 +137,7 @@ console.log(req.headers.cookie)
         ApiError.unAuthorizedRequest(
           401,
           `${req.originalUrl}`,
-          "No refresh token provided"
+         NODE_ENV === "development"?  "No refresh token provided": "Unauthorized, please logout"
         )
       );
     }
@@ -155,15 +156,15 @@ console.log(req.headers.cookie)
           "Account  doesn't not exist"
         )
       );
-    // if (user.refresh_token !== RefreshToken) {
-    //   return next(
-    //     ApiError.unAuthorizedRequest(
-    //       401,g
-    //       `${req.originalUrl}`,
-    //       "Invalid refresh token provided"
-    //     )
-    //   );
-    // }
+    if (user.refresh_token && user.refresh_token !== RefreshToken) {
+      return next(
+        ApiError.unAuthorizedRequest(
+          401,
+          `${req.originalUrl}`,
+         NODE_ENV === "development"?  "Invalid refresh token provided": "Unauthorized please logout"
+        )
+      );
+    }
 
     //generate new access & refresh token
     const { accessToken, refreshToken: newRefreshToken } = generateToken(

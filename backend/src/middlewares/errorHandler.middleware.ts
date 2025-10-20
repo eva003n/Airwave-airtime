@@ -24,7 +24,7 @@ const errorHandlerMiddleware = async (
     return res
       .type("application/problem+json")
       .status(500)
-      .json(ApiError.internalServerError(500, req.originalUrl));
+      .json(ApiError.internalServerError(500, req.originalUrl, "Server error, something went wrong"));
   }
 };
 export default errorHandlerMiddleware;
