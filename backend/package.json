@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "pm2 start ecosystem.config.js",
     "build": "tsc -b ",
     "dev": "nodemon",
     "pm2-start": "tsc -b && pm2 start ecosystem.config.js",

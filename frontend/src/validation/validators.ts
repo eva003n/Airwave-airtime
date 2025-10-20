@@ -372,6 +372,17 @@ export const bulkTopUpSchema = z.object({
   recipients: z.array(csvDataSchema),
 });
 
+export const walletBalanceSchema = z.object({
+  data: z.object({
+    balance: z.number(),
+    currencyCode: z.string(),
+    currencyName: z.string(),
+    updatedAt: z.date(),
+    lowBalanceThreshold: z.number(),
+    maxLowBalanceThreshold: z.number(),
+  }),
+});
+
 export type BulkTopUpForm = z.infer<typeof bulkTopUpSchema>;
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -393,3 +404,4 @@ export type TokenResponse = z.infer<typeof refreshTokenSchema>;
 export type OperatorDetect = z.infer<typeof operatorDetailsSchemaApi>;
 export type TopUpData = z.infer<typeof topUpDataSchema>;
 export type TopUpDataApi = z.infer<typeof topUpDataApiSchema>
+export type WalletBalance = z.infer<typeof walletBalanceSchema>

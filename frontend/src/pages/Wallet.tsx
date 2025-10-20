@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Card,
   CardAction,
@@ -13,7 +13,18 @@ import { Button } from '@/components/ui/button';
 // import Button from '../components/Button';
 import { Bell, Plus } from 'lucide-react';
 import ToggleSwitch from '@/components/ToggleSwitch';
+import { getWalletBalance } from '@/api';
 const WalletPage = () => {
+  const [balance, setBalance] = useState(0)
+
+  useEffect(() => {
+    (async () => {
+    const response = await getWalletBalance();
+    setBalance(response.data.data.balance)
+
+    })()
+
+  }, [])
   return (
     <section className="text-color px-4 py-14">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -23,7 +34,7 @@ const WalletPage = () => {
               My wallet
             </CardDescription>
             <CardTitle className="text-color text-2xl font-bold tabular-nums @[250px]/card:text-3xl">
-              Ksh 129,370
+              Ksh {balance}
             </CardTitle>
             <CardAction>
               <Bell size={24} />
@@ -47,12 +58,12 @@ const WalletPage = () => {
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 w-full text-color">
+            <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 w-full text-white">
               Recharge wallet
             </Button>
           </CardFooter>
         </Card>
-        <Card className=" relative min-h-48  bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
+        <Card className=" relative min-h-48  bg-gray-100 overflow-hidden">
           <CardHeader>
             {/* <CardTitle>Card Title</CardTitle>
             <CardDescription>Card Description</CardDescription>
@@ -60,7 +71,7 @@ const WalletPage = () => {
           </CardHeader>
           <CardContent className="absolute inset-0 bg-white/20 backdrop-blur-lg flex flex-col justify-center items-center  border border-white/30 z-10 ">
             <div className="flex flex-col items-center gap-2">
-              <Button className="bg-gray-100 rounded-full w-15 h-15 aspect-square">
+              <Button className="bg-gray-200 rounded-full w-15 h-15 aspect-square">
                 <Plus
                   size={100}
                   strokeWidth={4}

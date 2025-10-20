@@ -13,11 +13,13 @@ import { app } from "../app.js";
 import type User from "../models/User.js";
 import { generateQueueEvents } from "./index.js";
 import { connectDatabase } from "../config/database/postgres/postgres.js";
+import { runMigrations } from "../migrate.js";
 
 //this ensure sequelize models are initialized before running process
-(async () => {
+
   await connectDatabase();
-})();
+  await runMigrations()
+
 
 const validateTopUpData = async (job: Job<BulkTopUpData>) => {
   const result = topUpCsvSchema.safeParse(job.data);
@@ -25,7 +27,6 @@ const validateTopUpData = async (job: Job<BulkTopUpData>) => {
     throw result.error.issues;
   }
   await redis.hset(`job:${job.id}`, {
-    id: job.id,
     name: job.data.name,
     phoneNumber: job.data.phone,
     amount: job.data.amount,
@@ -135,6 +136,7 @@ const topUpWorkerEvents = generateQueueEvents("topUpQueue");
 // Status for jobs being processed
 topUpWorker.on("active", async (job) => {
   await redis.hset(`job:${job.id}`, {
+    id: job.id,
     status: "Processing",
     updatedAt: new Date(),
   });

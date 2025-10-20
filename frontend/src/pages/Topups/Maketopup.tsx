@@ -106,7 +106,9 @@ export default function MakeTopUpPage() {
            const formData = new FormData();
            formData.append("recipients", csvFile);
 
-        const response = await createBulkTopUps(user.id, formData)
+        
+         const response = await createBulkTopUps(user.id, formData)
+         bulkForm.reset()
         toast.success(response.data.message)
       } catch (error) {
         toast.error(error.response.data.message)

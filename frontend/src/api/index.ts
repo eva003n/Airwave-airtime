@@ -20,6 +20,7 @@ import type {
   SingleTopUpForm,
   TopUpDataApi,
   UserDataApi,
+  WalletBalance,
 } from "../validation/validators";
 import { apiClient } from "./apiclient";
 
@@ -87,7 +88,7 @@ const createBulkTopUps = async (id: string, data: any, ) => {
 }
 
 const getWalletBalance = async() => {
-  return apiClient.request("GET", "/wallet/balance")
+  return apiClient.request<WalletBalance>("GET", "/wallet/balance")
 }
 export {
   signUpUser,
