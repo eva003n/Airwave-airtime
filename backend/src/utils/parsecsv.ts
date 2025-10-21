@@ -7,6 +7,7 @@ import {
 } from "../middlewares/validators/validators.js";
 import ApiError from "./ApiError.js";
 import type { NextFunction } from "express";
+import { randomUUID } from "crypto";
 
 const OPERATOR_CODE_MAP: Record<string, number> = {
   Safaricom: 266,
@@ -23,22 +24,14 @@ const parseCsv = async (filePath: string): Promise<BulkTopUpData[]> => {
           mapHeaders: ({ header }) => header.trim().replace(/^['"]|['"]$/g, ""), // removes quotes + spaces
         })
       )
-      .on("data", (data: any, row: any) => {
-        // const { error } = topUpCsvSchema.safeParse(data);
-
-        // if (error) {
-        //   return next(
-        //     ApiError.unprocessable(
-        //       422,
-        //       "/api/v1/top-ups/bulk",
-        //       "Failed to parse the csv ",
-        //       error.issues
-        //     )
-        //   );
-        // }
+      .on("data", (data: BulkTopUpData, row: any) => {
 
         const operator = data.operator;
         data.operator_code = OPERATOR_CODE_MAP[operator] || 266; //default to safaricom
+        data.status = "Pending"
+        data.createdAt = new Date().toISOString()
+        data.updatedAt = new Date().toISOString()
+        data.id = randomUUID()
         results.push(data);
       })
       .on("end", () => resolve(results))

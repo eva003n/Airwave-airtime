@@ -105,7 +105,7 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
       eventSourceRef.current?.close();
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
     };
-  }, [token]);
+  }, [token, eventSourceRef]);
 
   return (
     <TopupContext.Provider value={{ topups, isConnected, reconnecting }}>

@@ -20,6 +20,13 @@ const topUpQueue = new Queue("topUpQueue", {
 // process 5 tops ups at a time
 topUpQueue.setGlobalConcurrency(5)
 //process 1 yop up per second
-topUpQueue.setGlobalRateLimit(100, 60000)
+topUpQueue.setGlobalRateLimit(100, 60000);
+
+// (async () => {
+//   await topUpQueue.pause(); // stop new jobs temporarily
+//   await topUpQueue.obliterate({ force: true });
+//   await topUpQueue.close();
+//   console.log("✅ Queue completely reset");
+// })();
 
 export { topUpQueue };

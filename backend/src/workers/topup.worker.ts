@@ -1,5 +1,5 @@
 import { Job, tryCatch, Worker } from "bullmq";
-import { connection, redis } from "../config/database/redis/redis.js";
+import { connection, pub, redis } from "../config/database/redis/redis.js";
 import {
   topUpCsvSchema,
   type BulkTopUpData,
@@ -14,27 +14,21 @@ import type User from "../models/User.js";
 import { generateQueueEvents } from "./index.js";
 import { connectDatabase } from "../config/database/postgres/postgres.js";
 import { runMigrations } from "../migrate.js";
+import { topUpQueue } from "../queues/topup.queue.js";
+import logger from "../logger/logger.winston.js";
+import { UpdatedAt } from "sequelize-typescript";
 
 //this ensure sequelize models are initialized before running process
 
-  await connectDatabase();
-  await runMigrations()
+await connectDatabase();
+await runMigrations();
 
-
-const validateTopUpData = async (job: Job<BulkTopUpData>) => {
-  const result = topUpCsvSchema.safeParse(job.data);
+const validateTopUpData = async (data: BulkTopUpData) => {
+  const result = topUpCsvSchema.safeParse(data);
   if (result.error) {
     throw result.error.issues;
   }
-  await redis.hset(`job:${job.id}`, {
-    name: job.data.name,
-    phoneNumber: job.data.phone,
-    amount: job.data.amount,
-    operator: job.data.operator,
-    status: "Pending",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  return result.data;
 };
 const autoDetect = async (phoneNumber: string) => {
   const countryIsoCode = "KE";
@@ -110,7 +104,7 @@ const topUpWorker = new Worker(
   async (job: Job<BulkTopUpData>) => {
     try {
       //validate the csv data
-      validateTopUpData(job);
+      validateTopUpData(job.data);
       //detect operator the operator
       const operatorDetails = await autoDetect(job.data.phone);
 
@@ -121,44 +115,99 @@ const topUpWorker = new Worker(
         operatorDetails.data.operatorId,
         job
       );
+
+      //  Update while job is still active
+      await job.updateData({ ...job.data, status: "Success", updatedAt: new Date().toISOString() });
+
+      // Publish to Redis for SSE streaming
+      await pub.publish(
+        "topups_updates",
+        JSON.stringify({ ...job.data, status: "Success", updatedAt: new Date().toISOString()})
+      );
     } catch (error) {
-      console.log(error.message);
+      job.updateData({ ...job.data, status: "Failed" });
+      await pub.publish(
+        "topups_updates",
+        JSON.stringify({ ...job.data, status: "Failed" })
+      );
+      logger.error(error.message);
     }
   },
   {
     connection,
-    maxStartedAttempts: 5,
   }
 );
 
 const topUpWorkerEvents = generateQueueEvents("topUpQueue");
 
 // Status for jobs being processed
-topUpWorker.on("active", async (job) => {
-  await redis.hset(`job:${job.id}`, {
-    id: job.id,
-    status: "Processing",
-    updatedAt: new Date(),
-  });
-  console.log(`Job id_${job.id} started being processed`);
+topUpWorker.on("active", async (job: Job) => {
+  if (!job) return;
+
+  try {
+    await job.updateData({
+      ...job.data,
+      status: "Processing",
+      updatedAt: new Date().toISOString(),
+    });
+
+    await pub.publish(
+      "topup_updates",
+      JSON.stringify({
+        ...job.data,
+        status: "Processing",
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    logger.error(error.message);
+  }
 });
 //status for jobs that have failed
-topUpWorker.on("failed", async (job, error) => {
-  await redis.hset(`job:${job?.id}`, {
-    status: "Failed",
-    // reason: error.message,
-    updatedAt: new Date(),
-  });
-  console.log(`Job id_${job?.id} failed because ${error.message}`);
+topUpWorker.on("failed", async (job, err) => {
+  if (!job) return;
+  try {
+    await job.updateData({
+      ...job.data,
+      status: "Failed",
+      updatedAt: new Date().toISOString(),
+      error: err.message,
+    });
+
+    await pub.publish(
+      "topup_updates",
+      JSON.stringify({
+        ...job.data,
+        status: "Failed",
+        updatedAt: new Date().toISOString(),
+        error: err.message,
+      })
+    );
+  } catch (error) {
+    logger.error(error.message);
+  }
 });
 
 // Status for completed jobs
 topUpWorker.on("completed", async (job, result, prev) => {
-  await redis.hset(`job:${job?.id}`, {
-    status: "Success",
-    updatedAt: new Date(),
-  });
-  console.log(`Job id_${job?.id} has been completed`);
+  // if(!job) return
+  // try {
+  //   await job.updateData({
+  //     ...job?.data,
+  //     status: "Success",
+  //     updatedAt: new Date().toISOString(),
+  //   });
+  //   await pub.publish(
+  //     "topup_updates",
+  //     JSON.stringify({
+  //       ...job.data,
+  //       status: "Success",
+  //       updatedAt: new Date().toISOString(),
+  //     })
+  //   );
+  // } catch (error) {
+  //   logger.error(error.message)
+  // }
 });
 
 export { topUpWorkerEvents };

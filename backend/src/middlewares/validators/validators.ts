@@ -1,6 +1,6 @@
 import { minLength, object, z } from "zod";
 import { MobileOperator } from "../../models/Recipients.js";
-import { KUNITY_BRANCHES } from "../../constants.js";
+import { KUNITY_BRANCHES, OPERATORS } from "../../constants.js";
 
 const signUpSchema = z.object({
   userName: z
@@ -43,11 +43,26 @@ const topUpSchema = z.object({
       /^2547\d{8}$/,
       "Phone number must start with 2547 and be 12 digits long"
     ),
-  operator: z.enum(Object.values(MobileOperator), {message: "Invalid operator, only 'safaricom' or 'Airtel' are allowed"}).optional()
+  operator: z
+    .enum(Object.values(MobileOperator), {
+      message: "Invalid operator, only 'safaricom' or 'Airtel' are allowed",
+    })
+    .optional(),
 });
 
+
+const isoDateString = z.preprocess((arg) => {
+  if (!arg) return undefined;
+  if (typeof arg === "string") return arg;
+  if (arg instanceof Date) return arg.toISOString();
+  if (typeof (arg as any)?.toISOString === "function")
+    return (arg as any).toISOString();
+  return undefined;
+}, z.string().optional());
+
 const topUpCsvSchema = z.object({
-  name: z.string("Name is required"),
+  id: z.uuid().optional(),
+  name: z.string({ message: "Name is required" }),
   phone: z
     .string()
     .regex(
@@ -55,44 +70,96 @@ const topUpCsvSchema = z.object({
       "Phone number must start with 2547 and be 12 digits long"
     ),
   amount: z
-    .transform(Number) //converts the type to a number
-    .pipe(
-      //revalidates it as a number
-      z
-        .number({ error: "Invalid input, not a number" })
-        .min(5, "Minimum airtime topup is KES 5")
-        .max(10000, "Maximum topup is KES 10,000")
-    ), // ensures it's typed properly
-  branch: z
-    .enum(KUNITY_BRANCHES)
-    .refine((val) => !!val, { message: "Branch is required" }),
-  operator: z
-    .enum(["Safaricom", "Airtel"] as const)
-    .refine((val) => !!val, { message: "Operator is required" }),
-
-  operator_code: z
     .transform(Number)
     .pipe(
       z
-        .number({ error: "Invalid input, not a number" })
-        .min(265, "Minimum operator code is 265")
-        .max(266, "Minimum operator code is 266")
-    )
+        .number()
+        .min(5, "Minimum airtime topup is KES 5")
+        .max(10000, "Maximum topup is KES 10,000")
+    ),
+  branch: z.enum(KUNITY_BRANCHES, { message: "Branch is required" }),
+  operator: z.enum(OPERATORS, {
+    message: "Operator is required",
+  }),
+  operator_code: z
+    .transform(Number)
+    .pipe(z.number().min(265).max(266))
     .optional(),
+  status: z
+    .enum(["Pending", "Processing", "Failed", "Completed", "Success"])
+    .optional(),
+  error: z.string().optional(),
+  createdAt: isoDateString.default(() => new Date().toISOString()),
+  updatedAt: isoDateString.optional(),
 });
+
+// const topUpCsvSchema = z.object({
+//   id: z.uuid().optional(),
+//   name: z.string("Name is required"),
+//   phone: z
+//     .string()
+//     .regex(
+//       /^2547\d{8}$/,
+//       "Phone number must start with 2547 and be 12 digits long"
+//     ),
+//   amount: z
+//     .transform(Number) //converts the type to a number
+//     .pipe(
+//       //revalidates it as a number
+//       z
+//         .number({ error: "Invalid input, not a number" })
+//         .min(5, "Minimum airtime topup is KES 5")
+//         .max(10000, "Maximum topup is KES 10,000")
+//     ), // ensures it's typed properly
+//   branch: z
+//     .enum(KUNITY_BRANCHES)
+//     .refine((val) => !!val, { message: "Branch is required" }),
+//   operator: z
+//     .enum(["Safaricom", "Airtel"] as const)
+//     .refine((val) => !!val, { message: "Operator is required" }),
+
+//   operator_code: z
+//     .transform(Number)
+//     .pipe(
+//       z
+//         .number({ error: "Invalid input, not a number" })
+//         .min(265, "Minimum operator code is 265")
+//         .max(266, "Minimum operator code is 266")
+//     )
+//     .optional(),
+//   status: z
+//     .enum(["Pending", "Processing", "Failed", "Completed", "Success"])
+//     .optional(),
+//   error: z.string().optional(),
+//   createdAt: z.preprocess((arg) => {
+//     // Accept ISO strings, Date instances, or any object that has a toISOString() method
+//     if (typeof arg === "string") return arg;
+//     if (arg instanceof Date) return arg.toISOString();
+//     if (arg && typeof (arg as any).toISOString === "function")
+//       return (arg as any).toISOString();
+//     return undefined;
+//   }, z.string().optional()), // ISO string for Day.js
+//   updatedAt: z.preprocess((arg) => {
+//     if (typeof arg === "string") return arg;
+//     if (arg instanceof Date) return arg.toISOString();
+//     if (arg && typeof (arg as any).toISOString === "function")
+//       return (arg as any).toISOString();
+//     return undefined;
+//   }, z.string().optional()),
+// });
 // const bulkTopUpDataSchema = topUpCsvSchema
 
 const operatorDetailsSchemaApi = z.object({
-    operatorId: z.number(),
-    name: z.string(),
+  operatorId: z.number(),
+  name: z.string(),
 });
 const reloadlyTopResponseSchema = z.object({
-      transactionId: z.number(),
-      recipientPhone: z.string(),
-      operatorId: z.number(),
-      status: z.string(),
-      deliveredAmount: z.number()
-    })
+  transactionId: z.number(),
+  recipientPhone: z.string(),
+  operatorId: z.number(),
+  status: z.string(),
+  deliveredAmount: z.number(),
+});
 const IdSchema = z.object({
   id: z
     .uuid()
@@ -107,14 +174,11 @@ const IdSchema = z.object({
 
 const OperatorDetailsSchema = z.object({
   phone_number: z.string().min(12).max(12),
-  countryIsoCode: z.string().min(2).max(2).default("KE")
-
-})
-
+  countryIsoCode: z.string().min(2).max(2).default("KE"),
+});
 
 //validate access token
 const tokenSchema = z.jwt({ alg: "HS256" });
-
 
 const recipientSchema = z.object({
   name: z
@@ -175,31 +239,42 @@ const recipientSchema = z.object({
 
 const cookieSchema = z.object({
   AccessToken: z.string().optional(),
-  RefreshToken: z.string()
-})
+  RefreshToken: z.string(),
+});
 
-const multipleRecipientSchema = z.array(recipientSchema).min(1).max(100)
+const multipleRecipientSchema = z.array(recipientSchema).min(1).max(100);
 
 const paginateSchema = z.object({
-  page: z.coerce.number({error: "Page is not a number"}),
-  limit: z.coerce.number({error: "Limit is not a number"})
-})
-
+  page: z.coerce.number({ error: "Page is not a number" }),
+  limit: z.coerce.number({ error: "Limit is not a number" }),
+});
 
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
 export type Token = z.infer<typeof tokenSchema>;
-export type TopUp = z.infer<typeof topUpSchema>
-export type Id = z.infer<typeof IdSchema>
-export type OperatorDatail = z.infer<typeof OperatorDetailsSchema >
+export type TopUp = z.infer<typeof topUpSchema>;
+export type Id = z.infer<typeof IdSchema>;
+export type OperatorDatail = z.infer<typeof OperatorDetailsSchema>;
 export type RecipientData = z.infer<typeof recipientSchema>;
 export type BulkRecipientData = z.infer<typeof multipleRecipientSchema>;
-export type PaginateData = z.infer<typeof paginateSchema>
-export type BulkTopUpData = z.infer<typeof topUpCsvSchema>
-export type CookieData = z.infer<typeof cookieSchema>
+export type PaginateData = z.infer<typeof paginateSchema>;
+export type BulkTopUpData = z.infer<typeof topUpCsvSchema>;
+export type CookieData = z.infer<typeof cookieSchema>;
 
 //reloadly api response types
-export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>
-export type OperatorDetailApi = z.infer<typeof operatorDetailsSchemaApi>
-export { signUpSchema, signInSchema, tokenSchema, topUpSchema, IdSchema, OperatorDetailsSchema, recipientSchema, paginateSchema, multipleRecipientSchema,topUpCsvSchema, cookieSchema };
+export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;
+export type OperatorDetailApi = z.infer<typeof operatorDetailsSchemaApi>;
+export {
+  signUpSchema,
+  signInSchema,
+  tokenSchema,
+  topUpSchema,
+  IdSchema,
+  OperatorDetailsSchema,
+  recipientSchema,
+  paginateSchema,
+  multipleRecipientSchema,
+  topUpCsvSchema,
+  cookieSchema,
+};

@@ -21,7 +21,7 @@ import logger from "../logger/logger.winston.js";
 import Recipient, { MobileOperator } from "../models/Recipients.js";
 import parseCsv from "../utils/parsecsv.js";
 import { Index } from "sequelize-typescript";
-import { redis } from "../config/database/redis/redis.js";
+import { redis, sub } from "../config/database/redis/redis.js";
 import { topUpWorkerEvents } from "../workers/topup.worker.js";
 import { da } from "zod/v4/locales";
 import { jobProducer } from "../queues/producer.js";
@@ -85,7 +85,7 @@ const createBulkTopUps = asyncHandler(
     if (req.file && req.file.path) {
       data = await parseCsv(req.file?.path);
       await enqueueTopUps(data, id);
-      console.log(data);
+            
       logger.info(`Successfully added ${data.length} to the top ups queue`);
     }
 
@@ -251,7 +251,6 @@ const deleteTopUp = asyncHandler(
   }
 );
 
-
 const getBulkTopUpStatus = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params as Id;
@@ -260,12 +259,7 @@ const getBulkTopUpStatus = asyncHandler(
     const interval = setInterval(() => {
       res.write(`:ping\n\n`);
     }, 15000);
-    req.on("close", () => {
-      clearInterval(interval);
-      res.end();
-      //remove the client
-      logger.info(`Server sent events connection closed by ${id}`);
-    });
+
     //track open sse connections
     manageClientConnections(id, res);
 
@@ -277,34 +271,26 @@ const getBulkTopUpStatus = asyncHandler(
     });
     res.flushHeaders();
 
-    const send = (event: string, data: any) =>
+    const send = (channel: string, message: string) =>
       res.write(
-        `event: ${event}\n` +
-          `data: ${JSON.stringify(data)}\n` +
+        `event: topups\n` +
+          `data: ${message}\n` +
           `id: ${req.user.id}\n` +
           `retry: 5000\n\n`
       );
 
-    //Status for queued jobs
-    topUpWorkerEvents.on("waiting", async ({ jobId, prev }, id) => {
-      const jobData = await redis.hgetall(`job;${jobId}`);
-      send("topup", { jobId, ...jobData });
-    });
+    //subscribe to a redis pub sub channet
+    sub.subscribe("topup_updates");
+    //;isten for messages and send them to client
+    sub.on("message", send);
 
-    topUpWorkerEvents.on("active", async ({ jobId, prev }, id) => {
-      const jobData = await redis.hgetall(`job;${jobId}`);
-      send("topup", { jobId, ...jobData });
-    });
-    topUpWorkerEvents.on("failed", async ({ jobId, failedReason }) => {
-      const jobData = await redis.hgetall(`job;${jobId}`);
-      send("topup", {
-        jobId,
-        ...jobData,
-      });
-    });
-    topUpWorkerEvents.on("completed", async ({ jobId }) => {
-      const jobData = await redis.hgetall(`job;${jobId}`);
-      send("topup", { jobId, ...jobData });
+    //clean up when client disconnects
+    req.on("close", () => {
+      sub.removeListener("message", send);
+      clearInterval(interval);
+      res.end();
+      //remove the client
+      logger.info(`Server sent events connection closed by ${id}`);
     });
   }
 );
