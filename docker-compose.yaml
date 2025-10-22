@@ -25,7 +25,8 @@ services:
   build: 
     context: ./backend
     dockerfile: Dockerfile
-  container_name: backworker
+  container_name: backend_worker
+  restart: always
   env_file:
     - backend/.env.development
   depends_on:
