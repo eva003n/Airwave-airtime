@@ -48,7 +48,7 @@ if (!confirm("Are you sure you want to delete this airtime topup?")) return;
     <section className="container mx-auto p-4">
       <Card className="p-4 shadow-md">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="md:text-2xl font-medium tracking-wide bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          <CardTitle className="md:text-2xl font-semibold text-gray-700">
             Top up Management
           </CardTitle>
           <div className="flex gap-4">
@@ -74,11 +74,13 @@ if (!confirm("Are you sure you want to delete this airtime topup?")) return;
         </CardHeader>
         <CardContent>
           <CardContent>
-            <TopUpDataTable columns={topUpColumns(handleDelete)} data={topUpData} 
-            page={page}
-            setPage={setPage}
-            pages={pages}
-            // topUps={}
+            <TopUpDataTable
+              columns={topUpColumns(handleDelete)}
+              data={topUpData}
+              page={page}
+              setPage={setPage}
+              pages={pages}
+              // topUps={}
             />
           </CardContent>
         </CardContent>

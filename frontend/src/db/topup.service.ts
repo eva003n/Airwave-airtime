@@ -18,6 +18,10 @@ export const TopUpService = {
     return db.topups.orderBy("createdAt").reverse().toArray();
   },
 
+  async delete(id: string) {
+    return db.topups.delete(id);
+  },
+
   async clear() {
     await db.topups.clear();
   },

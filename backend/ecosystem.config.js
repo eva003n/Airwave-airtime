@@ -3,7 +3,7 @@ export const apps = [
   {
     name: "airwave-airtime-api",
     script: "./dist/index.js",
-    watch: ["./src"],
+    watch: ["./dist"],
     env: {
       NODE_ENV: "development",
       PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
@@ -14,7 +14,7 @@ export const apps = [
   {
     name: "topups-worker",
     script: "./dist/workers/topup.worker.js",
-    watch: ["./src/workers"],
+    watch: ["./dist/workers"],
     env: {
       NODE_ENV: "development",
       PM2_NO_PIDUSAGE: "true", // ✅ disables wmic

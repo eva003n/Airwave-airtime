@@ -48,6 +48,7 @@ RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
 EXPOSE 8000
 
 # CMD ["./wait-for-db.sh"]
-CMD [ "node", "index.js"]
+# CMD [ "node", "index.js"]
+CMD ["pm2-runtime", "ecosystem.config.js"]
 
 

@@ -6,7 +6,7 @@ import { connection } from "../config/database/redis/redis.js";
 const topUpQueue = new Queue("topUpQueue", { 
     connection,
     defaultJobOptions: {
-        removeOnComplete: true,
+        removeOnComplete: false,
         removeOnFail: false,
         /* Retry logic and backoff */
         attempts: 5,
@@ -18,9 +18,9 @@ const topUpQueue = new Queue("topUpQueue", {
     }
 );
 // process 5 tops ups at a time
-topUpQueue.setGlobalConcurrency(5)
-//process 1 yop up per second
-topUpQueue.setGlobalRateLimit(100, 60000);
+topUpQueue.setGlobalConcurrency(1)
+//process 1 jop up per second
+topUpQueue.setGlobalRateLimit(1, 1000);
 
 // (async () => {
 //   await topUpQueue.pause(); // stop new jobs temporarily

@@ -31,13 +31,11 @@ async function upsertTopup(data: TopUp) {
     await TopUpService.update(data.id, {
       ...existing,
       ...data,
-      updatedAt: new Date(),
     });
   } else {
     await db.topups.add({
       ...data,
-      createdAt: data.createdAt ?? new Date(),
-      updatedAt: new Date(),
+    
     });
   }
 }

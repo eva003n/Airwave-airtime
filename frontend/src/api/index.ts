@@ -6,6 +6,7 @@ import type {
 } from "../interfaces/auth.interface";
 
 import type {
+  Analytics,
   Id,
   OperatorDatail,
   OperatorDetect,
@@ -87,9 +88,22 @@ const createBulkTopUps = async (id: string, data: any, ) => {
 
 }
 
+const startBulkTopUps = async () => {
+  return apiClient.request<{message: string}>("GET", "/top-ups/bulk")
+
+}
+
+// wallet management
 const getWalletBalance = async() => {
   return apiClient.request<WalletBalance>("GET", "/wallet/balance")
 }
+
+//Report management
+const getAnalyticsData = async() => {
+  return apiClient.request<Analytics>("GET", "/reports")
+}
+
+
 export {
   signUpUser,
   logInUser,
@@ -106,7 +120,11 @@ export {
   getAllTopUps,
   deleteTopUp,
   createBulkTopUps,
+  startBulkTopUps,
 
   //Wallet management
   getWalletBalance,
+
+  //report management
+getAnalyticsData
 };

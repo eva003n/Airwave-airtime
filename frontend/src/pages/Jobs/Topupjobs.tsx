@@ -21,6 +21,8 @@ import { TopUpDataTable } from "./Datatable";
 import topUpColumns from "./Columns";
 import { apiClient } from "@/api/apiclient";
 import { useTopups } from "@/context/topup.context";
+import { startBulkTopUps } from "@/api";
+import { toast } from "react-toastify";
 
 // Mock job queue data
 const jobQueue = [
@@ -190,22 +192,37 @@ const [token, setToken] = useState("");
 
 //  },[token])
 
-  const handleDelete = async () => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this airtime topup?")) return;
+    TopUpService.delete(id)
   };
 
+  const handleStart = async () => {
+    const response = await startBulkTopUps()
+    toast.success(response.data.message)
+  }
+
   return (
-    <div className=" space-y-6 bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
-          <Phone size={24} className="" />
-          Topup jobs
+    <div className="p-4 ">
+      <div className="flex items-center justify-between py-4">
+        <h1 className="text-2xl font-semibold text-gray-700 flex gap-3">
+          {/* <Phone size={24} className="" /> */}
+          Job Queue
         </h1>
-        <Link to={"/top-ups/make-topup"}>
-          <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
-            Make topup
+        <div className="flex gap-4">
+          <Button
+            variant={"outline"}
+            className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
+            onClick={handleStart}
+          >
+            Start bulk top
           </Button>
-        </Link>
+          <Link to={"/top-ups/make-topup"}>
+            <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+              Make topup
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card className="shadow-sm border-gray-200">

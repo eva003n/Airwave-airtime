@@ -26,9 +26,10 @@ const WalletPage = () => {
 
   }, [])
   return (
-    <section className="text-color px-4 py-14">
+    <section className="text-color p-4">
+      <h1 className="md:text-2xl font-semibold text-gray-700 py-2">My Wallet</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card >
+        <Card>
           <CardHeader>
             <CardDescription className="text-[1.3rem] font-semibold">
               My wallet
@@ -84,7 +85,7 @@ const WalletPage = () => {
           </CardContent>
           <CardFooter></CardFooter>
         </Card>
-        <Card >
+        <Card>
           <CardHeader>
             <CardTitle className="text-[1.3rem] font-semibold">
               Auto recharge
@@ -101,13 +102,14 @@ const WalletPage = () => {
             <p className="text-[.8rem]">Recharge my account: 129152 - 6450</p>
             <Input type="number" className="w-30" max={129152} min={6450} />
             <Input type="range" max={129152} min={6450} />
-            <p className="text-[.8rem]">When my balance goes below: 12916 - 646:</p>
+            <p className="text-[.8rem]">
+              When my balance goes below: 12916 - 646:
+            </p>
             <Input type="number" className="w-30" max={12916} min={646} />
 
             <Input type="range" max={12916} min={646} />
           </CardContent>
-          <CardFooter>
-          </CardFooter>
+          <CardFooter></CardFooter>
         </Card>
       </div>
     </section>

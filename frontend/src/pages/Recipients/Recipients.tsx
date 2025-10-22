@@ -245,7 +245,7 @@ const RecipientManagementPage = () => {
   return (
     <Card className="p-4 shadow-md">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="md:text-2xl font-medium tracking-wide bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        <CardTitle className="md:text-2xl font-semibold text-gray-700">
           Recipient Management
         </CardTitle>
         <Link to={"/recipients/recipient"}>

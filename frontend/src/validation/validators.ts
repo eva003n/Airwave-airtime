@@ -383,6 +383,27 @@ export const walletBalanceSchema = z.object({
   }),
 });
 
+const analyticsSchema = z.object({
+  data: z.object({
+    totalRecipients: z.number(),
+    totalTopUps: z.number(),
+    walletBalance: z.number(),
+    recipientGrowth: z.array(
+      z.object({
+        month: z.string(),
+        count: z.number(),
+      })
+    ),
+    topUpTrends: z.array(
+      z.object({
+        month: z.number(),
+        totalAirtime: z.number(),
+        totalTopups: z.number(),
+      })
+    ),
+  }),
+});
+
 export type BulkTopUpForm = z.infer<typeof bulkTopUpSchema>;
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -405,3 +426,4 @@ export type OperatorDetect = z.infer<typeof operatorDetailsSchemaApi>;
 export type TopUpData = z.infer<typeof topUpDataSchema>;
 export type TopUpDataApi = z.infer<typeof topUpDataApiSchema>
 export type WalletBalance = z.infer<typeof walletBalanceSchema>
+export type Analytics = z.infer<typeof analyticsSchema>

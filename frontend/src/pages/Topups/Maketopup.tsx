@@ -145,7 +145,7 @@ export default function MakeTopUpPage() {
     <div className="">
       <div className="max-w-5xl mx-auto space-y-6">
         <header className="flex justify-between">
-          <p className="text-2xl font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
+          <p className="text-2xl font-semibold text-gray-700 flex items-center gap-2">
             Make top up
           </p>
           <a href="/files/Bulk-top-up-template.xlsx" download className="">
@@ -347,12 +347,14 @@ export default function MakeTopUpPage() {
                     }}
                     type="button"
                   >
-                    Clear
+                    Reset
                   </Button>
                   <Button
                     className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:brightness-95 "
                     type="submit"
-                  >
+                  onClick={
+                    () => bulkForm.reset()
+                  }>
                     {bulkForm.formState.isSubmitting? "Uploading" : 
                     "Start topup"
                     }

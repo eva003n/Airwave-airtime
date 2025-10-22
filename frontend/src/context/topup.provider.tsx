@@ -5,6 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { useState, useRef, useEffect } from "react";
 import { TopupContext, upsertTopup } from "./topup.context";
 import { apiClient } from "@/api/apiclient";
+import { TopUpService } from "@/db/topup.service";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URI;
 
@@ -26,6 +27,7 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
   // Function to start SSE connection
   const connectStream = () => {
     const user = getItem<UserData>("user")
+    if(!user) return
     const url = `${API_BASE}/top-ups/progress/${user.id}`;
     const eventSource = new EventSource(url, { withCredentials: true });
 
@@ -35,7 +37,8 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
     eventSource.addEventListener("topup", async (event) => {
       try {
         const data = JSON.parse(event.data);
-        await upsertTopup(data);
+        console.log(data)
+        await TopUpService.add(data);
       } catch (err) {
         console.error("Error parsing SSE data:", err);
       }
@@ -91,8 +94,8 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
 //     }
 //   };
 
-  // Cleanup old topups every 24h
-  const cleanupOldTopups = async (hours = 24) => {
+  // Cleanup old topups every 168h  1 week
+  const cleanupOldTopups = async (hours = 168) => {
     const cutoff = new Date();
     cutoff.setHours(cutoff.getHours() - hours);
     await db.topups.where("createdAt").below(cutoff.toISOString()).delete();

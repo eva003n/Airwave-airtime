@@ -21,10 +21,9 @@ import logger from "../logger/logger.winston.js";
 import Recipient, { MobileOperator } from "../models/Recipients.js";
 import parseCsv from "../utils/parsecsv.js";
 import { Index } from "sequelize-typescript";
-import { redis, sub } from "../config/database/redis/redis.js";
-import { topUpWorkerEvents } from "../workers/topup.worker.js";
-import { da } from "zod/v4/locales";
+import {  connection, sub } from "../config/database/redis/redis.js";
 import { jobProducer } from "../queues/producer.js";
+import { topUpWorker } from "../workers/topup.worker.js";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
@@ -85,7 +84,7 @@ const createBulkTopUps = asyncHandler(
     if (req.file && req.file.path) {
       data = await parseCsv(req.file?.path);
       await enqueueTopUps(data, id);
-            
+      console.log(data)      
       logger.info(`Successfully added ${data.length} to the top ups queue`);
     }
 
@@ -251,6 +250,21 @@ const deleteTopUp = asyncHandler(
   }
 );
 
+const startBulkTopUp = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    //if worker is nit running run it
+    if(topUpWorker.isRunning()) return;
+
+    await topUpWorker.run();
+
+    return res.status(200).json(
+      new ApiResponse(200, null, "Bulk top ups started successfully")
+    )
+
+    
+  }
+)
+
 const getBulkTopUpStatus = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params as Id;
@@ -271,13 +285,15 @@ const getBulkTopUpStatus = asyncHandler(
     });
     res.flushHeaders();
 
-    const send = (channel: string, message: string) =>
+    const send = async (channel: string, message: string) =>{
+      const sseId = await connection.incr("sse_id")
       res.write(
-        `event: topups\n` +
+        `event: topup\n` +
           `data: ${message}\n` +
-          `id: ${req.user.id}\n` +
+          `id: ${sseId}\n` +
           `retry: 5000\n\n`
       );
+    }
 
     //subscribe to a redis pub sub channet
     sub.subscribe("topup_updates");
@@ -362,4 +378,5 @@ export {
   autoDetect,
   deleteTopUp,
   getBulkTopUpStatus,
+  startBulkTopUp,
 };

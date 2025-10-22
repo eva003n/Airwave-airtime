@@ -25,7 +25,7 @@ export type TopUpColumn = {
 import { Link, useNavigate } from "react-router-dom";
 import type { RecipientData, RecipientForm, TopUpData } from "@/validation/validators";
 import type { AxiosResponse } from "axios";
-import { getDateByDay } from "@/utils/formatdate";
+import { getDateByDay, getTimeFromNow } from "@/utils/formatdate";
 import { deleteRecipient } from "@/api";
 import { toast } from "react-toastify";
 import type { TopUp } from "@/db/db";
@@ -82,7 +82,7 @@ const topUpColumns = (
     accessorKey: "amount",
     header: () => <div className="text-right">Airtime amount</div>,
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("airtime_amount"));
+      const amount = parseFloat(row.getValue("amount"));
       const formatted = new Intl.NumberFormat("en-UK", {
         style: "currency",
         currency: "KES",
@@ -100,14 +100,6 @@ const topUpColumns = (
     header: "Operator",
   },
 
-  // {
-  //   accessorKey: "createdAt",
-  //   header: "Created at",
-  //   cell: ({ row }) => {
-  //     const formattedDate = getDateByDay(row.getValue("createdAt"));
-  //     return <div className="">{formattedDate}</div>;
-  //   },
-  // },
   {
     accessorKey: "status",
     header: "Status",
@@ -120,11 +112,19 @@ const topUpColumns = (
           ? "bg-yellow-100 text-yellow-700"
           : status === "Failed"
           ? "bg-red-100 text-red-700"
-          : "bg-blue-100 text-blue-700"
+          : "bg-blue-100 text-blue-700";
 
       return (
         <Badge className={`${color} px-3 py-1 rounded-full`}>{status}</Badge>
       );
+    },
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "Time",
+    cell: ({ row }) => {
+      const formattedDate = getTimeFromNow(row.getValue("updatedAt"));
+      return <div className="">{formattedDate}</div>;
     },
   },
   {

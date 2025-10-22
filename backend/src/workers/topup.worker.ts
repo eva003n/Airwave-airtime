@@ -1,5 +1,5 @@
 import { Job, tryCatch, Worker } from "bullmq";
-import { connection, pub, redis } from "../config/database/redis/redis.js";
+import { connection, pub } from "../config/database/redis/redis.js";
 import {
   topUpCsvSchema,
   type BulkTopUpData,
@@ -17,6 +17,7 @@ import { runMigrations } from "../migrate.js";
 import { topUpQueue } from "../queues/topup.queue.js";
 import logger from "../logger/logger.winston.js";
 import { UpdatedAt } from "sequelize-typescript";
+import asyncHandler from "../utils/asyncHandler.js";
 
 //this ensure sequelize models are initialized before running process
 
@@ -28,6 +29,8 @@ const validateTopUpData = async (data: BulkTopUpData) => {
   if (result.error) {
     throw result.error.issues;
   }
+
+ 
   return result.data;
 };
 const autoDetect = async (phoneNumber: string) => {
@@ -99,16 +102,18 @@ const sendTopUp = async (
   });
 };
 
-const topUpWorker = new Worker(
+let topUpWorker: Worker
+const startWorker = async () => {
+topUpWorker = new Worker(
   "topUpQueue",
   async (job: Job<BulkTopUpData>) => {
     try {
       //validate the csv data
-      validateTopUpData(job.data);
+      await validateTopUpData(job.data);
       //detect operator the operator
       const operatorDetails = await autoDetect(job.data.phone);
 
-      //make the top up
+      //make the top up to reloadly
       await sendTopUp(
         job.data.phone,
         job.data.amount,
@@ -116,49 +121,51 @@ const topUpWorker = new Worker(
         job
       );
 
-      //  Update while job is still active
-      await job.updateData({ ...job.data, status: "Success", updatedAt: new Date().toISOString() });
-
       // Publish to Redis for SSE streaming
-      await pub.publish(
-        "topups_updates",
-        JSON.stringify({ ...job.data, status: "Success", updatedAt: new Date().toISOString()})
-      );
+     
+      
     } catch (error) {
-      job.updateData({ ...job.data, status: "Failed" });
-      await pub.publish(
-        "topups_updates",
-        JSON.stringify({ ...job.data, status: "Failed" })
-      );
+      // job.updateData({ ...job.data, status: "Failed" });
+     
       logger.error(error.message);
     }
   },
   {
     connection,
+    autorun: false
   }
 );
 
-const topUpWorkerEvents = generateQueueEvents("topUpQueue");
+const topUpEvants = generateQueueEvents("topUpQueue");
+
+topUpEvants.on("waiting", async({jobId}) => {
+  const job = await topUpQueue.getJob(jobId) 
+  if(!job) return
+   return await pub.publish(
+     "topup_updates",
+     JSON.stringify({
+       ...job,
+       status: "Pending",
+       updatedAt: new Date().toISOString(),
+     })
+   );
+});
 
 // Status for jobs being processed
 topUpWorker.on("active", async (job: Job) => {
   if (!job) return;
 
   try {
-    await job.updateData({
-      ...job.data,
-      status: "Processing",
-      updatedAt: new Date().toISOString(),
-    });
-
-    await pub.publish(
-      "topup_updates",
-      JSON.stringify({
-        ...job.data,
-        status: "Processing",
-        updatedAt: new Date().toISOString(),
-      })
-    );
+    
+      return await pub.publish(
+        "topup_updates",
+        JSON.stringify({
+          ...job.data,
+          status: "Processing",
+          updatedAt: new Date().toISOString(),
+        })
+      );
+    
   } catch (error) {
     logger.error(error.message);
   }
@@ -167,22 +174,18 @@ topUpWorker.on("active", async (job: Job) => {
 topUpWorker.on("failed", async (job, err) => {
   if (!job) return;
   try {
-    await job.updateData({
-      ...job.data,
-      status: "Failed",
-      updatedAt: new Date().toISOString(),
-      error: err.message,
-    });
-
-    await pub.publish(
-      "topup_updates",
-      JSON.stringify({
-        ...job.data,
-        status: "Failed",
-        updatedAt: new Date().toISOString(),
-        error: err.message,
-      })
-    );
+     
+   return   await pub.publish(
+        "topup_updates",
+        JSON.stringify({
+          ...job.data,
+          status: "Failed",
+          updatedAt: new Date().toISOString(),
+          error: err.message,
+        })
+      );
+    
+      
   } catch (error) {
     logger.error(error.message);
   }
@@ -190,24 +193,42 @@ topUpWorker.on("failed", async (job, err) => {
 
 // Status for completed jobs
 topUpWorker.on("completed", async (job, result, prev) => {
-  // if(!job) return
-  // try {
-  //   await job.updateData({
-  //     ...job?.data,
-  //     status: "Success",
-  //     updatedAt: new Date().toISOString(),
-  //   });
-  //   await pub.publish(
-  //     "topup_updates",
-  //     JSON.stringify({
-  //       ...job.data,
-  //       status: "Success",
-  //       updatedAt: new Date().toISOString(),
-  //     })
-  //   );
-  // } catch (error) {
-  //   logger.error(error.message)
-  // }
+  if(!job) return
+  try {
+ 
+    await pub.publish(
+      "topup_updates",
+      JSON.stringify({
+        ...job.data,
+        status: "Success",
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    logger.error(error.message)
+  }
 });
 
-export { topUpWorkerEvents };
+
+topUpWorker.on("error", (error) => logger.error(`Top up worker failed ${error.message}`))
+}
+
+
+
+
+
+startWorker()
+.then(() => logger.info("Successfully started background processor for bulk top ups"))
+.catch((err) => {
+  logger.error("Top upWorker startup failed:", err);
+  process.exit(1);
+});
+
+
+
+export {
+  topUpWorker
+}
+
+
+

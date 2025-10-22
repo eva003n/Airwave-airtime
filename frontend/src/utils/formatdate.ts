@@ -13,7 +13,7 @@ const getMonth = (date: Date) => dayjs(date).month(); //zere based
 const getYear = (date: Date) => dayjs(date).year();
 
 const now = dayjs();
-//ditfference between now and the deadline for challenge in days
+//ditfference between now and future data
 const getDateDifference = (date: Date, day = now) => dayjs(date).diff(day, "day");
 //get time from now
 const getTimeFromNow = (pastDate: Date) => dayjs(pastDate).fromNow();

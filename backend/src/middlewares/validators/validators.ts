@@ -1,4 +1,4 @@
-import { minLength, object, z } from "zod";
+import { minLength, object, string, z } from "zod";
 import { MobileOperator } from "../../models/Recipients.js";
 import { KUNITY_BRANCHES, OPERATORS } from "../../constants.js";
 
@@ -89,8 +89,8 @@ const topUpCsvSchema = z.object({
     .enum(["Pending", "Processing", "Failed", "Completed", "Success"])
     .optional(),
   error: z.string().optional(),
-  createdAt: isoDateString.default(() => new Date().toISOString()),
-  updatedAt: isoDateString.optional(),
+  createdAt: z.string().optional(),
+  updatedAt:  z.string().optional(),
 });
 
 // const topUpCsvSchema = z.object({
@@ -249,6 +249,15 @@ const paginateSchema = z.object({
   limit: z.coerce.number({ error: "Limit is not a number" }),
 });
 
+const walletBalanceSchema = z.object({
+    balance: z.number(),
+    currencyCode: z.string(),
+    currencyName: z.string(),
+    updatedAt: z.date(),
+    lowBalanceThreshold: z.number(),
+    maxLowBalanceThreshold: z.number(),
+  })
+  
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -265,6 +274,8 @@ export type CookieData = z.infer<typeof cookieSchema>;
 //reloadly api response types
 export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;
 export type OperatorDetailApi = z.infer<typeof operatorDetailsSchemaApi>;
+export type WalletBalance = z.infer<typeof walletBalanceSchema>;
+
 export {
   signUpSchema,
   signInSchema,
@@ -277,4 +288,5 @@ export {
   multipleRecipientSchema,
   topUpCsvSchema,
   cookieSchema,
+  walletBalanceSchema,
 };

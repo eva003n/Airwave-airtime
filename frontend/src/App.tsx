@@ -47,8 +47,8 @@ const App = () => {
               <Route index element={<TopUpsPage />} />
               <Route element={<TopupLayout />}>
                 <Route path="make-topup" element={<MakeTopUpPage />} />
-                <Route path="bulk" element={<BulkTopUpQueue />} />
               </Route>
+              <Route path="bulk" element={<BulkTopUpQueue />} />
             </Route>
             {/* Wallet management */}
             <Route path="/wallet" element={<WalletPage />}></Route>

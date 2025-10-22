@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Users, Phone, Network, Signal, CardSim } from "lucide-react";
 import {
@@ -14,6 +14,9 @@ import {
 } from "recharts";
 import ListContainer from "@/components/ListContainer";
 import List from "@/components/List";
+import { getAnalyticsData } from "@/api";
+import type { Analytics } from "@/validation/validators";
+import CountUp from "react-countup";
 
 const recipientData = [
   { month: "May", recipients: 600 },
@@ -32,9 +35,18 @@ const topUpData = [
 ];
 
 export default function Dashboard() {
+const [analytics, setAnalytics] = useState<Analytics>()
+useEffect(() => {
+  const fetchAnalytics = async () => {
+    const response = await getAnalyticsData()
+    setAnalytics(response.data)
+  }
+fetchAnalytics()
+}, [])
+
   return (
     <div className="p-6 space-y-6 bg-sidebar min-h-screen">
-      <h1 className="text-2xl font-semibold text-gray-700">
+      <h1 className="md:text-2xl font-semibold text-gray-700">
         Dashboard Overview
       </h1>
 
@@ -49,7 +61,12 @@ export default function Dashboard() {
             <Users className="text-gray-500 w-5 h-5" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-700">1,254</p>
+            <CountUp
+              end={analytics?.data.totalRecipients || 0}
+              className="text-2xl font-bold text-gray-700"
+              duration={2}
+              separator=","
+            />
             <p className="text-sm text-gray-500">Active recipients</p>
           </CardContent>
         </Card>
@@ -63,7 +80,12 @@ export default function Dashboard() {
             <Phone className="text-gray-500 w-5 h-5" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-700">1,000</p>
+            <CountUp
+              end={analytics?.data.totalTopUps || 0}
+              className="text-2xl font-bold text-gray-700"
+              duration={2}
+              separator=","
+            />
             <p className="text-sm text-gray-500">All-time distributions</p>
           </CardContent>
         </Card>
@@ -77,7 +99,15 @@ export default function Dashboard() {
             <Wallet className="text-gray-500 w-5 h-5" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-700">KES 12,450</p>
+            <p className="text-2xl font-bold text-gray-700">
+              KES
+              <CountUp
+                end={analytics?.data.walletBalance || 0}
+                className="text-2xl font-bold text-gray-700"
+                duration={2}
+                separator=","
+              />
+            </p>
             <p className="text-sm text-gray-500">Float balance</p>
           </CardContent>
         </Card>
@@ -91,7 +121,11 @@ export default function Dashboard() {
             <Signal className="text-gray-500 w-5 h-5" />
           </CardHeader>
           <CardContent className="space-y-2">
-            <p className="text-2xl font-bold text-gray-700">2</p>
+            <CountUp
+              end={2}
+              className="text-2xl font-bold text-gray-700"
+              duration={2}
+            />
             <ListContainer className="flex gap-4 items-center">
               <List className="flex gap-1 items-center">
                 <CardSim size={16} className="text-green-400" />

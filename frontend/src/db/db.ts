@@ -9,8 +9,9 @@ export type TopUp = {
   branch: string,
   operator: string;
   status: "Pending" | "Success" | "Failed" | "Processing";
-  createdAt: Date;
-  updatedAt?: Date;
+  createdAt: string;
+  updatedAt?: string;
+  eroror?: string
 }
 
 export class TopUpDB extends Dexie {
