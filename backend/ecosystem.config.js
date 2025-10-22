@@ -2,8 +2,8 @@ export const apps = [
   // Process 1: Main HTTP API
   {
     name: "airwave-airtime-api",
-    script: "./dist/index.js",
-    watch: ["./dist"],
+    script: "./index.js",
+    watch: ["."],
     env: {
       NODE_ENV: "development",
       PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
@@ -13,8 +13,8 @@ export const apps = [
   // Process 2: Worker for topups
   {
     name: "topups-worker",
-    script: "./dist/workers/topup.worker.js",
-    watch: ["./dist/workers"],
+    script: "./workers/topup.worker.js",
+    watch: ["."],
     env: {
       NODE_ENV: "development",
       PM2_NO_PIDUSAGE: "true", // ✅ disables wmic

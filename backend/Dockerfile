@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat
 # install pnpm package manager
 RUN npm install -g pnpm 
+RUN npm install -g pm2 
 # Make file an executable
 
 
@@ -29,6 +30,8 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat
 # Install pnpm in runner stage
 RUN npm install -g pnpm
+RUN npm install -g pm2 
+
 
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs \
@@ -39,7 +42,8 @@ USER expressjs
 # Copy only necessary files
 COPY --from=builder /app/dist ./
 COPY --from=builder /app/package.json ./
-# COPY --from=builder /app/wait-for-db.sh ./
+COPY --from=builder /app/ecosystem.config.js ./
+
 COPY --from=deps /app/node_modules ./node_modules
 USER root
 RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
