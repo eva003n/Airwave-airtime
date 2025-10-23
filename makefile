@@ -29,48 +29,32 @@ FRONTEND_ENV_FILE=frontend/.env.${ENV}
 
 install:
 	$(info $(pink)------------------------------------------------------)
-	$(info $(pink)Make ($(os)): Installing Airwave airtime Project ($(ENV))...)
+	$(info $(pink)Make ($(os)): Installing Airwave airtime  ($(ENV))...)
 	$(info $(pink)------------------------------------------------------$(reset))
 	# Build and start containers
-	@docker compose --env-file $(BACKEND_ENV_FILE) build
-	@docker compose --env-file $(BACKEND_ENV_FILE) up --build -d
-	# Backend setup'
-	@docker exec -it airwave_api cp .backend/.env  .env
-	@docker exec -it airwave_api cp $(BACKEND_ENV_FILE) .env.${ENV}
-# 	@docker exec -it airwave_api pnpm migrate
-# 	@docker exec -it airwave_api pnpm seed
-	# Frontend setup
-	@docker exec -it airwave_web cp $(FRONTEND_ENV_FILE) .env
-
-	# Restart everything
-	@docker compose down
-	@make -s start
+# 	@docker compose --env-file $(BACKEND_ENV_FILE) build
+	@docker compose build
+# 	@docker compose --env-file $(BACKEND_ENV_FILE) up --build -d
+	@docker compose up --build -d
 
 start:
-	$(info $(pink) Make ($(os)): Starting Airwave airtime Project ($(ENV))...)
-	@docker compose --env-file $(BACKEND_ENV_FILE) up -d
+	$(info $(pink) Make ($(os)): Starting Airwave airtime  ($(ENV))...)
+	@docker compose up --build -d
 
 stop:
-	$(info $(pink) Make ($(os)): Stopping Airwave airtime Project ($(ENV))...)
+	$(info $(pink) Make ($(os)): Stopping Airwave airtime  ($(ENV))...)
 	@docker compose down 
 
 restart:
-	$(info $(pink) Make ($(os)): Restarting Airwave airtime Project ($(ENV))...)
+	$(info $(pink) Make ($(os)): Restarting Airwave airtime ($(ENV))...)
 	@make -s stop
 	@make -s start
 
 logs:
 	$(info $(pink) Make ($(os)): Showing logs ($(ENV))...)
-	@docker compose --env-file $(BACKEND_ENV_FILE) logs -f
+	@docker compose logs -f
 
-migrate:
-	$(info $(pink) Make ($(os)): Running backend migrations ($(ENV))...)
-	@docker compose --env-file $(BACKEND_ENV_FILE) run --rm backend pnpm migrate
-
-seed:
-	$(info $(pink) Make ($(os)): Running backend seeders ($(ENV))...)
-	@docker compose --env-file $(BACKEND_ENV_FILE) run --rm pnpm seed
 delete:
-	$(info $(pink) Make ($(os)): Running backend seeders ($(ENV))...)
+	$(info $(pink) Make ($(os)): Terminating docker containers ($(ENV))...)
 	@docker compose down -v 
 

@@ -32,7 +32,7 @@ const CreateRecipientPage = () => {
     resolver: zodResolver(recipientSchema),
     defaultValues: {
       phone_number: "254",
-      user_id: getItem<UserData>("user").id
+      user_id: getItem<UserData>("user").id,
     },
     //validation using zod schema
   });
@@ -44,7 +44,9 @@ const CreateRecipientPage = () => {
     } catch (error) {
       toast.error(error.message || "Something went wrong");
     } finally {
-      reset();
+      reset({
+        
+      });
     }
   };
 
@@ -128,6 +130,7 @@ const CreateRecipientPage = () => {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
+                        
                       >
                         <SelectTrigger className="w-full focus:ring-2 focus:ring-gray-500">
                           <SelectValue placeholder="Select branch" />

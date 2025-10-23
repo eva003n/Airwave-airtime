@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, Users, Phone, Network, Signal, CardSim } from "lucide-react";
 import {
@@ -17,6 +17,8 @@ import List from "@/components/List";
 import { getAnalyticsData } from "@/api";
 import type { Analytics } from "@/validation/validators";
 import CountUp from "react-countup";
+import { getMonth } from "@/utils/formatdate";
+import { MONTHS_SHORT } from "@/constants";
 
 const recipientData = [
   { month: "May", recipients: 600 },
@@ -44,6 +46,21 @@ useEffect(() => {
 fetchAnalytics()
 }, [])
 
+const topUpTrendsData = useMemo(() => {
+  if (!analytics?.data.topUpTrends) return topUpData;
+  return analytics.data.topUpTrends.map((t: any) => ({
+    month: MONTHS_SHORT[getMonth(t.month)],
+    totalTopups: Number(t.totalTopups ?? t.topups ?? 0),
+  }));
+}, [analytics]);
+
+const recipientGrowthData = useMemo(() => {
+  if (!analytics?.data.recipientGrowth) return recipientData; // fallback sample
+  return analytics.data.recipientGrowth.map((r: any) => ({
+    month: MONTHS_SHORT[getMonth(r.month)],
+    recipients: Number(r.recipients ?? r.count ?? 0), // tolerate different keys
+  }));
+}, [analytics]);
   return (
     <div className="p-6 space-y-6 bg-sidebar min-h-screen">
       <h1 className="md:text-2xl font-semibold text-gray-700">
@@ -62,7 +79,7 @@ fetchAnalytics()
           </CardHeader>
           <CardContent>
             <CountUp
-            start={0}
+              start={0}
               end={analytics?.data.totalRecipients || 0}
               className="text-2xl font-bold text-gray-700"
               duration={2}
@@ -82,7 +99,7 @@ fetchAnalytics()
           </CardHeader>
           <CardContent>
             <CountUp
-            start={0}
+              start={0}
               end={analytics?.data.totalTopUps || 0}
               className="text-2xl font-bold text-gray-700"
               duration={2}
@@ -155,11 +172,15 @@ fetchAnalytics()
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={recipientData}>
+              <LineChart data={recipientGrowthData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="month" stroke="#9ca3af" />
                 <YAxis stroke="#9ca3af" />
-                <Tooltip />
+                <Tooltip
+                  formatter={(value) =>
+                    Intl.NumberFormat().format(Number(value))
+                  }
+                />
                 <Line
                   type="monotone"
                   dataKey="recipients"
@@ -181,13 +202,13 @@ fetchAnalytics()
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={topUpData}>
+              <BarChart data={topUpTrendsData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="month" stroke="#9ca3af" />
                 <YAxis stroke="#9ca3af" />
                 <Tooltip />
                 <Bar
-                  dataKey="topups"
+                  dataKey="totalTopups"
                   fill="#6b7280" // gray-500
                   radius={[8, 8, 0, 0]}
                 />

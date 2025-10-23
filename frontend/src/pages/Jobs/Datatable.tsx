@@ -54,9 +54,9 @@ interface DataTableProps<TData, TValue> {
 export function TopUpDataTable<TData, TValue>({
   columns,
   data,
-  pages,
-  page,
-  setPage,
+  // pages,
+  // page,
+  // setPage,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -167,7 +167,7 @@ export function TopUpDataTable<TData, TValue>({
         </TableBody>
       </Table>
       <div className="flex items-center justify-center space-x-2 py-4 m-0 p-9  ">
-        <Pagination className="">
+        {/* <Pagination className="">
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
@@ -203,7 +203,27 @@ export function TopUpDataTable<TData, TValue>({
               />
             </PaginationItem>
           </PaginationContent>
-        </Pagination>
+        </Pagination> */}
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="disabled:brightness-50"
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="disabled:brightness-50"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );

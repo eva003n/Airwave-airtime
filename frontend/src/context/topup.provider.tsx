@@ -7,7 +7,7 @@ import { TopupContext, upsertTopup } from "./topup.context";
 import { apiClient } from "@/api/apiclient";
 import { TopUpService } from "@/db/topup.service";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URI;
+const API_BASE = import.meta.env.VITE_API_BASE_URI || "http://localhost:8000/api/v1";
 
 export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -44,6 +44,11 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     })
 
+    eventSource.onopen = () => {
+      console.log("SSE connection established");
+    };
+
+
     eventSource.onerror = async (error) => {
       if (eventSource?.readyState === EventSource.CLOSED) {
       await handleSessionExpired();
@@ -51,15 +56,12 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       console.warn("SSE error or disconnect:", error);
-      //   setIsConnected(false);
-      //   eventSource.close();
+        setIsConnected(false);
+        eventSource.close();
 
-      // Try to see if session is still valid
-      //   const stillValid = await checkTokenValidity();
-      //   if (!stillValid) {
-      //   } else {
-      //     scheduleReconnect();
-      //   }
+      
+          scheduleReconnect();
+        
     };
   };
 
@@ -75,10 +77,10 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleSessionExpired = async() => {
-   if(!token) {
+   
     const newToken = await apiClient.getAccessToken();
-    setToken(newToken)
-   }
+    if(newToken) setToken(newToken)
+   
   };
 
 //   const checkTokenValidity = async (): Promise<boolean> => {

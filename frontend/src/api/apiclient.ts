@@ -117,11 +117,11 @@ class ApiClient {
      
 
      //use axios to avoid interceptor recursion
-     const res = await axios.get<TokenResponse>(this.authUrl, {
+     const response = await axios.get<TokenResponse>(this.authUrl, {
       withCredentials: true
      });
 
-     const {access_token, expires_in} = res.data.data
+     const {access_token, expires_in} = response.data.data
 
      this.token = access_token;
      this.tokenExpiry = expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request

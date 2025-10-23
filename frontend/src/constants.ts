@@ -18,8 +18,23 @@ const KUNITY_BRANCHES = [
 ]
 const OPERATORS = ["Safaricom", "Airtel"]
 
+const MONTHS_SHORT: string[] = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
  
 export {
 KUNITY_BRANCHES,
 OPERATORS,
+MONTHS_SHORT
 }

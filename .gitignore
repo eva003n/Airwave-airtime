@@ -5,7 +5,7 @@
 /backend/uploads
 /frontend/dist
 .env
-/**/*/.env
+# /**/*/.env
 /**/*/.env.p*
 /**/*/.env.d*
 /**/*/*.log
