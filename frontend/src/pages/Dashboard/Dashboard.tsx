@@ -62,6 +62,7 @@ fetchAnalytics()
           </CardHeader>
           <CardContent>
             <CountUp
+            start={0}
               end={analytics?.data.totalRecipients || 0}
               className="text-2xl font-bold text-gray-700"
               duration={2}
@@ -81,6 +82,7 @@ fetchAnalytics()
           </CardHeader>
           <CardContent>
             <CountUp
+            start={0}
               end={analytics?.data.totalTopUps || 0}
               className="text-2xl font-bold text-gray-700"
               duration={2}
@@ -99,9 +101,10 @@ fetchAnalytics()
             <Wallet className="text-gray-500 w-5 h-5" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-gray-700">
-              KES
+            <p className="text-2xl font-bold text-gray-700 flex gap-2 items-center">
+              <span>KES</span>
               <CountUp
+                start={0}
                 end={analytics?.data.walletBalance || 0}
                 className="text-2xl font-bold text-gray-700"
                 duration={2}
@@ -122,6 +125,7 @@ fetchAnalytics()
           </CardHeader>
           <CardContent className="space-y-2">
             <CountUp
+              start={0}
               end={2}
               className="text-2xl font-bold text-gray-700"
               duration={2}

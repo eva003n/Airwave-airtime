@@ -32,6 +32,7 @@ const connectDatabase = async () => {
   try {
     await sequelize.authenticate();
     logger.info("Connected to Postgres server successfully");
+    await  sequelize.sync({ alter: true }); // Sync models with database
     defineAssociations()
   } catch (error) {
     logger.error(`Failed to connect to Postgres server with error ${error}`);

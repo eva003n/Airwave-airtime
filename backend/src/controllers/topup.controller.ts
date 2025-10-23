@@ -271,7 +271,8 @@ const getBulkTopUpStatus = asyncHandler(
 
     //keep the connection alive
     const interval = setInterval(() => {
-      res.write(`:ping\n\n`);
+      res
+      .write(`:ping\n\n`);
     }, 15000);
 
     //track open sse connections
@@ -281,13 +282,13 @@ const getBulkTopUpStatus = asyncHandler(
     res.status(200).set({
       "Content-Type": "text/event-stream",
       "Cache-control": "no-cache",
-      Connection: "keep-alive",
+      "Connection": "keep-alive",
     });
     res.flushHeaders();
 
     const send = async (channel: string, message: string) =>{
       const sseId = await connection.incr("sse_id")
-      res.write(
+       res.write(
         `event: topup\n` +
           `data: ${message}\n` +
           `id: ${sseId}\n` +
