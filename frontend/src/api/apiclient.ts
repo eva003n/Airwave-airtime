@@ -25,13 +25,13 @@ class ApiClient {
   constructor() {
     this.clientId = "";
     this.clientSecret = "";
-    this.audience = import.meta.env.VITE_API_BASE_URI;
-    this.authUrl = import.meta.env.VITE_API_AUTH_URL;
+    this.audience = (import.meta as any).env?.VITE_API_BASE_URI || "http://localhost:8000/api/v1";
+    this.authUrl = (import.meta as any).env?.VITE_API_AUTH_URL || "http://localhost:8000/api/v1/auth/refresh-token";
     this.isRefreshing = false;
 
     this.api = axios.create({
       baseURL:
-        import.meta.env.VITE_API_BASE_URI || "http://localhost:8000/api/v1",
+        (import.meta as any).env?.VITE_API_BASE_URI || "http://localhost:8000/api/v1",
       headers: {
         "Content-Type": "application/json",
       },
@@ -46,7 +46,7 @@ class ApiClient {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error: any) => Promise.reject(error)
     );
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
@@ -121,11 +121,11 @@ class ApiClient {
       withCredentials: true
      });
 
-     const {access_token, expires_in} = response.data.data
+    //  const {access_token, expires_in} = response.data.data
 
-     this.token = access_token;
-     this.tokenExpiry = expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request
-     return this.token;
+     this.token = response.data.data.access_token;
+     this.tokenExpiry = response.data.data.expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request
+     return response.data.data.access_token;
    } catch (error) {
     // console.log(error)
     throw error;

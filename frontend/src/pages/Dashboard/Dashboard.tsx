@@ -20,21 +20,21 @@ import CountUp from "react-countup";
 import { getMonth } from "@/utils/formatdate";
 import { MONTHS_SHORT } from "@/constants";
 
-const recipientData = [
-  { month: "May", recipients: 600 },
-  { month: "Jun", recipients: 800 },
-  { month: "Jul", recipients: 1200 },
-  { month: "Aug", recipients: 1450 },
-  { month: "Sep", recipients: 1650 },
-];
+// const recipientData = [
+//   { month: "May", recipients: 600 },
+//   { month: "Jun", recipients: 800 },
+//   { month: "Jul", recipients: 1200 },
+//   { month: "Aug", recipients: 1450 },
+//   { month: "Sep", recipients: 1650 },
+// ];
 
-const topUpData = [
-  { month: "May", topups: 2000 },
-  { month: "Jun", topups: 2400 },
-  { month: "Jul", topups: 3000 },
-  { month: "Aug", topups: 3500 },
-  { month: "Sep", topups: 3900 },
-];
+// const topUpData = [
+//   { month: "May", topups: 2000 },
+//   { month: "Jun", topups: 2400 },
+//   { month: "Jul", topups: 3000 },
+//   { month: "Aug", topups: 3500 },
+//   { month: "Sep", topups: 3900 },
+// ];
 
 export default function Dashboard() {
 const [analytics, setAnalytics] = useState<Analytics>()
@@ -47,7 +47,7 @@ fetchAnalytics()
 }, [])
 
 const topUpTrendsData = useMemo(() => {
-  if (!analytics?.data.topUpTrends) return topUpData;
+  if (!analytics?.data.topUpTrends) return ;
   return analytics.data.topUpTrends.map((t: any) => ({
     month: MONTHS_SHORT[getMonth(t.month)],
     totalTopups: Number(t.totalTopups ?? t.topups ?? 0),
@@ -55,7 +55,7 @@ const topUpTrendsData = useMemo(() => {
 }, [analytics]);
 
 const recipientGrowthData = useMemo(() => {
-  if (!analytics?.data.recipientGrowth) return recipientData; // fallback sample
+  if (!analytics?.data.recipientGrowth) return ; // fallback sample
   return analytics.data.recipientGrowth.map((r: any) => ({
     month: MONTHS_SHORT[getMonth(r.month)],
     recipients: Number(r.recipients ?? r.count ?? 0), // tolerate different keys

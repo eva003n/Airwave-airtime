@@ -210,7 +210,7 @@ export function TopUpDataTable<TData, TValue>({
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="disabled:brightness-50"
+            // className="disabled:brightness-50"
           >
             Previous
           </Button>
@@ -219,7 +219,7 @@ export function TopUpDataTable<TData, TValue>({
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="disabled:brightness-50"
+            // className="disabled:brightness-50"
           >
             Next
           </Button>

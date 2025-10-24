@@ -14,6 +14,9 @@ import { Button } from '@/components/ui/button';
 import { Bell, Plus } from 'lucide-react';
 import ToggleSwitch from '@/components/ToggleSwitch';
 import { getWalletBalance } from '@/api';
+import CountUp from "react-countup";
+
+
 const WalletPage = () => {
   const [balance, setBalance] = useState(0)
 
@@ -35,7 +38,13 @@ const WalletPage = () => {
               My wallet
             </CardDescription>
             <CardTitle className="text-color text-2xl font-bold tabular-nums @[250px]/card:text-3xl">
-              Ksh {balance}
+              <span>KES</span>
+              <CountUp
+                start={0}
+                end={balance}
+                duration={2}
+                separator=","
+              />
             </CardTitle>
             <CardAction>
               <Bell size={24} />

@@ -44,9 +44,7 @@ const CreateRecipientPage = () => {
     } catch (error) {
       toast.error(error.message || "Something went wrong");
     } finally {
-      reset({
-        
-      });
+      reset();
     }
   };
 
