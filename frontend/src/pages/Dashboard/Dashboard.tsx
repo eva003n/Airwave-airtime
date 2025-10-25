@@ -145,7 +145,7 @@ const recipientGrowthData = useMemo(() => {
               start={0}
               end={2}
               className="text-2xl font-bold text-gray-700"
-              duration={2}
+              duration={3}
             />
             <ListContainer className="flex gap-4 items-center">
               <List className="flex gap-1 items-center">

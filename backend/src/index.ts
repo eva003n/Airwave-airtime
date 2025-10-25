@@ -9,6 +9,7 @@ const port = PORT;
 const serverUrl =
   NODE_ENV === "production" ? SERVER_URL : `${SERVER_URL}:${port}`;
 
+// fist connect to postgresdatabase
 await connectDatabase();
 //run database migrations
 await runMigrations();

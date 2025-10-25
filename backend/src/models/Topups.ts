@@ -1,22 +1,5 @@
-import type {
-  CreationAttributes,
-  InferCreationAttributes,
-  InferAttributes,
-} from "sequelize";
-
-import {
-  Table,
-  Column,
-  DataType,
-  Model,
-  Unique,
-  BeforeCreate,
-  BeforeUpdate,
-  ForeignKey,
-  BelongsTo,
-} from "sequelize-typescript";
-import Recipient from "./Recipients.js";
-import User, { UserRole } from "./User.js";
+import { Model, DataTypes } from "sequelize";
+import { sequelize } from "../config/database/postgres/postgres.js";
 
 export enum MobileOperator {
   Safaricom = "Safaricom",
@@ -25,7 +8,6 @@ export enum MobileOperator {
 
 export enum TopStatus {
   Pending = "Pending",
-  // Processing = "Processing",
   Successful = "Success",
   Failed = "Failed",
 }
@@ -34,86 +16,74 @@ export enum OperatorType {
   Safaricom = "Safaricom Kenya",
   Airtel = "Airtel Kenya",
 }
-@Table({
-  tableName: "topups",
-  modelName: "Topup",
-  indexes: [
-    {
-      unique: true,
-      fields: ["transaction_id"],
-    },
-  ],
-})
 
-// sequelize model name | sql table name
-export default class Topup extends Model<
-  InferAttributes<Topup>,
-  InferCreationAttributes<Topup>
-> {
-  @Column({
-    type: DataType.UUID,
-    primaryKey: true,
-    allowNull: false,
-    defaultValue: DataType.UUIDV4,
-  })
+class Topup extends Model {
   declare id?: string;
-
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
   declare transaction_id: number;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
   declare phone_number: string;
-
-  @Column({
-    // avoid using Object.values(MobileOperator) here to prevent circular import at module initialization
-    type: DataType.ENUM(...Object.values(MobileOperator)),
-    allowNull: false,
-  })
   declare operator: MobileOperator;
-
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
   declare airtime_amount: number;
-
-  @ForeignKey(() => Recipient)
-  @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
   declare recipient_id: string;
-
-
-
-  @ForeignKey(() => User)
-  @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
   declare user_id: string;
-
-  @Column({
-    type: DataType.ENUM(...Object.values(TopStatus)),
-    allowNull: false,
-    defaultValue: "Pending",
-  })
   declare status?: TopStatus;
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
 
-  // @BeforeCreate
-
-  //   public override toJSON(): object  {
-  //     const attributes = {...this.get()} as any
-  //     delete attributes.password
-  //     delete attributes.verification_secret
-  //     delete attributes.refresh_token
-  //     delete attributes.email
-  //     return attributes;
-  //   }
+  public override toJSON(): object {
+    const attributes = { ...this.get() } as any;
+    return attributes;
+  }
 }
+
+Topup.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
+    },
+    transaction_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      unique: true,
+    },
+    phone_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    operator: {
+      type: DataTypes.ENUM(...Object.values(MobileOperator)),
+      allowNull: false,
+    },
+    airtime_amount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    recipient_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+    user_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.ENUM(...Object.values(TopStatus)),
+      allowNull: false,
+      defaultValue: TopStatus.Pending,
+    },
+  },
+  {
+    sequelize,
+    tableName: "topups",
+    indexes: [
+      {
+        unique: true,
+        fields: ["transaction_id"],
+      },
+    ],
+  }
+);
+
+export default Topup;

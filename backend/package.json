@@ -10,6 +10,7 @@
     "build": "tsc -b ",
     "dev": "nodemon",
     "pm2-start": "tsc -b && pm2 start ecosystem.config.js",
+    "make:migration": "tsx src/make-migrations.ts",
     "migrate": "node dist/migrate.ts",
     "migrate:dev": "tsx src/migrate.ts",
     "docker build": "docker buildx build -f ./backend.Dockerfile",

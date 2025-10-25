@@ -24,14 +24,24 @@ import {
   APP_NAME,
   NODE_ENV,
 } from "../config/env.js";
+import { Op } from "sequelize";
 
 const signUp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { userName, email, password } = req.body as SignUpAuth;
 
-      const isUser = await User.findOne({ where: { email: email } });
+    const [ user, created ] = await User.findOrCreate({
+      where: {[ Op.or]: [{ email: email }, { username: userName }] },
+      defaults: {
+        username: userName,
+        email: email,
+      password: password,
+      },
+    });
 
-    if (isUser)
+      // const isUser = await User.findOne({ where: { or: [{ email: email }, { username: userName }] } });
+
+    if (!created)
       return next(
         ApiError.conflictRequest(
           409,
@@ -40,17 +50,17 @@ const signUp = asyncHandler(
         )
       );
 
-    const newUser = await User.create({
-      username: userName,
-      email: email,
-      password: password,
-    });
+    // const newUser = await User.create({
+    //   username: userName,
+    //   email: email,
+    //   password: password,
+    // });
     return res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          newUser,
+          user,
           "Account created successfully, please login"
         )
       );
@@ -72,7 +82,8 @@ const signIn = asyncHandler(
       );
 
     //verify password
-    const isValidPassword = await compare(password, isUser.get("password"));
+    const isValidPassword = await compare(password, isUser.password as string);
+    console.log(isUser.password)
 
     if (!isValidPassword)
       return next(
@@ -153,18 +164,21 @@ console.log(req.headers.cookie)
         ApiError.notFound(
           404,
           `${req.originalUrl}`,
-          "Account  doesn't not exist"
+          "Account doesn't not exist, create an account"
         )
       );
-    if (user.refresh_token && user.refresh_token !== RefreshToken) {
-      return next(
-        ApiError.unAuthorizedRequest(
-          401,
-          `${req.originalUrl}`,
-         NODE_ENV === "development"?  "Invalid refresh token provided": "Unauthorized please logout"
-        )
-      );
-    }
+
+    //   console.log(user.refresh_token)
+    //   console.log(user.refresh_token !== RefreshToken)
+    // if (user.refresh_token && user.get("refresh_token") !== RefreshToken) {
+    //   return next(
+    //     ApiError.unAuthorizedRequest(
+    //       401,
+    //       `${req.originalUrl}`,
+    //      NODE_ENV === "development"?  "Invalid refresh token provided": "Unauthorized please logout"
+    //     )
+    //   );
+    // }
 
     //generate new access & refresh token
     const { accessToken, refreshToken: newRefreshToken } = generateToken(

@@ -1,4 +1,4 @@
-import { KUNITY_BRANCHES } from "@/constants";
+import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS } from "@/constants";
 import { object, z } from "zod";
 
 const signUpSchema = z.object({
@@ -118,11 +118,19 @@ const recipientSchema = z.object({
     .min(3, "Designation must be at least 3 characters long")
     .max(50, "Designation too long"),
   user_id: z.string(),
+  department: z.enum(KUNITY_DEPARTMENTS, { error: "Department is required" }),
 });
 
 const paginateSchema = z.object({
   page: z.coerce.number({ error: "Page is not a number" }),
   limit: z.coerce.number({ error: "Limit is not a number" }),
+});
+
+const recipientQuerySchema = z.object({
+  page: z.number().optional(),
+  limit: z.number().optional(),
+  department: z.string().optional(),
+  branch: z.string().optional(),
 });
 
 const refreshTokenSchema = z.object({
@@ -414,6 +422,7 @@ export type Id = z.infer<typeof IdSchema>;
 export type OperatorDatail = z.infer<typeof operatorDetailsSchema>;
 export type SingleTopUpForm = z.infer<typeof singleTopUpSchema>;
 export type ParsedRecipient = z.infer<typeof csvDataSchema>;
+export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
 
 //Api responses types
 export type RecipientData = z.infer<typeof recipientDataSchema>;

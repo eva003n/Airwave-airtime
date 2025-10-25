@@ -23,5 +23,17 @@ const KUNITY_BRANCHES = [
 ];
 const OPERATORS = ["Safaricom", "Airtel"];
 
+const KUNITY_DEPARTMENTS = [
+  "Credit",
+  "Marketing",
+  "Finance",
+  "Human Resources",
+  "IT",
+  "Sales",
+  "Legal",
+  "Procurement",
+  "Customer Service",
+  "Operations",
+];
 
- export { ENVIRONMENTS, KUNITY_BRANCHES, OPERATORS };
+ export { ENVIRONMENTS, KUNITY_BRANCHES, OPERATORS, KUNITY_DEPARTMENTS };

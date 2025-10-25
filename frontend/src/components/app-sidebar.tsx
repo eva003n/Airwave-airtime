@@ -19,6 +19,8 @@ import logoImage from "/images/Airwave-logo.png";
 import { AlarmCheckIcon, CardSim, LayoutDashboard,LogOut, Plus, Settings, UserPlus, Wallet } from "lucide-react";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { fa } from "zod/v4/locales";
 
 const items = [
   {
@@ -55,9 +57,21 @@ const items = [
 
 
 export function AppSidebar() {
-    const {open} = useSidebar()
+  const { open, setOpen } = useSidebar();
+  const [isOpen, setIsOpen] = useState(() => {
+    // ✅ Read localStorage once, during initial mount
+    const saved = localStorage.getItem("sidebarOpen");
+    return saved === null ? true : saved === "true";
+  });
+
+
+
+useEffect(() => {
+  // ✅ Write only when value actually changes
+  localStorage.setItem("sidebarOpen", String(isOpen));
+}, [isOpen]);
   return (
-    <Sidebar  collapsible="icon">
+    <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarHeader className="px-0 py-4">
           <div className="flex gap-1 items-center">
@@ -94,8 +108,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroupContent>
         <SidebarGroup />
-        <SidebarMenuAction>
-        </SidebarMenuAction>
+        <SidebarMenuAction></SidebarMenuAction>
       </SidebarContent>
     </Sidebar>
   );

@@ -1,131 +1,104 @@
-import type {
-  CreationAttributes,
-  InferCreationAttributes,
-  InferAttributes,
-} from "sequelize";
-
-import {
-  Table,
-  Column,
-  DataType,
-  Model,
-  Unique,
-  BeforeCreate,
-  BeforeUpdate,
-  BeforeBulkCreate,
-  ForeignKey,
-  BelongsTo,
-} from "sequelize-typescript";
-import Topup from "./Topups.js";
-import User from "./User.js";
+import { Model, DataTypes } from "sequelize";
+import { sequelize } from "../config/database/postgres/postgres.js";
 
 export enum MobileOperator {
   Safaricom = "Safaricom",
   Airtel = "Airtel",
 }
-@Table({
-  tableName: "recipients",
-  modelName: "Recipient",
-  indexes: [
-    {
-      unique: true,
-      fields: ["phone_number"],
-    },
-  ],
-})
 
-// sequelize model name | sql table name
-export default class Recipient extends Model<
-  InferAttributes<Recipient>,
-  InferCreationAttributes<Recipient>
-> {
-  @Column({
-    type: DataType.UUID,
-    primaryKey: true,
-    allowNull: false,
-    defaultValue: DataType.UUIDV4,
-  })
+class Recipient extends Model {
   declare id?: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
   declare name: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
+  declare department: string;
   declare branch: string;
-  @ForeignKey(() => User)
-  @Column({
-    type: DataType.UUID,
-    allowNull: false,
-  })
   declare user_id: string;
-
-  //   @BelongsTo(() => User, {
-  //     as: "user",
-  //     foreignKey: "user_id"
-  //   })
-  // declare user?: User
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
   declare phone_number: string;
-
-  @Column({
-    type: DataType.ENUM(...Object.values(MobileOperator)),
-    // defaultValue: "Safaricom",
-  })
-  declare operator: MobileOperator;
-
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-    defaultValue: 266, //safaricom
-  })
+  declare operator?: MobileOperator;
   declare operator_code?: number;
-
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
   declare airtime_amount: number;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-    defaultValue: "none",
-  })
   declare designation?: string;
-
-  @Column({
-    type: DataType.BOOLEAN,
-    defaultValue: true,
-  })
   declare active?: boolean;
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
 
-  @BeforeBulkCreate
-  @BeforeCreate
   static async assignOperatorCode(instance: Recipient) {
     if (!instance.operator_code) {
       const operatorCode =
         instance.operator === MobileOperator.Safaricom ? 266 : 265;
-
       instance.operator_code = operatorCode;
     }
   }
-
-  //   public override toJSON(): object  {
-  //     const attributes = {...this.get()} as any
-  //     delete attributes.password
-  //     delete attributes.verification_secret
-  //     delete attributes.refresh_token
-  //     delete attributes.email
-  //     return attributes;
-  //   }
 }
+
+Recipient.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    branch: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    department: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    user_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+    phone_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    operator: {
+      type: DataTypes.ENUM(...Object.values(MobileOperator)),
+    },
+    operator_code: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 266,
+    },
+    airtime_amount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    designation: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "none",
+    },
+    active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+  },
+  {
+    sequelize,
+    tableName: "recipients",
+    indexes: [
+      {
+        unique: true,
+        fields: ["phone_number"],
+      },
+    ],
+  }
+);
+
+// Register hooks (same behavior as @BeforeCreate / @BeforeBulkCreate)
+Recipient.beforeCreate(Recipient.assignOperatorCode);
+Recipient.beforeBulkCreate(async (instances: Recipient[]) => {
+  for (const inst of instances) {
+    await Recipient.assignOperatorCode(inst);
+  }
+});
+
+export default Recipient;

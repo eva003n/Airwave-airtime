@@ -15,6 +15,7 @@ import type {
   RecipientData,
   RecipientDataApi,
   RecipientForm,
+  RecipientQueryData,
   Recipientupdate,
   SignInAuth,
   SignUpAuth,
@@ -60,7 +61,7 @@ const deleteRecipient = async (id: Id) => {
 const getRecipient = async (id: Id) => {
   return apiClient.request<Recipientupdate>("GET", `/recipients/${id}`)
 };
-const getAllRecipients = async (params: PaginateData) => {
+const getAllRecipients = async (params: RecipientQueryData) => {
   return apiClient.request<RecipientDataApi>("GET", `/recipients`, null, params);
 };
 

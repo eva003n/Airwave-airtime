@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { KUNITY_BRANCHES, OPERATORS } from "../../constants";
+import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS, OPERATORS } from "../../constants";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { recipientSchema, type RecipientForm, type UserData } from "@/validation/validators";
@@ -128,7 +128,6 @@ const CreateRecipientPage = () => {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
-                        
                       >
                         <SelectTrigger className="w-full focus:ring-2 focus:ring-gray-500">
                           <SelectValue placeholder="Select branch" />
@@ -184,6 +183,43 @@ const CreateRecipientPage = () => {
                       {errors.operator && (
                         <div className="text-rose-500 text-[.8rem]">
                           {errors.operator.message}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                />
+
+                {/* Department */}
+                <Controller
+                  name="department"
+                  control={control}
+                  rules={{ required: "Department is required" }}
+                  render={({ field }) => (
+                    <div className="grid gap-4">
+                      <Label
+                        htmlFor="department"
+                        className="text-gray-700 font-medium"
+                      >
+                        Department
+                      </Label>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-full focus:ring-2 focus:ring-gray-500">
+                          <SelectValue placeholder="Select department" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white">
+                          {KUNITY_DEPARTMENTS.map((department) => (
+                            <SelectItem key={department} value={department}>
+                              {department}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.department && (
+                        <div className="text-rose-500 text-[.8rem]">
+                          {errors.department.message}
                         </div>
                       )}
                     </div>

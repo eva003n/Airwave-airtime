@@ -8,6 +8,7 @@ import {
 import ApiError from "./ApiError.js";
 import type { NextFunction } from "express";
 import { randomUUID } from "crypto";
+import { pub } from "../config/database/redis/redis.js";
 
 const OPERATOR_CODE_MAP: Record<string, number> = {
   Safaricom: 266,
@@ -24,7 +25,7 @@ const parseCsv = async (filePath: string): Promise<BulkTopUpData[]> => {
           mapHeaders: ({ header }) => header.trim().replace(/^['"]|['"]$/g, ""), // removes quotes + spaces
         })
       )
-      .on("data", (data: BulkTopUpData, row: any) => {
+      .on("data", async(data: BulkTopUpData, row: any) => {
 
         const operator = data.operator;
         data.operator_code = OPERATOR_CODE_MAP[operator] || 266; //default to safaricom
@@ -32,7 +33,17 @@ const parseCsv = async (filePath: string): Promise<BulkTopUpData[]> => {
         data.createdAt = new Date().toISOString()
         data.updatedAt = new Date().toISOString()
         data.id = randomUUID()
+
+       
         results.push(data);
+
+         await pub.publish(
+           "topup_updates",
+           JSON.stringify({
+             ...data,
+             
+           })
+         );
       })
       .on("end", () => resolve(results))
       .on("error", (error) => logger.error(error.message));

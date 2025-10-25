@@ -22,7 +22,7 @@ import TopUpsPage from "./pages/Topups/Topups.tsx";
 
 const App = () => {
   return (
-    <div className="bg-color min-h-svh">
+    <div className="bg-color min-h-svh ">
       <Routes>
         .{/* Authentication management  */}
         <Route element={<PublicRoute />}>

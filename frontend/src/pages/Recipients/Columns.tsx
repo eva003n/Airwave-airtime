@@ -15,6 +15,7 @@ export type RecipientColumn = {
     id: string
     name: string,
     phone: string,
+    department: string,
     branch: string,
     operator: string,
     airtime_amount: number,
@@ -98,6 +99,10 @@ const recipientColumns = (
     header: "Branch",
   },
   {
+    accessorKey: "department",
+    header: "Department",
+  },
+  {
     accessorKey: "createdAt",
     header: "Created at",
     cell: ({ row }) => {
@@ -105,14 +110,14 @@ const recipientColumns = (
       return <div className="">{formattedDate}</div>;
     },
   },
-  {
-    accessorKey: "updatedAt",
-    header: "Updated at",
-    cell: ({ row }) => {
-      const formattedDate = getDateByDay(row.getValue("updatedAt"));
-      return <div className="">{formattedDate}</div>;
-    },
-  },
+  // {
+  //   accessorKey: "updatedAt",
+  //   header: "Updated at",
+  //   cell: ({ row }) => {
+  //     const formattedDate = getDateByDay(row.getValue("updatedAt"));
+  //     return <div className="">{formattedDate}</div>;
+  //   },
+  // },
   {
     id: "actions",
     cell: ({ row }) => {

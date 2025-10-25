@@ -21,13 +21,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Grid } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Funnel, Grid, ListFilter, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -42,6 +44,16 @@ import {
 import type { RecipientData } from "@/validation/validators";
 import { deleteRecipient } from "@/api";
 import { toast } from "react-toastify";
+import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS } from "@/constants";
+import { de } from "zod/v4/locales";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@radix-ui/react-select";
+import type { set } from "zod";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -50,8 +62,15 @@ interface DataTableProps<TData, TValue> {
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setRecipients: React.Dispatch<React.SetStateAction<RecipientData[]>>;
-  recipients: RecipientData[]
+  recipients: RecipientData[];
+  branch?: string;
+  department: string;
+  
+  handleSearchParam: (key: string, value: string) => void;
+  handleClearFilters: () => void;
 }
+
+
 
 export function DataTable<TData, TValue>({
   columns,
@@ -59,11 +78,15 @@ export function DataTable<TData, TValue>({
   pages,
   page,
   setPage,
+  branch,
+  department,
+
+  handleSearchParam,
+  handleClearFilters,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] =
-      useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
@@ -78,54 +101,122 @@ export function DataTable<TData, TValue>({
     state: {
       sorting,
       columnFilters,
-      columnVisibility
+      columnVisibility,
     },
   });
 
-
-
   return (
     <div className="overflow-hidden">
-      <div className="flex items-center justify-end gap-2">
-        <Input
-          placeholder="Search by name or phone"
-          value={
-            (table.getColumn("name")?.getFilterValue() as string) ?? ""
-            // (table.getColumn("phone")?.getFilterValue() as string)
-          }
-          onChange={(e) => {
-            table.getColumn("name")?.setFilterValue(e.target.value);
-            // table.getColumn("phone")?.setFilterValue(e.target.value);
-          }}
-          className="max-w-sm"
-        />
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" title="Filter by branch">
+                {/* <ListFilter className="w-6 h-6" /> */}
+                {branch ? `${branch}` : "Branch"}
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" title="Format Columns">
-              <Grid strokeWidth={2} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-white">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+            <DropdownMenuContent className="bg-white">
+              <DropdownMenuLabel>Select branch</DropdownMenuLabel>
+              {KUNITY_BRANCHES.map((branch, index) => (
+                <DropdownMenuCheckboxItem
+                  key={index}
+                  className="capitalize"
+                  checked={columnVisibility[branch]}
+                  onCheckedChange={(value) => {
+                    // setBranch(value ? branch : "");
+                    handleSearchParam("branch", value ? branch : "");
+                    setColumnVisibility(() => ({
+                      // ...prev,
+                      [branch]: value,
+                    }));
+                  }}
+                >
+                  {branch}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center" asChild>
+              {/* <ListFilter className="w-6 h-6" /> */}
+              <Button variant="outline" title="Filter by department">
+                {department ? `${department}` : "Department"} <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="bg-white">
+              {KUNITY_DEPARTMENTS.map((department, index) => (
+                <DropdownMenuCheckboxItem
+                  key={index}
+                  className="capitalize"
+                  checked={columnVisibility[department]}
+                  onCheckedChange={(value) => {
+                      handleSearchParam("department", value ? department : "");
+                      setColumnVisibility(() => ({
+                          // ...prev,
+                          [department]: value,
+                        }));
+                  }}
+                >
+                  {department}
+                </DropdownMenuCheckboxItem>
+              ))}
+              {/* Dropdown items for branch selection can be added here */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {
+            (branch || department) && (
+              <Button
+                variant="outline"
+                onClick={handleClearFilters}
+              >
+                <X className="w-4 h-4 " /> Clear filters
+              </Button>
+            )}
+        </div>
+        <div className="flex gap-2">
+          <Input
+            placeholder="Search by name"
+            value={
+              (table.getColumn("name")?.getFilterValue() as string) ?? ""
+              // (table.getColumn("phone")?.getFilterValue() as string)
+            }
+            onChange={(e) => {
+              table.getColumn("name")?.setFilterValue(e.target.value);
+              // table.getColumn("phone")?.setFilterValue(e.target.value);
+            }}
+            className="max-w-sm"
+          />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" title="Format Columns">
+                <Grid strokeWidth={2} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-white">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       <Table>
         <TableCaption>List of airtime recipients.</TableCaption>
@@ -177,7 +268,11 @@ export function DataTable<TData, TValue>({
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                className={page === 1 ? "pointer-events-none opacity-30" : "cursor-pointer"}
+                className={
+                  page === 1
+                    ? "pointer-events-none opacity-30"
+                    : "cursor-pointer"
+                }
               />
             </PaginationItem>
             {[...Array(pages)].map((_, i) => (
@@ -197,7 +292,9 @@ export function DataTable<TData, TValue>({
               <PaginationNext
                 onClick={() => setPage((prev) => Math.min(pages, prev + 1))}
                 className={
-                  page === pages ? "pointer-events-none  opacity-30" : "cursor-pointer"
+                  page === pages
+                    ? "pointer-events-none  opacity-30"
+                    : "cursor-pointer"
                 }
               />
             </PaginationItem>

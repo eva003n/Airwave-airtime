@@ -32,9 +32,23 @@ const MONTHS_SHORT: string[] = [
   "Nov",
   "Dec",
 ];
- 
+
+const KUNITY_DEPARTMENTS = [
+  "Credit",
+  "Marketing",
+  "Finance",
+  "Human Resources",
+  "IT",
+  "Sales",
+  "Legal",
+  "Procurement",
+  "Customer Service",
+  "Operations",
+];
+
 export {
 KUNITY_BRANCHES,
 OPERATORS,
-MONTHS_SHORT
+MONTHS_SHORT,
+KUNITY_DEPARTMENTS
 }

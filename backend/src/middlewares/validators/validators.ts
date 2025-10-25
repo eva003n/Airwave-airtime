@@ -1,6 +1,6 @@
 import { minLength, object, string, z } from "zod";
 import { MobileOperator } from "../../models/Recipients.js";
-import { KUNITY_BRANCHES, OPERATORS } from "../../constants.js";
+import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS, OPERATORS } from "../../constants.js";
 
 const signUpSchema = z.object({
   userName: z
@@ -235,8 +235,16 @@ const recipientSchema = z.object({
     .min(3, "Designation must be at least 3 characters long")
     .max(50, "Designation too long"),
   user_id: z.uuidv4(),
+  department: z.enum(KUNITY_DEPARTMENTS, { error: "Department is required" }),
 });
 
+const recipientQuerySchema = z.object({
+  page: z.string().optional(),
+  limit: z.string().optional(),
+  department: z.string().optional(),
+  branch: z.string().optional(),
+
+})
 const cookieSchema = z.object({
   AccessToken: z.string().optional(),
   RefreshToken: z.string(),
@@ -270,6 +278,7 @@ export type BulkRecipientData = z.infer<typeof multipleRecipientSchema>;
 export type PaginateData = z.infer<typeof paginateSchema>;
 export type BulkTopUpData = z.infer<typeof topUpCsvSchema>;
 export type CookieData = z.infer<typeof cookieSchema>;
+export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
 
 //reloadly api response types
 export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;
@@ -284,6 +293,7 @@ export {
   IdSchema,
   OperatorDetailsSchema,
   recipientSchema,
+  recipientQuerySchema,
   paginateSchema,
   multipleRecipientSchema,
   topUpCsvSchema,

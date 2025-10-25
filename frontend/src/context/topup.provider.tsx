@@ -96,8 +96,8 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
 //     }
 //   };
 
-  // Cleanup old topups every 168h  1 week
-  const cleanupOldTopups = async (hours = 168) => {
+  // Cleanup old topups every 24 hours
+  const cleanupOldTopups = async (hours = 24) => {
     const cutoff = new Date();
     cutoff.setHours(cutoff.getHours() - hours);
     await db.topups.where("createdAt").below(cutoff.toISOString()).delete();

@@ -1,112 +1,125 @@
-import type {CreationAttributes, InferCreationAttributes, InferAttributes } from "sequelize";
+import  {
+  Model,
+  DataTypes
+} from "sequelize";
 
-import { Table, Column, DataType, Model, Unique, BeforeCreate, BeforeUpdate, HasMany } from "sequelize-typescript";
-import { hash } from "bcryptjs";
-import Recipient from "./Recipients.js";
-import Topup from "./Topups.js";
+import { compare, hash } from "bcryptjs";
 
+import { sequelize } from "../config/database/postgres/postgres.js";
 
 export enum UserRole {
-    Admin = "admin",
-    User = "user"
+  Admin = "admin",
+  User = "user",
 }
-@Table({
-  tableName: "users",
-  modelName: "User",
-  indexes: [
-    {
-      unique: true,
-      fields: ["email", "username"],
-    },
-  ],
-})
 
-// sequelize model name | sql table name
-export default class User extends Model<
-  InferAttributes<User>,
-  InferCreationAttributes<User>
-> {
-  @Column({
-    type: DataType.UUID,
-    primaryKey: true,
-    allowNull: false,
-    defaultValue: DataType.UUIDV4,
-  })
+
+class User extends Model {
   declare id?: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-  })
   declare username: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: false,
-    // unique: true
-  })
   declare email: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  
-  })
-  declare password: string;
- 
-
-  @Column({
-    type: DataType.ENUM(...Object.values(UserRole)),
-    defaultValue: "user",
-  })
-  declare role?: UserRole;
-
-  @Column({
-    type: DataType.STRING(512),
-    allowNull: true,
-  })
+  declare password?: string;
   declare refresh_token?: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
   declare avatar_url?: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
   declare avatar_id?: string;
-
-  @Column({
-    type: DataType.STRING,
-    allowNull: true,
-  })
   declare verification_secret?: string;
-
-  @Column({
-    type: DataType.BOOLEAN,
-    defaultValue: false,
-  })
   declare is_MFA_enabled?: boolean;
+  declare role?: UserRole;
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
 
-  @BeforeCreate
-  @BeforeUpdate
-  static async hashPassword(instance: User) {
-    if(instance.changed("password")) {
-      instance.password = await hash(instance.password, 12);
+  public static async hashPassword(instance: User) {
+    if (instance.changed("password")) {
+      instance.password = (await hash(
+        instance.password as string,
+        12
+      )) as unknown as string;
     }
-
-    
   }
 
-  public override toJSON(): object  {
-    const attributes = {...this.get()} as any
-    delete attributes.password
-    delete attributes.verification_secret
-    delete attributes.refresh_token
-    delete attributes.email
+
+
+
+  public override toJSON(): object {
+    const attributes = { ...this.get() } as any;
+    delete attributes.password;
+    delete attributes.verification_secret;
+    delete attributes.refresh_token;
+    delete attributes.email;
     return attributes;
   }
 }
+
+User.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+
+    role: {
+      type: DataTypes.ENUM(...Object.values(UserRole)),
+      defaultValue: "user",
+    },
+
+    refresh_token: {
+      type: DataTypes.STRING(512),
+      allowNull: true,
+    },
+
+    avatar_url: {
+      type: DataTypes.STRING(512),
+      allowNull: true,
+    },
+
+    avatar_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    verification_secret: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    is_MFA_enabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+  },
+  {
+    tableName: "users",
+    sequelize, // passing the `sequelize` instance is required
+
+    indexes: [
+      {
+        unique: true,
+        fields: ["email", "username"],
+      },
+    ],
+  }
+);
+
+export default User;
+
+//hooks
+User.beforeCreate(User.hashPassword);

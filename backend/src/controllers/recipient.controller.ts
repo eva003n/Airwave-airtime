@@ -19,7 +19,8 @@ const createRecipient = asyncHandler(
       branch,
       airtime_amount,
       phone_number,
-      user_id
+      user_id,
+      department
     }: RecipientData = req.body;
 
     const operatorCode = operator === "Safaricom" ? 266 : 265;
@@ -42,7 +43,8 @@ const createRecipient = asyncHandler(
       branch,
       airtime_amount,
       phone_number,
-      user_id: user_id || req.user.if
+      user_id: user_id || req.user.id,
+      department
     });
 
     return res
@@ -100,6 +102,7 @@ const updateRecipient = asyncHandler(
       branch,
       airtime_amount,
       phone_number,
+      department
     }: RecipientData = req.body;
 
     const operatorCode = operator === "Safaricom" ? 266 : 265;
@@ -110,13 +113,23 @@ const updateRecipient = asyncHandler(
         ApiError.notFound(404, req.originalUrl, "Recipient does not exist")
       );
 
-    isRecipient.name = name;
-    isRecipient.operator = operator;
-    isRecipient.phone_number = phone_number;
-    isRecipient.airtime_amount = airtime_amount;
-    isRecipient.designation = designation;
-    isRecipient.operator_code = operatorCode;
-    isRecipient.branch = branch;
+      //update serveral filelds at once
+      isRecipient.set({
+        name,
+        operator,
+        phone_number,
+        airtime_amount,
+        designation,
+        branch,
+        department
+      })
+    // isRecipient.name = name;
+    // isRecipient.operator = operator;
+    // isRecipient.phone_number = phone_number;
+    // isRecipient.airtime_amount = airtime_amount;
+    // isRecipient.designation = designation;
+    // isRecipient.operator_code = operatorCode;
+    // isRecipient.branch = branch;
 
     const updatedRecipient = await isRecipient.save();
 
@@ -153,8 +166,10 @@ const getAllrecipients = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const branch = req.query.branch as string;
+    const department = req.query.department as string;
 
-    const data = await getPaginatedRecipients(page, limit);
+    const data = await getPaginatedRecipients(page, limit, branch, department);
 
     return res
       .status(200)
@@ -179,14 +194,32 @@ const getRecipient = asyncHandler(
   }
 );
 
-const getPaginatedRecipients = async (page = 1, limit = 10) => {
+const getPaginatedRecipients = async (
+  page = 1,
+  limit = 10,
+  branch?: string,
+  department?: string 
+) => {
   //inplements page by page logic
   const offset = (page - 1) * limit;
 
+  //build an object of dynamic filters
+  const filters = { branch, department };
+
+  //convert resulting array to object for filtering
+  const where = Object.fromEntries(
+    //build an array of key value pairs removing empty values
+    Object.entries(filters).filter(([_, v]) => v?.toString().trim())
+  );
+  console.log(where)
+
   const { rows, count } = await Recipient.findAndCountAll({
+    where,
     limit,
     offset,
     order: [["createdAt", "DESC"]],
+    // attributes: { exclude: ["user_id"] },
+    // group: [[branch, department]],
   });
 
   return {
