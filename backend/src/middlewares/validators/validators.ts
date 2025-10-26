@@ -1,6 +1,10 @@
 import { minLength, object, string, z } from "zod";
-import { MobileOperator } from "../../models/Recipients.js";
-import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS, OPERATORS } from "../../constants.js";
+import { MobileOperator } from "../../models/Recipient.js";
+import {
+  KUNITY_BRANCHES,
+  KUNITY_DEPARTMENTS,
+  OPERATORS,
+} from "../../constants.js";
 
 const signUpSchema = z.object({
   userName: z
@@ -50,7 +54,6 @@ const topUpSchema = z.object({
     .optional(),
 });
 
-
 const isoDateString = z.preprocess((arg) => {
   if (!arg) return undefined;
   if (typeof arg === "string") return arg;
@@ -90,7 +93,7 @@ const topUpCsvSchema = z.object({
     .optional(),
   error: z.string().optional(),
   createdAt: z.string().optional(),
-  updatedAt:  z.string().optional(),
+  updatedAt: z.string().optional(),
 });
 
 // const topUpCsvSchema = z.object({
@@ -243,8 +246,8 @@ const recipientQuerySchema = z.object({
   limit: z.string().optional(),
   department: z.string().optional(),
   branch: z.string().optional(),
-
-})
+  name: z.string().optional(),
+});
 const cookieSchema = z.object({
   AccessToken: z.string().optional(),
   RefreshToken: z.string(),
@@ -258,14 +261,14 @@ const paginateSchema = z.object({
 });
 
 const walletBalanceSchema = z.object({
-    balance: z.number(),
-    currencyCode: z.string(),
-    currencyName: z.string(),
-    updatedAt: z.date(),
-    lowBalanceThreshold: z.number(),
-    maxLowBalanceThreshold: z.number(),
-  })
-  
+  balance: z.number(),
+  currencyCode: z.string(),
+  currencyName: z.string(),
+  updatedAt: z.date(),
+  lowBalanceThreshold: z.number(),
+  maxLowBalanceThreshold: z.number(),
+});
+
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;

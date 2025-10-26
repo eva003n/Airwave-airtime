@@ -131,6 +131,7 @@ const recipientQuerySchema = z.object({
   limit: z.number().optional(),
   department: z.string().optional(),
   branch: z.string().optional(),
+  name: z.string().optional(),
 });
 
 const refreshTokenSchema = z.object({

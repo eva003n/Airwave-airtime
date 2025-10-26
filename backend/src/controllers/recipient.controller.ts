@@ -4,7 +4,7 @@ import type {
   PaginateData,
   RecipientData,
 } from "../middlewares/validators/validators.js";
-import Recipient from "../models/Recipients.js";
+import Recipient from "../models/Recipient.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -20,7 +20,7 @@ const createRecipient = asyncHandler(
       airtime_amount,
       phone_number,
       user_id,
-      department
+      department,
     }: RecipientData = req.body;
 
     const operatorCode = operator === "Safaricom" ? 266 : 265;
@@ -44,7 +44,7 @@ const createRecipient = asyncHandler(
       airtime_amount,
       phone_number,
       user_id: user_id || req.user.id,
-      department
+      department,
     });
 
     return res
@@ -62,9 +62,10 @@ const createRecipients = asyncHandler(
     //check for duplicates
     const existingRecipients = await Recipient.findAll();
 
-    const isDuplicate = existingRecipients.filter((recipient)  => {
+    const isDuplicate = existingRecipients.filter((recipient) => {
       return recipients.filter(
-        (newRecipient: RecipientData): boolean => recipient.phone_number === newRecipient.phone_number
+        (newRecipient: RecipientData): boolean =>
+          recipient.phone_number === newRecipient.phone_number
       );
     });
 
@@ -102,7 +103,7 @@ const updateRecipient = asyncHandler(
       branch,
       airtime_amount,
       phone_number,
-      department
+      department,
     }: RecipientData = req.body;
 
     const operatorCode = operator === "Safaricom" ? 266 : 265;
@@ -113,16 +114,16 @@ const updateRecipient = asyncHandler(
         ApiError.notFound(404, req.originalUrl, "Recipient does not exist")
       );
 
-      //update serveral filelds at once
-      isRecipient.set({
-        name,
-        operator,
-        phone_number,
-        airtime_amount,
-        designation,
-        branch,
-        department
-      })
+    //update serveral filelds at once
+    isRecipient.set({
+      name,
+      operator,
+      phone_number,
+      airtime_amount,
+      designation,
+      branch,
+      department,
+    });
     // isRecipient.name = name;
     // isRecipient.operator = operator;
     // isRecipient.phone_number = phone_number;
@@ -168,8 +169,9 @@ const getAllrecipients = asyncHandler(
     const limit = parseInt(req.query.limit as string) || 10;
     const branch = req.query.branch as string;
     const department = req.query.department as string;
+    const name = req.query.name as string;
 
-    const data = await getPaginatedRecipients(page, limit, branch, department);
+    const data = await getPaginatedRecipients(page, limit, branch, department, name);
 
     return res
       .status(200)
@@ -198,20 +200,20 @@ const getPaginatedRecipients = async (
   page = 1,
   limit = 10,
   branch?: string,
-  department?: string 
+  department?: string,
+  name?: string
 ) => {
   //inplements page by page logic
   const offset = (page - 1) * limit;
 
   //build an object of dynamic filters
-  const filters = { branch, department };
+  const filters = { branch, department, name };
 
   //convert resulting array to object for filtering
   const where = Object.fromEntries(
     //build an array of key value pairs removing empty values
     Object.entries(filters).filter(([_, v]) => v?.toString().trim())
   );
-  console.log(where)
 
   const { rows, count } = await Recipient.findAndCountAll({
     where,

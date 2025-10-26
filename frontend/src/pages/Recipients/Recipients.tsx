@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Edit, Pen, Trash2 } from "lucide-react";
 import recipientColumns, { type RecipientColumn } from "./Columns";
 import { DataTable } from "./Datatable";
@@ -38,14 +38,18 @@ const RecipientManagementPage = () => {
       const fetchRecipients = async() => {
         const branch = searchParams.get("branch") || ""
         const department = searchParams.get("department") || ""
+        const name = searchParams.get("name") || ""
         setBranch(branch)
         setDepartment(department)
+        setSearch(name)
         try {
           const response = await getAllRecipients({
             page,
             limit: 10,
             branch,
             department,
+            name
+            
           });
           const recipientsData = response.data.data.recipients;
           setRecipients(recipientsData);
@@ -58,7 +62,7 @@ const RecipientManagementPage = () => {
 
       }
       fetchRecipients()
-    }, [branch, department, page, searchParams])
+    }, [branch, department, page, searchParams, name])
 
   // const filtered = recipients.filter(
   //   (r) =>
@@ -98,11 +102,16 @@ const RecipientManagementPage = () => {
     }
 
   return (
-    <Card className="p-4 shadow-md">
+    <Card className=" shadow-md container">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="md:text-2xl font-semibold text-gray-700">
-          Recipient Management
-        </CardTitle>
+        <div>
+          <CardTitle className="md:text-2xl font-semibold text-gray-700">
+            Recipient Management
+          </CardTitle>
+          <CardDescription className="py-2 text-gray-500">
+            Manage your airtime recipients details, all in one place.
+          </CardDescription>
+        </div>
         <Link to={"/recipients/recipient"}>
           <Button
             //   variant={"link"}
@@ -124,6 +133,8 @@ const RecipientManagementPage = () => {
           setRecipients={setRecipients}
           branch={branch}
           department={department}
+          name={search}
+          setSearch={setSearch}
           handleSearchParam={handleSearchParam}
           handleClearFilters={handleClearFilters}
         />

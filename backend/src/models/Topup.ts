@@ -83,6 +83,8 @@ Topup.init(
         fields: ["transaction_id"],
       },
     ],
+    timestamps: true,
+    paranoid: true,
   }
 );
 

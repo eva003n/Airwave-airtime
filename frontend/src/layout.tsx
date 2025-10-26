@@ -31,7 +31,7 @@ const AppLayout = () => {
                 <ToggleSwitch/>
             </div> */}
         </Header>
-        <main className="bg-sidebar overflow-y-auto min-h-[calc(100svh-36px)] overflow-x-hidden">
+        <main className="bg-sidebar overflow-y-auto min-h-[calc(100svh-36px)]   ">
           {<Outlet />}
         </main>
       </div>

@@ -1,5 +1,5 @@
 import { QueryInterface, DataTypes } from "sequelize";
-import { MobileOperator } from "../models/Recipients.js";
+import { MobileOperator } from "../models/Recipient.js";
 
 async function up({ context }: { context: QueryInterface }) {
   await context.createTable("recipients", {

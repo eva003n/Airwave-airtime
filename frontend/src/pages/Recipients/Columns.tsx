@@ -83,7 +83,7 @@ const recipientColumns = (
   },
   {
     accessorKey: "airtime_amount",
-    header: () => <div className="text-right">Airtime amount</div>,
+    header: () => <div className="text-right">Airtime</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("airtime_amount"));
       const formatted = new Intl.NumberFormat("en-UK", {
@@ -93,6 +93,10 @@ const recipientColumns = (
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
+  },
+  {
+    accessorKey: "designation",
+    header: "Designation",
   },
   {
     accessorKey: "branch",

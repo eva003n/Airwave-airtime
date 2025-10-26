@@ -15,10 +15,10 @@ import csvParser from "csv-parser";
 import { uploadsRoot } from "../middlewares/multer.middleware.js";
 import path from "path";
 import User from "../models/User.js";
-import Topup, { TopStatus } from "../models/Topups.js";
+import Topup, { TopStatus } from "../models/Topup.js";
 import { topUpQueue } from "../queues/topup.queue.js";
 import logger from "../logger/logger.winston.js";
-import Recipient, { MobileOperator } from "../models/Recipients.js";
+import Recipient, { MobileOperator } from "../models/Recipient.js";
 import parseCsv from "../utils/parsecsv.js";
 import { Index } from "sequelize-typescript";
 import { connection, sub } from "../config/database/redis/redis.js";
@@ -357,7 +357,7 @@ const getPaginatedTopUps = async (page = 1, limit = 10) => {
     include: {
       model: Recipient,
       as: "recipient",
-      attributes: ["id", "name", "branch", "phone_number"],
+      attributes: ["id", "name", "branch", "phone_number", "department"],
     },
   });
 

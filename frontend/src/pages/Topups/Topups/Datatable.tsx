@@ -122,7 +122,7 @@ export function TopUpDataTable<TData, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <Table>
+      <Table className="bg-white">
         <TableCaption>List of airtime topups</TableCaption>
 
         <TableHeader>

@@ -101,6 +101,10 @@ const topUpColumns = (
     header: "Branch",
   },
   {
+    accessorKey: "recipient.department",
+    header: "Department",
+  },
+  {
     accessorKey: "createdAt",
     header: "Created at",
     cell: ({ row }) => {

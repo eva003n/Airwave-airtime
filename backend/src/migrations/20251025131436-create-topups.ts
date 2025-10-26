@@ -1,6 +1,6 @@
 import { QueryInterface, DataTypes } from "sequelize";
-import { MobileOperator } from "../models/Recipients.js";
-import { TopStatus } from "../models/Topups.js";
+import { MobileOperator } from "../models/Recipient.js";
+import { TopStatus } from "../models/Topup.js";
 
 async function up({ context }: { context: QueryInterface }) {
   await context.createTable("topups", {

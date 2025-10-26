@@ -21,7 +21,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronLeft, ChevronRight, Funnel, Grid, ListFilter, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Funnel,
+  Grid,
+  ListFilter,
+  X,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import {
@@ -65,12 +73,11 @@ interface DataTableProps<TData, TValue> {
   recipients: RecipientData[];
   branch?: string;
   department: string;
-  
+  name: string;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
   handleSearchParam: (key: string, value: string) => void;
   handleClearFilters: () => void;
 }
-
-
 
 export function DataTable<TData, TValue>({
   columns,
@@ -80,6 +87,8 @@ export function DataTable<TData, TValue>({
   setPage,
   branch,
   department,
+  name,
+  // setSearch,
 
   handleSearchParam,
   handleClearFilters,
@@ -143,7 +152,8 @@ export function DataTable<TData, TValue>({
             <DropdownMenuTrigger className="flex items-center" asChild>
               {/* <ListFilter className="w-6 h-6" /> */}
               <Button variant="outline" title="Filter by department">
-                {department ? `${department}` : "Department"} <ChevronDown className="ml-2 h-4 w-4" />
+                {department ? `${department}` : "Department"}{" "}
+                <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-white">
@@ -153,11 +163,11 @@ export function DataTable<TData, TValue>({
                   className="capitalize"
                   checked={columnVisibility[department]}
                   onCheckedChange={(value) => {
-                      handleSearchParam("department", value ? department : "");
-                      setColumnVisibility(() => ({
-                          // ...prev,
-                          [department]: value,
-                        }));
+                    handleSearchParam("department", value ? department : "");
+                    setColumnVisibility(() => ({
+                      // ...prev,
+                      [department]: value,
+                    }));
                   }}
                 >
                   {department}
@@ -166,15 +176,11 @@ export function DataTable<TData, TValue>({
               {/* Dropdown items for branch selection can be added here */}
             </DropdownMenuContent>
           </DropdownMenu>
-          {
-            (branch || department) && (
-              <Button
-                variant="outline"
-                onClick={handleClearFilters}
-              >
-                <X className="w-4 h-4 " /> Clear filters
-              </Button>
-            )}
+          {(branch || department || name) && (
+            <Button variant="outline" onClick={handleClearFilters}>
+              <X className="w-4 h-4 " /> Clear filters
+            </Button>
+          )}
         </div>
         <div className="flex gap-2">
           <Input
@@ -185,9 +191,17 @@ export function DataTable<TData, TValue>({
             }
             onChange={(e) => {
               table.getColumn("name")?.setFilterValue(e.target.value);
+              // setSearch(e.target.value);
+              // handleSearchParam("name", e.target.value);
+
               // table.getColumn("phone")?.setFilterValue(e.target.value);
             }}
             className="max-w-sm"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                // handleSearchParam("name", name);
+              }
+            }}
           />
 
           <DropdownMenu>
@@ -218,7 +232,7 @@ export function DataTable<TData, TValue>({
           </DropdownMenu>
         </div>
       </div>
-      <Table>
+      <Table className="bg-white">
         <TableCaption>List of airtime recipients.</TableCaption>
 
         <TableHeader>

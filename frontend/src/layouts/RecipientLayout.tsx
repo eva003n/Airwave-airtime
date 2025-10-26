@@ -5,7 +5,7 @@ import { Link, Outlet } from "react-router-dom";
 
 const RecipientLayout = () => {
   return (
-    <section className="px-4 py-4">
+    <section className="px-4 py-4 ">
       <Outlet />
     </section>
   );

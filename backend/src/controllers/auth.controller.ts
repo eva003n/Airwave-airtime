@@ -140,9 +140,7 @@ const signOut = asyncHandler(
 const tokenRefresh = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { RefreshToken } = req.cookies as CookieData;
-    // if(AccessToken) return
-console.log(req.cookies)
-console.log(req.headers.cookie)
+
     if (!RefreshToken) {
       return next(
         ApiError.unAuthorizedRequest(

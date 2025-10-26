@@ -29,7 +29,7 @@ const migrator = new Umzug({
 
 // Helper functions
 export const runMigrations = async () => {
-  logger.info("⏳ Running pending database migrations...");
+  logger.info("🔍 Searching for pending database migrations...");
   const pending = await migrator.pending();
   if (pending.length === 0) {
     logger.info("✅ No pending migrations. Database is up to date.");
