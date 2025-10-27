@@ -74,7 +74,7 @@ const sendTopUp = async (data: SingleTopUpForm) => {
   return apiClient.request<{message: string}>("POST", "/top-ups", data)
 
 }
-const getAllTopUps = async(params: PaginateData) => {
+const getAllTopUps = async(params: RecipientQueryData) => {
   return apiClient.request<TopUpDataApi>("GET", "/top-ups", null, params)
 
 }

@@ -44,6 +44,8 @@ const topUpColumns = (
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
+        className={"border-[1.5px] border-gray-400"}
+        title="Select all"
       />
     ),
     cell: ({ row }) => (
@@ -52,6 +54,10 @@ const topUpColumns = (
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
+        className={`${
+          row.getIsSelected() ? "border-[1.5px] border-gray-400" : ""
+        }`}
+        title="Select row"
       />
     ),
     enableSorting: false,
@@ -75,11 +81,15 @@ const topUpColumns = (
   },
   {
     accessorKey: "phone_number",
-    header: "Phone number",
+    header: "Phone",
+  },
+  {
+    accessorKey: "operator",
+    header: "Operator",
   },
   {
     accessorKey: "airtime_amount",
-    header: () => <div className="text-right">Airtime amount</div>,
+    header: () => <div className="text-right">Airtime </div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("airtime_amount"));
       const formatted = new Intl.NumberFormat("en-UK", {
@@ -89,11 +99,6 @@ const topUpColumns = (
 
       return <div className="text-right font-medium">{formatted}</div>;
     },
-  },
-
-  {
-    accessorKey: "operator",
-    header: "Operator",
   },
 
   {
@@ -146,7 +151,9 @@ const topUpColumns = (
             <DropdownMenuItem>
               <button
                 className="flex gap-2 items-center"
-                onClick={() => {handleDelete(topUp.id)}}
+                onClick={() => {
+                  handleDelete(topUp.id);
+                }}
               >
                 <Trash2 /> Delete
               </button>

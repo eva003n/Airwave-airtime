@@ -2,7 +2,8 @@ export const apps = [
   // Process 1: Main HTTP API
   {
     name: "airwave-airtime-api",
-    script: "./index.js",
+    // script: "./index.js", //docker
+    script: "dist/index.js", //local
     // watch: ["."],
     env: {
       NODE_ENV: "development",
@@ -13,7 +14,8 @@ export const apps = [
   // Process 2: Worker for topups
   {
     name: "topups-worker",
-    script: "./workers/topup.worker.js",
+    // script: "./workers/topup.worker.js", //docker
+    script: "dist/workers/topup.worker.js", //docker
     // watch: ["."],
     env: {
       NODE_ENV: "development",

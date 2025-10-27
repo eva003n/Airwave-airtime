@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS, OPERATORS } from "../../constants";
 import { createRecipient, getRecipient, updateRecipient } from "@/api";
-import { getItem, handleValidationError } from "@/utils";
+import { getItem } from "@/utils";
 import {
   type RecipientForm,
   recipientSchema,
@@ -305,7 +305,7 @@ const EditRecipientPage = () => {
               {/* Submit */}
               <Button
                 disabled={isSubmitting}
-                onClick={() => handleValidationError(errors)}
+                // onClick={() => handleValidationError(errors)}
                 className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
               >
                 {isSubmitting ? "Editing" : "Edit recipient"}

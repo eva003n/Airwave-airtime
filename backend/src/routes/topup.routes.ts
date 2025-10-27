@@ -1,7 +1,7 @@
 import { Router, type RequestHandler } from "express";
 import {  autoDetectOperator, createBulkTopUps, deleteTopUp, getBulkTopUpStatus, getMnpDetails, getOperators, getTopUps, getTopUpStatus, sendBulkTopUps, sendTopUp, startBulkTopUp,} from "../controllers/topup.controller.js";
 import { validate } from "../middlewares/validators/validator.middleware.js";
-import { IdSchema, OperatorDetailsSchema, paginateSchema, topUpSchema } from "../middlewares/validators/validators.js";
+import { IdSchema, OperatorDetailsSchema, paginateSchema, recipientQuerySchema, topUpSchema } from "../middlewares/validators/validators.js";
 import { uploadSingleFile } from "../middlewares/multer.middleware.js";
 import { protectRoute } from "../middlewares/auth.middleware.js";
 
@@ -11,7 +11,7 @@ const router = Router()
 router.use(protectRoute)
 
 //Enable single topups
-router.route("/").get(validate(paginateSchema), getTopUps);
+router.route("/").get(validate(recipientQuerySchema), getTopUps);
 //Perform single top up
 router.route("/").post(validate(topUpSchema), sendTopUp);
 

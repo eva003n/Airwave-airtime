@@ -30,8 +30,7 @@ import { deleteRecipient } from "@/api";
 import { toast } from "react-toastify";
 
 const recipientColumns = (
-   handleDelete: (id: string) => void,
-
+  handleDelete: (id: string) => void
 ): ColumnDef<RecipientData>[] => [
   {
     id: "select",
@@ -44,6 +43,8 @@ const recipientColumns = (
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
+        className={"border-[1.5px] border-gray-400"}
+        title="Select all"
       />
     ),
     cell: ({ row }) => (
@@ -52,6 +53,10 @@ const recipientColumns = (
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
+        className={`${
+          row.getIsSelected() ? "border-[1.5px] border-gray-400" : ""
+        }`}
+        title="Select row"
       />
     ),
     enableSorting: false,
@@ -94,10 +99,7 @@ const recipientColumns = (
       return <div className="text-right font-medium">{formatted}</div>;
     },
   },
-  {
-    accessorKey: "designation",
-    header: "Designation",
-  },
+
   {
     accessorKey: "branch",
     header: "Branch",
@@ -106,14 +108,19 @@ const recipientColumns = (
     accessorKey: "department",
     header: "Department",
   },
+
   {
-    accessorKey: "createdAt",
-    header: "Created at",
-    cell: ({ row }) => {
-      const formattedDate = getDateByDay(row.getValue("createdAt"));
-      return <div className="">{formattedDate}</div>;
-    },
+    accessorKey: "designation",
+    header: "Designation",
   },
+  // {
+  //   accessorKey: "createdAt",
+  //   header: "Created at",
+  //   cell: ({ row }) => {
+  //     const formattedDate = getDateByDay(row.getValue("createdAt"));
+  //     return <div className="">{formattedDate}</div>;
+  //   },
+  // },
   // {
   //   accessorKey: "updatedAt",
   //   header: "Updated at",
@@ -126,7 +133,6 @@ const recipientColumns = (
     id: "actions",
     cell: ({ row }) => {
       const recipient = row.original;
-      
 
       return (
         <DropdownMenu>
@@ -148,10 +154,10 @@ const recipientColumns = (
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <button
-              className="flex gap-2 items-center"
-              onClick={() => handleDelete(recipient.id)}
+                className="flex gap-2 items-center"
+                onClick={() => handleDelete(recipient.id)}
               >
-              <Trash2 /> Delete
+                <Trash2 /> Delete
               </button>
             </DropdownMenuItem>
           </DropdownMenuContent>

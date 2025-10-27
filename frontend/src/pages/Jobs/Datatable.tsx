@@ -42,6 +42,7 @@ import {
 import type { RecipientData, RecipientForm, TopUpData } from "@/validation/validators";
 import { deleteRecipient } from "@/api";
 import { toast } from "react-toastify";
+import  { AnimatePresence, motion } from "motion/react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -143,7 +144,7 @@ export function TopUpDataTable<TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody>
+        {/* <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
@@ -164,7 +165,47 @@ export function TopUpDataTable<TData, TValue>({
               </TableCell>
             </TableRow>
           )}
-        </TableBody>
+        </TableBody> */}
+        <AnimatePresence mode="wait">
+          <motion.tbody
+            key={table.getRowModel().rows.length}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{
+              duration: 0.4,
+              ease: "easeInOut",
+            }}
+            className="overflow-hidden"
+          >
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No top up jobs yet
+                </TableCell>
+              </TableRow>
+            )}
+          </motion.tbody>
+        </AnimatePresence>
       </Table>
       <div className="flex items-center justify-center space-x-2 py-4 m-0 p-9  ">
         {/* <Pagination className="">

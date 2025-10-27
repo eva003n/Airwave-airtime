@@ -5,7 +5,9 @@ const requestHandler = (
   success: (res: AxiosResponse) => AxiosResponse,
   error: (err: AxiosError<{ message: string }>) => AxiosError
 ) => {
-  return api().then(success).catch(error);
+  return api()
+    .then(success)
+    .catch(error);
 };
 
 

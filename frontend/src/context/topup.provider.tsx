@@ -24,6 +24,7 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
     [] 
   ) || [];
 
+  
   // Function to start SSE connection
   const connectStream = () => {
     const user = getItem<UserData>("user")
@@ -103,9 +104,16 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
     await db.topups.where("createdAt").below(cutoff.toISOString()).delete();
   };
 
+  (async () => {
+    const allTopups = await db.topups.toArray();
+    console.log(allTopups);
+  })()
+
   useEffect(() => {
     connectStream();
     cleanupOldTopups();
+
+    
     return () => {
       eventSourceRef.current?.close();
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);

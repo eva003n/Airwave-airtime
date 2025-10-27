@@ -137,29 +137,35 @@ const startWorker = async () => {
 
   topUpEvants.on("waiting", async ({ jobId }) => {
     const job = await topUpQueue.getJob(jobId);
-    if (!job) return;
+    if (!job) return;   const payload = {
+      id: job.id,
+      ...job.data,
+      status: "Pending",
+      updatedAt: new Date().toISOString(),
+    };
+
+    
     return await pub.publish(
       "topup_updates",
-      JSON.stringify({
-        ...job,
-        status: "Pending",
-        updatedAt: new Date().toISOString(),
-      })
+      JSON.stringify(payload)
     );
   });
 
   // Status for jobs being processed
-  topUpWorker.on("active", async (job: Job) => {
+  topUpWorker.on("active", async (job: Job<BulkTopUpData>) => {
     if (!job) return;
 
     try {
+
+         const payload = {
+           id: job.id,
+           ...job.data,
+           status: "Processing",
+          updatedAt: new Date().toISOString(),
+         };
       return await pub.publish(
         "topup_updates",
-        JSON.stringify({
-          ...job.data,
-          status: "Processing",
-          updatedAt: new Date().toISOString(),
-        })
+        JSON.stringify(payload)
       );
     } catch (error) {
       logger.error(error.message);
@@ -169,14 +175,17 @@ const startWorker = async () => {
   topUpWorker.on("failed", async (job, err) => {
     if (!job) return;
     try {
+
+         const payload = {
+           id: job.id,
+           ...job.data,
+           status: "Failed",
+           updatedAt: new Date().toISOString(),
+           error: err.message
+         };
       return await pub.publish(
         "topup_updates",
-        JSON.stringify({
-          ...job.data,
-          status: "Failed",
-          updatedAt: new Date().toISOString(),
-          error: err.message,
-        })
+        JSON.stringify(payload)
       );
     } catch (error) {
       logger.error(error.message);
@@ -187,13 +196,16 @@ const startWorker = async () => {
   topUpWorker.on("completed", async (job, result, prev) => {
     if (!job) return;
     try {
+
+    const payload = {
+      id: job.id,
+      ...job.data,
+      status: "Success",
+      updatedAt: new Date().toISOString(),
+    };
       await pub.publish(
         "topup_updates",
-        JSON.stringify({
-          ...job.data,
-          status: "Success",
-          updatedAt: new Date().toISOString(),
-        })
+        JSON.stringify(payload)
       );
     } catch (error) {
       logger.error(error.message);

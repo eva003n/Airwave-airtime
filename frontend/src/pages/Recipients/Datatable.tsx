@@ -10,7 +10,7 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
+import { motion, AnimatePresence } from "motion/react";
 import {
   Table,
   TableBody,
@@ -71,9 +71,10 @@ interface DataTableProps<TData, TValue> {
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setRecipients: React.Dispatch<React.SetStateAction<RecipientData[]>>;
   recipients: RecipientData[];
-  branch?: string;
+  branch: string;
   department: string;
   name: string;
+  loading: boolean,
   setSearch: React.Dispatch<React.SetStateAction<string>>;
   handleSearchParam: (key: string, value: string) => void;
   handleClearFilters: () => void;
@@ -88,8 +89,7 @@ export function DataTable<TData, TValue>({
   branch,
   department,
   name,
-  // setSearch,
-
+  loading,
   handleSearchParam,
   handleClearFilters,
 }: DataTableProps<TData, TValue>) {
@@ -183,7 +183,7 @@ export function DataTable<TData, TValue>({
           )}
         </div>
         <div className="flex gap-2">
-          <Input
+          {/* <Input
             placeholder="Search by name"
             value={
               (table.getColumn("name")?.getFilterValue() as string) ?? ""
@@ -202,7 +202,7 @@ export function DataTable<TData, TValue>({
                 // handleSearchParam("name", name);
               }
             }}
-          />
+          /> */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -233,7 +233,9 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
       <Table className="bg-white">
-        <TableCaption>List of airtime recipients.</TableCaption>
+        <TableCaption className="text-gray-400">
+          List of airtime recipients.
+        </TableCaption>
 
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -253,7 +255,7 @@ export function DataTable<TData, TValue>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody>
+        {/* <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
@@ -269,12 +271,52 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No recipients.
+              <TableCell colSpan={columns.length} className="h-24 text-center text-gray-400">
+                No airtime recipients.
               </TableCell>
             </TableRow>
           )}
-        </TableBody>
+        </TableBody> */}
+        <AnimatePresence mode="wait">
+          <motion.tbody
+            key={table.getRowModel().rows.length}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{
+              duration: 0.4,
+              ease: "easeInOut",
+            }}
+            className="overflow-hidden"
+          >
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  {loading ? "Loading recipients..." : " No recipient data yet."}
+                </TableCell>
+              </TableRow>
+            )}
+          </motion.tbody>
+        </AnimatePresence>
       </Table>
       <div className="flex items-center justify-center space-x-2 py-4 m-0 p-9  ">
         <Pagination className="">

@@ -23,7 +23,6 @@ import parseCsv from "../utils/parsecsv.js";
 import { Index } from "sequelize-typescript";
 import { connection, sub } from "../config/database/redis/redis.js";
 import { jobProducer } from "../queues/producer.js";
-import { topUpWorker } from "../workers/topup.worker.js";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
@@ -32,8 +31,11 @@ const getTopUps = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const branch = req.query.branch as string;
+    const department = req.query.department as string;
+    const name = req.query.name as string;
 
-    const topUps = await getPaginatedTopUps(page, limit);
+    const topUps = await getPaginatedTopUps(page, limit, branch, department, name);
 
     return res
       .status(200)
@@ -252,10 +254,12 @@ const deleteTopUp = asyncHandler(
 
 const startBulkTopUp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    //if worker is nit running run it
-    if (topUpWorker.isRunning()) return;
+    const worker = (await import("../workers/topup.worker.js")).topUpWorker;
 
-    await topUpWorker.run();
+    //if worker is nit running run it
+    if (worker?.isRunning()) return;
+
+    await worker?.run();
 
     return res
       .status(200)
@@ -346,19 +350,35 @@ const enqueueTopUps = async (data: BulkTopUpData[], id: string) => {
   );
 };
 
-const getPaginatedTopUps = async (page = 1, limit = 10) => {
+const getPaginatedTopUps = async (
+  page = 1,
+  limit = 10,
+  branch?: string,
+  department?: string,
+  name?: string
+) => {
   //inplements page by page logic
   const offset = (page - 1) * limit;
+
+  //build an object of dynamic filters
+  const filters = { branch, department, name };
+
+  //convert resulting array to object for filtering
+  const where = Object.fromEntries(
+    //build an array of key value pairs removing empty values
+    Object.entries(filters).filter(([_, v]) => v?.toString().trim())
+  );
 
   const { rows, count } = await Topup.findAndCountAll({
     limit,
     offset,
     order: [["createdAt", "DESC"]],
-    include: {
+    include: [{
       model: Recipient,
+      where,
       as: "recipient",
       attributes: ["id", "name", "branch", "phone_number", "department"],
-    },
+    }],
   });
 
   return {

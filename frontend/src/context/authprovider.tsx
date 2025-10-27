@@ -46,7 +46,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       },
       (err: AxiosError<{message: string}>) => {
         setLoading(false);
-        toast.error(err.response?.data.message)
+        toast.error(err.response?.data.message || err.message);
         return err;
       }
     );
@@ -63,13 +63,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(false);
         navigate("/dashboard");
         toast.success(response.data.message);
-
         return response;
       },
       (err: AxiosError<{ message: string }>) => {
         setLoading(false);       
-         toast.error(err.response?.data.message);
-        return err;
+        toast.error(err.response?.data.message || err.message);
+         return err
+
       }
     );
   };
@@ -101,13 +101,12 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(null);
         removeItem("user");
         navigate("/");
-        console.log(response);
         toast.success(response.data.message);
         return response;
       },
       (err: AxiosError<{ message: string }>) => {
         setLoading(false);
-        console.error(err.response?.data.message);
+        toast.error(err.response?.data.message );
         return err;
       }
     );

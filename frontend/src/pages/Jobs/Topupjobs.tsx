@@ -141,57 +141,6 @@ const [pages, setPages] = useState(1);
 const [page, setPage] = useState(1);
 const [token, setToken] = useState("");
 
-// useEffect(() => {
-//   const user = getItem<UserData>("user");
-//   const url = `${import.meta.env.VITE_API_BASE_URI}/top-ups/progress/${user.id}`;
-//   const eventSource: EventSource = new EventSource(url, {
-//     withCredentials: true
-//   })
-
-//   eventSource.onmessage = (event) => {
-
-//     console.log(event.data)
-
-//   }
-
-//   eventSource.addEventListener("topup", (event) => {
-//     const data: TopUp = JSON.parse(event.data)
-//     // setTopups(event.data)
-//      const topup = {
-//        id: data.id,
-//        name: data.name,
-//        phone: data.phone,
-//        amount: data.amount,
-//        branch: data.branch,
-//        operator: data.operator,
-//        status: data.status,
-//        createdAt: data.createdAt ?? new Date(),
-//        updatedAt: new Date(),
-//      };
-//      TopUpService.add(topup)
-
-
-
-//   })
-
-//   eventSource.onerror = async (error) => {
-//     console.error("SSE error:", error);
-
-//     // If the connection closed due to 401
-//     if (eventSource?.readyState === EventSource.CLOSED) {
-      
-//      const newToken= await apiClient.getAccessToken()
-//      setToken(newToken)
-//     }
-//   };
-
-
-
- 
-//  return () => eventSource.close();
-
-//  },[token])
-
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this airtime topup?")) return;
     TopUpService.delete(id)
@@ -204,27 +153,6 @@ const [token, setToken] = useState("");
 
   return (
     <div className="p-4 ">
-      <div className="flex items-center justify-between py-4">
-        <h1 className="text-2xl font-semibold text-gray-700 flex gap-3">
-          {/* <Phone size={24} className="" /> */}
-          Job Queue
-        </h1>
-        <div className="flex gap-4">
-          <Button
-            variant={"outline"}
-            className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
-            onClick={handleStart}
-          >
-            Start bulk top
-          </Button>
-          <Link to={"/top-ups/make-topup"}>
-            <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
-              Make topup
-            </Button>
-          </Link>
-        </div>
-      </div>
-
       <Card className="shadow-sm border-gray-200">
         <CardHeader>
           {/* <CardTitle className="text-gray-700 flex justify-between">
@@ -235,6 +163,26 @@ const [token, setToken] = useState("");
               </Button>
             </Link>
           </CardTitle> */}
+          <div className="flex items-center justify-between ">
+            <p className="text-2xl font-semibold text-gray-700 flex gap-3">
+              {/* <Phone size={24} className="" /> */}
+              Job Queue
+            </p>
+            <div className="flex gap-4">
+              <Button
+                variant={"outline"}
+                className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
+                onClick={handleStart}
+              >
+                Start bulk top
+              </Button>
+              <Link to={"/top-ups/make-topup"}>
+                <Button className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white">
+                  Make topup
+                </Button>
+              </Link>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">

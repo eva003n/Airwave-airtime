@@ -28,20 +28,23 @@ const RecipientManagementPage = () => {
   const [recipients, setRecipients] =
     useState<RecipientData[]>([]);
 
-  const [page, setPage] = useState(1)
-  const [pages, setPages] = useState(1)
+  const [page, setPage] = useState(0)
+  const [pages, setPages] = useState(0)
   const [department, setDepartment] = useState("")
   const [branch, setBranch] = useState("")
   const [searchParams, setSearchParams] = useSearchParams();
+  const [loading, setLoading] = useState(false)
 
     useEffect(() => {
       const fetchRecipients = async() => {
         const branch = searchParams.get("branch") || ""
         const department = searchParams.get("department") || ""
         const name = searchParams.get("name") || ""
+        
         setBranch(branch)
         setDepartment(department)
         setSearch(name)
+        setLoading(true)
         try {
           const response = await getAllRecipients({
             page,
@@ -52,6 +55,7 @@ const RecipientManagementPage = () => {
             
           });
           const recipientsData = response.data.data.recipients;
+          setLoading(false)
           setRecipients(recipientsData);
           setPage(response.data.data.currentPage);
           setPages(response.data.data.totalPages);
@@ -137,6 +141,7 @@ const RecipientManagementPage = () => {
           setSearch={setSearch}
           handleSearchParam={handleSearchParam}
           handleClearFilters={handleClearFilters}
+          loading={loading}
         />
       </CardContent>
     </Card>

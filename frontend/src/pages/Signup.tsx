@@ -1,4 +1,4 @@
-import { Loader, Mail, User, Lock } from "lucide-react";
+import { Loader, Mail, User, Lock, X } from "lucide-react";
 import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -8,11 +8,17 @@ import Logo from "../components/Logo";
 import { useAuth } from "../context/authcontext";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import  { signUpSchema, type SignUpAuth } from "../validation/validators";
+import { signUpSchema, type SignUpAuth } from "../validation/validators";
 import { signUpUser } from "../api/index";
-import { handleValidationError } from "../utils";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
+// import { handleValidationError } from "../utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { AxiosError } from "axios";
 
 const Signup = () => {
   //form state management
@@ -23,32 +29,41 @@ const Signup = () => {
   });
 
   //  global authentication state mangement
-  const { signUp} = useAuth();
+  const { signUp } = useAuth();
   const {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<SignUpAuth>({
     //validation using zod schema
-    resolver: zodResolver(signUpSchema)
+    resolver: zodResolver(signUpSchema),
   });
 
   //Api communication
   const onSubmit: SubmitHandler<SignUpAuth> = async (data) => {
-    try {
-     await signUp(data);
-    // toast.success(response.data.message)
-    } catch (error) {
-      // toast.error(error.message)
-      
-    }finally{
-      reset()
-    }
+    const response = await signUp(data);
+
+    // if (response instanceof AxiosError) {
+    //   setError("root", { message: response.response?.data.message || response.message });
+    // }
+
+    return reset()
+    // return reset(
+    //   {
+    //     email: "",
+    //     password: "",
+    //     userName: "",
+    //   },
+    //   { keepErrors: true }
+    // );
   };
 
+  const handleCloseError = () => setError("root", { message: "" });
+
   return (
-    <Card className="w-[90%] max-w-[25rem]">
+    <Card className="w-[90%] max-w-[25rem] ">
       <CardHeader>
         <CardTitle>
           <div className="flex justify-center mt-5">
@@ -56,18 +71,24 @@ const Signup = () => {
           </div>
         </CardTitle>
       </CardHeader>
-      <CardDescription className="flex justify-center">
-        <p className="font-semibold text-[.9rem] text-gray-400 text-center  max-w-[17rem] ">
+      <CardDescription className="flex flex-col gap-2 ">
+        <p className=" text-[1rem] max-w-[80%] mx-auto text-gray-400  text-center">
           Sign up and make airtime distribution at scale a breeze
         </p>
+        {errors.root?.message && (
+          <div className="bg-rose-100 p-2 flex justify-between mx-4   ">
+            <p>{errors.root?.message}</p>
+            <button onClick={handleCloseError}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </CardDescription>
       <CardContent>
         <form
           className="w-[90%] flex max-w-[20rem] flex-col mx-auto gap-4 "
           onSubmit={handleSubmit(onSubmit)}
         >
-          <div className="text-center mt-5 grid gap-7"></div>
-
           <div>
             <Input
               type="email"
@@ -123,7 +144,7 @@ const Signup = () => {
             isLoading={isSubmitting}
             disabled={isSubmitting}
             className="mt-4"
-            onClick={() => handleValidationError(errors)}
+            // onClick={() => handleValidationError(errors)}
           />
           <div className="text-center dark:border-[1.5px] dark:border-gray-600 border-none py-1.5 rounded-sm">
             <p className=" text-[.9rem] text-gray-500">Have an account?</p>

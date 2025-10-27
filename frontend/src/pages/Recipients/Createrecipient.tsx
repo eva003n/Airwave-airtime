@@ -17,7 +17,7 @@ import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS, OPERATORS } from "../../constants"
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { recipientSchema, type RecipientForm, type UserData } from "@/validation/validators";
-import { getItem, handleValidationError } from "@/utils";
+import { getItem,  } from "@/utils";
 import { createRecipient } from "@/api";
 import { toast } from "react-toastify";
 
@@ -279,7 +279,7 @@ const CreateRecipientPage = () => {
               {/* Submit */}
               <Button
                 disabled={isSubmitting}
-                onClick={() => handleValidationError(errors)}
+                // onClick={() => handleValidationError(errors)}
                 className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
               >
                 {isSubmitting ? "Saving" : "Save recipient"}

@@ -82,7 +82,7 @@ const recipientGrowthData = useMemo(() => {
               start={0}
               end={analytics?.data.totalRecipients || 0}
               className="text-2xl font-bold text-gray-700"
-              duration={2}
+              duration={5}
               separator=","
             />
             <p className="text-sm text-gray-500">Active recipients</p>
@@ -102,7 +102,7 @@ const recipientGrowthData = useMemo(() => {
               start={0}
               end={analytics?.data.totalTopUps || 0}
               className="text-2xl font-bold text-gray-700"
-              duration={2}
+              duration={5}
               separator=","
             />
             <p className="text-sm text-gray-500">All-time distributions</p>
@@ -124,7 +124,7 @@ const recipientGrowthData = useMemo(() => {
                 start={0}
                 end={analytics?.data.walletBalance || 0}
                 className="text-2xl font-bold text-gray-700"
-                duration={2}
+                duration={5}
                 separator=","
               />
             </p>
@@ -145,7 +145,8 @@ const recipientGrowthData = useMemo(() => {
               start={0}
               end={2}
               className="text-2xl font-bold text-gray-700"
-              duration={3}
+              duration={5}
+              separator=","
             />
             <ListContainer className="flex gap-4 items-center">
               <List className="flex gap-1 items-center">

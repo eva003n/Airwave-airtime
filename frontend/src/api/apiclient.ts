@@ -54,6 +54,7 @@ class ApiClient {
         const failedRequest = error.config as AxiosRequestConfig & {
           _retry: boolean;
         };
+
         //handle 401 unauthorized 
 
         if (error.response?.status == 401 && !failedRequest._retry) {
