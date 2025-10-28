@@ -26,3 +26,8 @@ how-to-handle-uploading-and-parsing-files-in-your-frontend-app-tests-19bee8e7a61
 We suggest that you begin by typing:
 
     pnpm exec playwright test
+
+# Testing 
+https://vitest.dev/guide/
+https://testing-library.com/docs/react-testing-library/intro/
+https://playwright.dev/docs/writing-tests

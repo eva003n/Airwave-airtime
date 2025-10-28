@@ -18,7 +18,7 @@ if(user) {
 
 
   if (user ) {
-    return  <Navigate to="/dashboard" replace />
+    return  <Navigate to="/dashboard" replace={true} />
     
   } else {
     return <Outlet />;

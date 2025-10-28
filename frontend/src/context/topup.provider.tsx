@@ -104,10 +104,6 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
     await db.topups.where("createdAt").below(cutoff.toISOString()).delete();
   };
 
-  (async () => {
-    const allTopups = await db.topups.toArray();
-    console.log(allTopups);
-  })()
 
   useEffect(() => {
     connectStream();

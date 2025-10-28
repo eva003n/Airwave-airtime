@@ -8,7 +8,7 @@ const ProtectedRoute = () => {
   const user = getItem<UserData>("user");
 
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" replace={true} />;
   } else {
     return <Outlet />;
   }

@@ -1,5 +1,5 @@
 
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import Header from "./components/Header";
@@ -24,7 +24,8 @@ const AppLayout = () => {
           <div>
             <SidebarTrigger className="size-9" />
           </div>
-          <Button  variant="outline"onClick={handleLogOut} className="flex gap-2 items-center">
+          
+          <Button  variant="ghost" onClick={handleLogOut} className="flex gap-2 items-center cursor-pointer">
             <LogOut size={16}/> <span className="text-[.9rem] font-medium hover:underline ">Log out</span>
           </Button>
           {/* <div>
