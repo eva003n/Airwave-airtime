@@ -31,10 +31,9 @@ import {
 } from "@/validation/validators";
 import { OPERATORS } from "@/constants";
 import { toast } from "react-toastify";
-import type{ BulkTopUpForm, UserData } from "@/validation/validators";
+import type { BulkTopUpForm, UserData } from "@/validation/validators";
 import CSVDropzone from "./Make-topup/CsvDropZone";
 import { getItem } from "@/utils";
-
 
 // --- Main Page ---
 export default function MakeTopUpPage() {
@@ -53,31 +52,31 @@ export default function MakeTopUpPage() {
     defaultValues: {
       phone_number: "254",
       airtime_amount: 5,
-      operator_code: 0,
-      countryIsoCode: "KE",
-      operator: "Safaricom",
+      // operator_code: 0,
+      // countryIsoCode: "KE",
+      // operator: "Safaricom",
     },
   });
 
-  useEffect(() => {
-    if (operatorData?.data?.operatorId) {
-      singleForm.setValue("operator_code", operatorData.data.operatorId);
-      singleForm.setValue(
-        "operator",
-        operatorData.data.operatorId == 266 ? "Safaricom" : "Airtel",
-        {
-          shouldValidate: true,
-          shouldDirty: true,
-          shouldTouch: true,
-        }
-      );
-    }
-  }, [operatorData]);
+  // useEffect(() => {
+  //   if (operatorData?.data?.operatorId) {
+  //     singleForm.setValue("operator_code", operatorData.data.operatorId);
+  //     singleForm.setValue(
+  //       "operator",
+  //       operatorData.data.operatorId == 266 ? "Safaricom" : "Airtel",
+  //       {
+  //         shouldValidate: true,
+  //         shouldDirty: true,
+  //         shouldTouch: true,
+  //       }
+  //     );
+  //   }
+  // }, [operatorData]);
 
   const bulkForm = useForm<BulkTopUpForm>({
     resolver: zodResolver(bulkTopUpSchema),
     defaultValues: {
-      recipients: []
+      recipients: [],
     },
   });
 
@@ -92,7 +91,7 @@ export default function MakeTopUpPage() {
     }
   });
 
-  const onBulkSubmit = bulkForm.handleSubmit( async() => {
+  const onBulkSubmit = bulkForm.handleSubmit(async () => {
     setStatusMessage(null);
     if (!csvFile || bulkParsed.length === 0) {
       setStatusMessage(
@@ -100,21 +99,20 @@ export default function MakeTopUpPage() {
       );
       return;
     }
-   
-      try {
-        const user = getItem<UserData>("user")
-           const formData = new FormData();
-           formData.append("recipients", csvFile);
 
-        
-         const response = await createBulkTopUps(user.id, formData)
-         bulkForm.reset()
-        toast.success(response.data.message)
-      } catch (error) {
-        toast.error(error.response.data.message)
-        
-      }
+    try {
+      const user = getItem<UserData>("user");
+      const formData = new FormData();
+      formData.append("recipients", csvFile);
 
+      const response = await createBulkTopUps(user.id, formData);
+      setCsvFile(null);
+      setBulkParsed([]);
+      bulkForm.reset();
+      toast.success(response.data.message);
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
   });
 
   const handleOperatorAutoDetection = async () => {
@@ -177,14 +175,14 @@ export default function MakeTopUpPage() {
                     minLength={12}
                     maxLength={12}
                   />
-                  <Button
+                  {/* <Button
                     variant={"outline"}
                     className=" my-2 text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
                     onClick={handleOperatorAutoDetection}
                     type="button"
                   >
                     {detectibg ? "Detecting..." : "Next"}
-                  </Button>
+                  </Button> */}
                   {singleForm.formState.errors.phone_number && (
                     <div className="text-xs text-red-600 mt-1">
                       {singleForm.formState.errors.phone_number.message}
@@ -205,26 +203,26 @@ export default function MakeTopUpPage() {
                   </div>
                 )}
 
-                {next && operatorData && (
-                  <>
-                    <div>
-                      <Label className="text-sm text-gray-700">
-                        Amount (KES) eg 5 - 10000
-                      </Label>
-                      <Input
-                        {...singleForm.register("airtime_amount")}
-                        placeholder="Amount"
-                        type="number"
-                        max={10000}
-                        min={5}
-                      />
-                      {singleForm.formState.errors.airtime_amount && (
-                        <div className="text-xs text-red-600 mt-1">
-                          {singleForm.formState.errors.airtime_amount?.message}
-                        </div>
-                      )}
-                    </div>
-                    <div>
+                {/* {next && operatorData && ( */}
+                <>
+                  <div>
+                    <Label className="text-sm text-gray-700">
+                      Amount (KES) eg 5 - 10000
+                    </Label>
+                    <Input
+                      {...singleForm.register("airtime_amount")}
+                      placeholder="Amount"
+                      type="number"
+                      max={10000}
+                      min={5}
+                    />
+                    {singleForm.formState.errors.airtime_amount && (
+                      <div className="text-xs text-red-600 mt-1">
+                        {singleForm.formState.errors.airtime_amount?.message}
+                      </div>
+                    )}
+                  </div>
+                  {/* <div>
                       <Label className="text-sm text-gray-700">Operator</Label>
                       <Controller
                         name="operator"
@@ -260,9 +258,9 @@ export default function MakeTopUpPage() {
                           </>
                         )}
                       />
-                    </div>
-                  </>
-                )}
+                    </div> */}
+                </>
+                {/* )} */}
 
                 <div className="flex items-center justify-end gap-2">
                   <Button
@@ -352,12 +350,11 @@ export default function MakeTopUpPage() {
                   <Button
                     className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:brightness-95 "
                     type="submit"
-                  onClick={
-                    () => bulkForm.reset()
-                  }>
-                    {bulkForm.formState.isSubmitting? "Uploading" : 
-                    "Start topup"
-                    }
+                    onClick={() => bulkForm.reset()}
+                  >
+                    {bulkForm.formState.isSubmitting
+                      ? "Uploading"
+                      : "Start topup"}
                   </Button>
                 </div>
 

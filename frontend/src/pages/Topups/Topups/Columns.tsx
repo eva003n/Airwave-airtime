@@ -80,11 +80,11 @@ const topUpColumns = (
     },
   },
   {
-    accessorKey: "phone_number",
+    accessorKey: "recipient.phone_number",
     header: "Phone",
   },
   {
-    accessorKey: "operator",
+    accessorKey: "recipient.operator",
     header: "Operator",
   },
   {

@@ -326,11 +326,11 @@ export const singleTopUpSchema = z.object({
         .max(10000, "Maximum topup is KES 10,000")
     ), // ensures it's typed properly
 
-  operator_code: z.number(),
-  operator: z.enum(["Safaricom", "Airtel"], {
-    message: "Operator is required",
-  }),
-  countryIsoCode: z.string().min(2).max(2),
+  // operator_code: z.number(),
+  // operator: z.enum(["Safaricom", "Airtel"], {
+  //   message: "Operator is required",
+  // }),
+  // countryIsoCode: z.string().min(2).max(2),
 });
 
 const topUpDataSchema = z.object({
@@ -376,9 +376,19 @@ export const csvDataSchema = z.object({
     .refine((val) => !!val, { message: "Operator is required" }),
 });
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024
+const ACCEPTED_FILE_TYPE = "text/csv"
 export const bulkTopUpSchema = z.object({
   // operator: z.enum(["Safaricom", "Airtel", "Telkom"]),
   recipients: z.array(csvDataSchema),
+  file: z.instanceof(File, {message: "No file choosen"})
+  .optional()
+  .refine((file) => {
+    return !file || file.size <= MAX_FILE_SIZE
+  }, "File must be less than 10MB")
+  .refine((file) => {
+    return !file || file.type === ACCEPTED_FILE_TYPE
+  }, "File must be a csv file")
 });
 
 export const walletBalanceSchema = z.object({

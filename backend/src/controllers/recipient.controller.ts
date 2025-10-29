@@ -23,7 +23,7 @@ const createRecipient = asyncHandler(
       department,
     }: RecipientData = req.body;
 
-    const operatorCode = operator === "Safaricom" ? 266 : 265;
+  //  const operatorCode = operator === "Safaricom" ? 266 : 265;
 
     const isRecipient = await Recipient.findOne({ where: { phone_number } });
     if (isRecipient)
@@ -38,7 +38,7 @@ const createRecipient = asyncHandler(
     const newRecipient = await Recipient.create({
       name,
       operator,
-      operator_code: operatorCode,
+      // operator_code: operatorCode,
       designation,
       branch,
       airtime_amount,
@@ -106,7 +106,7 @@ const updateRecipient = asyncHandler(
       department,
     }: RecipientData = req.body;
 
-    const operatorCode = operator === "Safaricom" ? 266 : 265;
+    // const operatorCode = operator === "Safaricom" ? 266 : 265;
 
     const isRecipient = await Recipient.findByPk(id);
     if (!isRecipient)

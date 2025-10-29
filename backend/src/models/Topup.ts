@@ -20,8 +20,6 @@ export enum OperatorType {
 class Topup extends Model {
   declare id?: string;
   declare transaction_id: number;
-  declare phone_number: string;
-  declare operator: MobileOperator;
   declare airtime_amount: number;
   declare recipient_id: string;
   declare user_id: string;
@@ -48,14 +46,7 @@ Topup.init(
       allowNull: false,
       unique: true,
     },
-    phone_number: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    operator: {
-      type: DataTypes.ENUM(...Object.values(MobileOperator)),
-      allowNull: false,
-    },
+  
     airtime_amount: {
       type: DataTypes.INTEGER,
       allowNull: false,

@@ -1,4 +1,4 @@
-import type { Queue } from "bullmq";
+import { delay, type Queue } from "bullmq";
 
 class JobProducer {
   //add a single job to queue
@@ -10,6 +10,7 @@ class JobProducer {
     const jobs = data.map((dataItem, Index) => ({
       name: `${jobName}-${Index + 1}`,
       data: Object.assign({userId: id}, dataItem),
+      delay: 60000
     }));
     await queue.addBulk(jobs);
   }
