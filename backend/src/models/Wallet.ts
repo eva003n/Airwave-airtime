@@ -2,9 +2,10 @@ import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/database/postgres/postgres.js";
 
 
+// server
 class Wallet extends Model {
     declare id?: string;
-    declare user_id: string;
+    declare owner: string;
     declare balance?: number;
     declare currency_code?: string;
     declare currency_name?: string;
@@ -15,6 +16,7 @@ class Wallet extends Model {
     declare updatedAt?: Date;
 }
 
+
 Wallet.init(
   {
     id: {
@@ -23,7 +25,7 @@ Wallet.init(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    user_id: {
+    owner: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {
@@ -79,7 +81,7 @@ Wallet.init(
     indexes: [
       {
         unique: true,
-        fields: ["user_id"],
+        fields: ["owner"],
       },
     ],
   }

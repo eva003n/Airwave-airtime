@@ -268,6 +268,13 @@ const walletBalanceSchema = z.object({
   lowBalanceThreshold: z.number(),
   maxLowBalanceThreshold: z.number(),
 });
+const africasTalkingWalletBalanceSchema = z.object({
+data: z.object({
+  userData: z.object({
+    balance: z.string()
+  })
+})
+});
 
 const AfricasTalkingTopUpSchema = z.object({
   responses: z.array(
@@ -299,6 +306,7 @@ export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;
 export type OperatorDetailApi = z.infer<typeof operatorDetailsSchemaApi>;
 export type WalletBalance = z.infer<typeof walletBalanceSchema>;
 export type ATTopUpResponse = z.infer<typeof AfricasTalkingTopUpSchema>;
+export type ATWallet = z.infer<typeof africasTalkingWalletBalanceSchema>
 export {
   signUpSchema,
   signInSchema,

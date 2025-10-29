@@ -10,8 +10,11 @@ const formatError = (errors: ZodIssue[]) => {
 }
 
 
+const getCurrency = (currency: string) => {
+  return parseInt(currency.replace("KES", "").trim())
+
+}
 
 
 
-
-export { formatError}; 
+export { formatError, getCurrency}; 

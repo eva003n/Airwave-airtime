@@ -28,6 +28,7 @@ import { jobProducer } from "../queues/producer.js";
 import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
 import { AFRICAS_TALKING_USERNAME } from "../config/env.js";
 import { randomInt, randomUUID } from "crypto";
+import { getCurrency } from "../utils/index.js";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
@@ -203,11 +204,10 @@ const sendTopUp = asyncHandler(
         ? TopStatus.Successful
         : TopStatus.Failed;
 
-    const amount = parseInt(
-      topResponse.responses[0]?.amount.replace("KES", "").trim() as string
+    const amount = getCurrency(
+      topResponse.responses[0]?.amount as string
     );
     const id = await randomInt(600000);
-    console.log(id)
     const topUp = await Topup.create({
       transaction_id: id,
       status,
