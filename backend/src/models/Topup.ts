@@ -58,6 +58,10 @@ Topup.init(
     user_id: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: "users",
+        key: "id"
+      }
     },
     status: {
       type: DataTypes.ENUM(...Object.values(TopStatus)),
