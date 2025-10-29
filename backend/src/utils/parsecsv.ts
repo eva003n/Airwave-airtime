@@ -37,13 +37,13 @@ const parseCsv = async (filePath: string): Promise<BulkTopUpData[]> => {
        
         results.push(data);
 
-         await pub.publish(
-           "topup_updates",
-           JSON.stringify({
-             ...data,
+        //  await pub.publish(
+        //    "topup_updates",
+        //    JSON.stringify({
+        //      ...data,
              
-           })
-         );
+        //    })
+        //  );
       })
       .on("end", () => resolve(results))
       .on("error", (error) => logger.error(error.message));

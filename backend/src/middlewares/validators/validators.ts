@@ -35,12 +35,12 @@ const topUpSchema = z.object({
     .number()
     .min(5, "Top up cannot be below 5 ksh")
     .max(10000, "Top up cannot exceed 10,000 ksh"),
-  operator_code: z
-    .number()
-    .refine((val) => val == 265 || val == 266, {
-      message: "Operator code supported are either 265 or 266",
-    })
-    .default(266),
+  // operator_code: z
+  //   .number()
+  //   .refine((val) => val == 265 || val == 266, {
+  //     message: "Operator code supported are either 265 or 266",
+  //   })
+  //   .default(266),
   phone_number: z
     .string()
     .regex(
@@ -269,6 +269,17 @@ const walletBalanceSchema = z.object({
   maxLowBalanceThreshold: z.number(),
 });
 
+const AfricasTalkingTopUpSchema = z.object({
+  responses: z.array(
+    z.object({
+      requestId: z.string(),
+      phoneNumber: z.string(),
+      status: z.string(),
+      amount: z.string(),
+    })
+  ),
+});
+
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -287,7 +298,7 @@ export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
 export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;
 export type OperatorDetailApi = z.infer<typeof operatorDetailsSchemaApi>;
 export type WalletBalance = z.infer<typeof walletBalanceSchema>;
-
+export type ATTopUpResponse = z.infer<typeof AfricasTalkingTopUpSchema>;
 export {
   signUpSchema,
   signInSchema,

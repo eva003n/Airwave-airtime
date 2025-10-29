@@ -1,8 +1,10 @@
 import { reloadlyClient } from "../config/reloadly/reloadlyclient.js";
 import type {
+  ATTopUpResponse,
   BulkTopUpData,
   Id,
   OperatorDatail,
+  OperatorDetailApi,
   ReloadlyTopUp,
   TopUp,
 } from "../middlewares/validators/validators.js";
@@ -23,6 +25,9 @@ import parseCsv from "../utils/parsecsv.js";
 import { Index } from "sequelize-typescript";
 import { connection, sub } from "../config/database/redis/redis.js";
 import { jobProducer } from "../queues/producer.js";
+import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
+import { AFRICAS_TALKING_USERNAME } from "../config/env.js";
+import { randomInt, randomUUID } from "crypto";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
@@ -35,7 +40,13 @@ const getTopUps = asyncHandler(
     const department = req.query.department as string;
     const name = req.query.name as string;
 
-    const topUps = await getPaginatedTopUps(page, limit, branch, department, name);
+    const topUps = await getPaginatedTopUps(
+      page,
+      limit,
+      branch,
+      department,
+      name
+    );
 
     return res
       .status(200)
@@ -101,9 +112,61 @@ const createBulkTopUps = asyncHandler(
       );
   }
 );
+// const sendTopUp = asyncHandler(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const { airtime_amount, operator_code, phone_number }: TopUp = req.body;
+
+//     const recipient = await Recipient.findOne({ where: { phone_number } });
+
+//     if (!recipient)
+//       return next(
+//         ApiError.notFound(
+//           404,
+//           req.originalUrl,
+//           "Airtime recipient does not exist"
+//         )
+//       );
+
+//     const topResponse = await reloadlyClient.request<ReloadlyTopUp>(
+//       "POST",
+//       "/topups",
+//       //payload send to reloadly airtime api
+//       {
+//         amount: airtime_amount,
+//         operatorId: operator_code,
+//         recipientPhone: {
+//           countryCode: "KE",
+//           number: phone_number,
+//         },
+//       }
+//     );
+
+//     // console.log(topResponse.data)
+//     const operator =
+//       topResponse.data.operatorId === 266
+//         ? MobileOperator.Safaricom
+//         : MobileOperator.Airtel;
+//     const status =
+//       topResponse.data.status === "SUCCESSFUL"
+//         ? TopStatus.Successful
+//         : TopStatus.Failed;
+
+//     const topUp = await Topup.create({
+//       transaction_id: topResponse.data.transactionId,
+//       status,
+//       airtime_amount: topResponse.data.deliveredAmount,
+//       recipient_id: recipient.id || "",
+//       user_id: req.user.id,
+//     });
+
+//     return res
+//       .status(200)
+//       .json(new ApiResponse(200, topUp, "Successfully topped up "));
+//   }
+// );
 const sendTopUp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { airtime_amount, operator_code, phone_number }: TopUp = req.body;
+    const { airtime_amount, phone_number }: TopUp = req.body;
 
     const recipient = await Recipient.findOne({ where: { phone_number } });
 
@@ -116,36 +179,39 @@ const sendTopUp = asyncHandler(
         )
       );
 
-    const topResponse = await reloadlyClient.request<ReloadlyTopUp>(
-      "POST",
-      "/topups",
-      //payload send to reloadly airtime api
-      {
-        amount: airtime_amount,
-        operatorId: operator_code,
-        recipientPhone: {
-          countryCode: "KE",
-          number: phone_number,
-        },
-      }
-    );
+    const topResponse = (
+      await africasTalkingClient.send<{}, ATTopUpResponse>(
+        "/version1/airtime/send",
+        //payload send to reloadly airtime api
+        {
+          username: AFRICAS_TALKING_USERNAME,
+          recipients: [
+            {
+              phoneNumber: phone_number,
+              amount: `KES ${airtime_amount}`,
+            },
+          ],
+          maxNumRetry: 2,
+        }
+      )
+    ).data;
 
-    // console.log(topResponse.data)
-    const operator =
-      topResponse.data.operatorId === 266
-        ? MobileOperator.Safaricom
-        : MobileOperator.Airtel;
+
+   
     const status =
-      topResponse.data.status === "SUCCESSFUL"
+      topResponse.responses[0]?.status === "Sent"
         ? TopStatus.Successful
         : TopStatus.Failed;
 
+    const amount = parseInt(
+      topResponse.responses[0]?.amount.replace("KES", "").trim() as string
+    );
+    const id = await randomInt(600000);
+    console.log(id)
     const topUp = await Topup.create({
-      transaction_id: topResponse.data.transactionId,
-      phone_number: topResponse.data.recipientPhone,
-      operator,
+      transaction_id: id,
       status,
-      airtime_amount: topResponse.data.deliveredAmount,
+      airtime_amount: amount,
       recipient_id: recipient.id || "",
       user_id: req.user.id,
     });
@@ -221,8 +287,11 @@ const getMnpDetails = asyncHandler(
   }
 );
 
-const autoDetect = async (phoneNumber: string, countryIsoCode: string) => {
-  const operatorDetails = await reloadlyClient.request(
+const autoDetect = async (
+  phoneNumber: string,
+  countryIsoCode: string = "KE"
+) => {
+  const operatorDetails = await reloadlyClient.request<OperatorDetailApi>(
     "GET",
     `/operators/auto-detect/phone/${phoneNumber}/countries/${countryIsoCode}`
   );
@@ -373,12 +442,14 @@ const getPaginatedTopUps = async (
     limit,
     offset,
     order: [["createdAt", "DESC"]],
-    include: [{
-      model: Recipient,
-      where,
-      as: "recipient",
-      attributes: ["id", "name", "branch", "phone_number", "department"],
-    }],
+    include: [
+      {
+        model: Recipient,
+        where,
+        as: "recipient",
+        attributes: ["id", "name", "branch", "phone_number", "department", "operator"],
+      },
+    ],
   });
 
   return {

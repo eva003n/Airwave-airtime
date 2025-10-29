@@ -2,6 +2,7 @@ import { QueueEvents } from "bullmq";
 import { connection } from "../config/database/redis/redis.js";
 import { Worker } from "bullmq";
 import logger from "../logger/logger.winston.js";
+import {Redis} from "ioredis";
 
 // Article to read from---. https://workerholic.github.io/
 
@@ -9,7 +10,10 @@ import logger from "../logger/logger.winston.js";
 //listen on global events emmited by a queue for progress tracking
 
 const generateQueueEvents = (queueName: string) => {
-    return new QueueEvents(queueName, {connection})
+  const queueEventsConnection = new Redis(connection.options)
+  //queue events need their on connection instance because they perform blocking tasks
+
+    return new QueueEvents(queueName, { connection: queueEventsConnection });
 
 }
 

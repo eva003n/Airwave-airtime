@@ -6,7 +6,7 @@ import { connection } from "../config/database/redis/redis.js";
 const topUpQueue = new Queue("topUpQueue", { 
     connection,
     defaultJobOptions: {
-        removeOnComplete: false,
+        removeOnComplete: true,
         removeOnFail: false,
         /* Retry logic and backoff */
         attempts: 5,

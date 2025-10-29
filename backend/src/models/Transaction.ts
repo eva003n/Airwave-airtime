@@ -6,7 +6,6 @@ https://www.moderntreasury.com/learn/ledger-database
 
 https://www.architecture-weekly.com/p/building-your-own-ledger-database
 
-https://docs.oracle.com/cd/G35125_01/pt862pbr2/eng/pt/tnvs/CreatingVirtualLedgers-074f4c.html?pli=ul_d2500e115_tnvs
 
 https://medium.com/@mahammadkhalilov/how-to-build-a-custom-ledger-system-a-comprehensive-guide-838c73ca512d
 */

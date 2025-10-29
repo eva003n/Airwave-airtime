@@ -93,7 +93,7 @@ const CSVDropzone = ({
             <LoaderComponent/>
           </div>
         )}
-        <input {...getInputProps()} name="recipients" type="file" />
+        <input {...getInputProps()}  type="file" name="recipients"/>
         <p className="text-sm text-gray-600">
           Drag & drop your CSV here, or click to upload.
         </p>

@@ -14,20 +14,20 @@ class Recipient extends Model {
   declare user_id: string;
   declare phone_number: string;
   declare operator?: MobileOperator;
-  declare operator_code?: number;
+  // declare operator_code?: number;
   declare airtime_amount: number;
   declare designation?: string;
   declare active?: boolean;
   declare createdAt?: Date;
   declare updatedAt?: Date;
 
-  static async assignOperatorCode(instance: Recipient) {
-    if (!instance.operator_code) {
-      const operatorCode =
-        instance.operator === MobileOperator.Safaricom ? 266 : 265;
-      instance.operator_code = operatorCode;
-    }
-  }
+  // static async assignOperatorCode(instance: Recipient) {
+  //   if (!instance.operator_code) {
+  //     const operatorCode =
+  //       instance.operator === MobileOperator.Safaricom ? 266 : 265;
+  //     instance.operator_code = operatorCode;
+  //   }
+  // }
 }
 
 Recipient.init(
@@ -62,11 +62,11 @@ Recipient.init(
     operator: {
       type: DataTypes.ENUM(...Object.values(MobileOperator)),
     },
-    operator_code: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 266,
-    },
+    // operator_code: {
+    //   type: DataTypes.INTEGER,
+    //   allowNull: false,
+    //   defaultValue: 266,
+    // },
     airtime_amount: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -94,11 +94,11 @@ Recipient.init(
 );
 
 // Register hooks (same behavior as @BeforeCreate / @BeforeBulkCreate)
-Recipient.beforeCreate(Recipient.assignOperatorCode);
-Recipient.beforeBulkCreate(async (instances: Recipient[]) => {
-  for (const inst of instances) {
-    await Recipient.assignOperatorCode(inst);
-  }
-});
+// Recipient.beforeCreate(Recipient.assignOperatorCode);
+// Recipient.beforeBulkCreate(async (instances: Recipient[]) => {
+//   for (const inst of instances) {
+//     await Recipient.assignOperatorCode(inst);
+//   }
+// });
 
 export default Recipient;
