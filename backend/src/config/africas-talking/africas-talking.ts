@@ -23,16 +23,10 @@ interface TokenResponse {
 }
 
 class ApiClient {
-  private audience: string;
-  private authUrl: string;
-  private token: string | null = null;
-  private tokenExpiry: number = 0;
   private api: AxiosInstance;
 
   constructor() {
-    this.audience = RELOADLY_AUDIENCE || "https://topups-sandbox.reloadly.com";
-    this.authUrl =
-      RELOADLY_AUTH_URL || "https://auth.reloadly.com/oauth/token ";
+
 
     this.api = axios.create({
       baseURL:
@@ -80,28 +74,11 @@ class ApiClient {
     );
   }
 
-  //   private async getAccessToken(): Promise<string> {
-  //     //get current data in milliseconds and convert to seconds
-  //     const now = Math.floor(Date.now() / 1000);
-  //     if (this.token && now < this.tokenExpiry) {
-  //       return this.token;
-  //     }
-
-  //     const res = await axios.post<TokenResponse>(this.authUrl, {
-  //       audience: this.audience,
-  //       grant_type: "client_credentials",
-  //     });
-
-  //     this.token = res.data.access_token;
-  //     this.tokenExpiry = now + res.data.expires_in - 60; // buffer
-  //     return this.token;
-  //   }
-
   public async send<T, D>(url: string, data: T): Promise<AxiosResponse<D>> {
     return this.api.post<D>(url, data);
   }
 
-  public async get(url: string) {
+  public async get<T>(url: string): Promise<T> {
     return this.api.get(url, {
       params: {
         username: AFRICAS_TALKING_USERNAME || "sandbox",
