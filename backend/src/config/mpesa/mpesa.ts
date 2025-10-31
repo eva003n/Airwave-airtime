@@ -42,21 +42,21 @@ class MpesaClient {
     });
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
-      (error: AxiosError<{ message: string }>) => {
-        const reloadlyError = new ThirdPartyServiceError(
-          error.config?.url || "/topups",
-          "Airtime api error",
+      (error: AxiosError<{ errorMessage: string }>) => {
+        const mpesaError = new ThirdPartyServiceError(
+          error.config?.url || "/api/v1/payments",
+          error.response?.data.errorMessage || "Mpesa api error",
           error.status || 500
         );
         if (error.status && error.status === 400) {
           return Promise.reject(
             ApiError.badRequest(
               error?.status || 500,
-              error.config?.url || "/topups",
-              error.response?.data.message ||
+              error.config?.url || "/api/v1/payments",
+              error.response?.data.errorMessage ||
                 error.message ||
                 "Something went wrong",
-              reloadlyError
+              mpesaError
             )
           );
         } else {
@@ -64,10 +64,10 @@ class MpesaClient {
             ApiError.internalServerError(
               error?.status || 500,
               error.config?.url || "/topups",
-              error.response?.data.message ||
+              error.response?.data.errorMessage ||
                 error.message ||
                 "Something went wrong",
-              reloadlyError
+              mpesaError
             )
           );
         }
@@ -87,18 +87,20 @@ class MpesaClient {
     if (this.token && now < this.tokenExpiry) {
       return this.token;
     }
-
-    const res = await axios.post<TokenResponse>(this.authUrl, null, {
-     headers: {
-      Authorization: `Basic ${Buffer.from(`${this.customerKey}:${this.customerSecret}`).toString("base64")}`
-     },
+    const auth = Buffer.from(
+      `${this.customerKey}:${this.customerSecret}`
+    ).toString("base64");
+    const res = await axios.get<TokenResponse>(this.authUrl, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
       params: {
         grant_type: "client_credentials",
       },
     });
 
     this.token = res.data.access_token;
-    this.tokenExpiry = now + res.data.expires_in - 60; // i minite before expiry
+    this.tokenExpiry = now + res.data.expires_in - 60; // refresh 1 minute before expiry
     return this.token;
   }
 

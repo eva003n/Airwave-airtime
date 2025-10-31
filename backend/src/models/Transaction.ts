@@ -85,3 +85,5 @@ Transaction.init(
     ]
   }
 );
+
+export default Transaction

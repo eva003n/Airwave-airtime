@@ -14,6 +14,9 @@ await connectDatabase();
 //run database migrations
 await runMigrations();
 
+
+
 app.listen(port, () => {
-  logger.info(`🚀 Server running at ${serverUrl}...🚀`);
+  logger.info(`🚀 Local -> ${serverUrl}🚀`);
+  // logger.info(`🚀 Public -> ${publicUrl}🚀`);
 });

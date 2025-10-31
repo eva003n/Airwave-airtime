@@ -5,7 +5,7 @@ import { sequelize } from "../config/database/postgres/postgres.js";
 // server
 class Wallet extends Model {
     declare id?: string;
-    declare owner: string;
+    declare user_id: string;
     declare balance?: number;
     declare currency_code?: string;
     declare currency_name?: string;
@@ -25,7 +25,7 @@ Wallet.init(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    owner: {
+    user_id: {
       type: DataTypes.UUID,
       allowNull: false,
       references: {

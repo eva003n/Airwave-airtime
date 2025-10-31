@@ -14,7 +14,7 @@ import {
 } from "../env.js";
 import logger from "../../logger/logger.winston.js";
 import ApiError from "../../utils/ApiError.js";
-import ReloadlyError from "../../utils/ReloadlyError.js";
+import ReloadlyError from "../../utils/ServiceError.js";
 
 interface TokenResponse {
   access_token: string;
@@ -26,8 +26,6 @@ class ApiClient {
   private api: AxiosInstance;
 
   constructor() {
-
-
     this.api = axios.create({
       baseURL:
         AFRICAS_TALKING_AIRTIME_API_URI ||

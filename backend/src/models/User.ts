@@ -5,7 +5,9 @@ import  {
 
 import { compare, hash } from "bcryptjs";
 
+
 import { sequelize } from "../config/database/postgres/postgres.js";
+import { randomBytes, randomInt } from "crypto";
 
 export enum UserRole {
   Admin = "admin",
@@ -18,6 +20,7 @@ class User extends Model {
   declare username: string;
   declare email: string;
   declare password?: string;
+  declare account_number: number;
   declare refresh_token?: string;
   declare avatar_url?: string;
   declare avatar_id?: string;
@@ -35,6 +38,10 @@ class User extends Model {
       )) as unknown as string;
     }
   }
+  public static async generateAccountNo(instance: User) {
+  const accNo = randomInt(80000000); // 8 numbers
+  instance.account_number = accNo ; // e.g. 12345678
+}
 
 
 
@@ -72,6 +79,10 @@ User.init(
 
     password: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    account_number: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
 
@@ -113,7 +124,7 @@ User.init(
     indexes: [
       {
         unique: true,
-        fields: ["email", "username"],
+        fields: ["email", "username", "account_number"],
       },
     ],
   }
@@ -123,3 +134,4 @@ export default User;
 
 //hooks
 User.beforeCreate(User.hashPassword);
+User.beforeCreate(User.generateAccountNo)

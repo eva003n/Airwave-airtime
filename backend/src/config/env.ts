@@ -42,6 +42,7 @@ export const {
   MPESA_CUSTOMER_SECRET,
   MPESA_BASE_URL,
   MPESA_AUTH_URL,
-
+  BASE_URL,
+  MPESA_SHORT_CODE,
 } = process.env;
 

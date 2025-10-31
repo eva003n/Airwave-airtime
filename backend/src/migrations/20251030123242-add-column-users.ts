@@ -1,13 +1,14 @@
 import { QueryInterface, DataTypes } from "sequelize";
 
  async function up({ context }: { context: QueryInterface }) {
-  await context.renameColumn("wallets", "user_id", "owner")
-  
+  await context.addColumn("users", "account_number", {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+  });
 }
 
  async function down({ context }: { context: QueryInterface }) {
-  await context.renameColumn("wallets", "owner", "user_id");
-  
+  await context.removeColumn("users", "account_number")
 }
 
 export { up, down };

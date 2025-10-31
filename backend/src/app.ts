@@ -48,6 +48,7 @@ import userRouter from "./routes/user.routes.js";
 import walletRouter from "./routes/wallet.routes.js";
 import transactionRouter from "./routes/transaction.routes.js"
 import reportRouter from "./routes/report.routes.js";
+import paymentRouter from "./routes/payment.routes.js"
 import notFoundRouter from "./routes/not-found.routes.js";
 import healthCheckRouter from "./routes/health.routes.js";
 import { serverAdapter } from "./config/Bullmq/bullboard.js";
@@ -66,6 +67,8 @@ app.use("/api/v1/wallet", walletRouter);
 app.use("/api/v1/transactions", transactionRouter);
 /* -- Reports and analytics -- */
 app.use("/api/v1/reports", reportRouter);
+/* -- Payments -- */
+app.use("/api/v1/payments", paymentRouter)
 /*-- API monotoring -- */
 app.use("/api/v1/health-check", healthCheckRouter);
 

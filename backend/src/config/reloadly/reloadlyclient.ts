@@ -11,7 +11,7 @@ import {
 } from "../env.js";
 import logger from "../../logger/logger.winston.js";
 import ApiError from "../../utils/ApiError.js";
-import ReloadlyError from "../../utils/ReloadlyError.js";
+import ThirdPartyServiceError from "../../utils/ServiceError.js";
 
 interface TokenResponse {
   access_token: string;
@@ -46,7 +46,7 @@ class ReloadlyClient {
       (response: AxiosResponse) => response,
       (error: AxiosError<{ message: string }>) => {
 
-        const reloadlyError = new ReloadlyError(
+        const reloadlyError = new ThirdPartyServiceError(
           error.config?.url || "/topups",
           "Airtime api error",
           error.status || 500
