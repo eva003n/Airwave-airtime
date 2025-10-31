@@ -8,67 +8,60 @@ This document outlines the functional and non-functional requirements for a web 
 
 ### 2.1 Administrator
 
-Full access to all system features.
+1. Full access to all system features.
+2. Manage user accounts and roles.
+3. View all transactions and system-wide reports.
+4. Monitoring and maintanance
 
-Manage user accounts and roles.
-
-View all transactions and system-wide reports.
 
 ## 2.2 Standard User (Distributor)
 
-Manage personal account settings.
-
-Create, view, and manage recipient lists.
-
-Initiate bulk airtime distributions.
-
-View personal transaction history and distribution reports.
-
-View account balance and top-up history.
+1. Manage personal account settings.
+2. Create, view, and manage recipient lists.
+3. Initiate bulk airtime distributions.
+4. View personal transaction history and distribution reports.
+5. Perform wallet management tasks eg recharge via various payment methods
+6. View account balance and top-up history.
 
 ## 3. Functional Requirements
 
 ### 3.1 Account Management
 
-The system shall allow new users to register for an account with a userna,e and password.
+The system shall allow new users to register for an account with email, username and password.
 
 The system shall provide secure user authentication via email and password.
 
 ### 3.2 Recipient Management
 
-The system shall allow users to manually add new recipients, including mobile number and name.
-
-The system shall allow users to upload recipient lists in CSV or Excel format. The system must validate the mobile numbers to ensure they are in a correct format or use an existing in-built recepients list.
-
-The system shall allow users to manage (view, edit, delete) existing recipient lists.
+1. The system shall allow users to manually add new recipients and their details.
+2. The system shall allow users to upload recipient lists in CSV or Excel format. The system must validate the mobile numbers to ensure they are in the correct format 
+3. Filter recipients based on branch and department, search by name
+4. The system shall allow users to manage (view, edit, delete) existing recipient lists.
 
 ### 3.3 Airtime Distribution
 
-The system shall allow a user to select or upload  a recipient list for distribution.
-
-The system shall allow a user to specify a fixed amount of airtime to be sent to each recipient in the selected list.
-
-The system shall allow users to select the mobile network operator (MNO) if the system supports multiple providers.
-
-The system shall generate a confirmation report summary of the distribution details (number of recipients, total cost) before execution.
-
-The system shall process bulk distribution requests asynchronously to handle high loads and prevent overloading the server.
-
-The system shall support scheduled distributions to be executed at a future date and time.
+1. The system shall allow a user to select or upload  a recipient list for bulk distribution.
+2. The system shall allow users to select the mobile network operator (MNO) if the system supports multiple providers.
+3. The system shall process bulk distribution requests asynchronously to handle high loads and prevent overloading the server thus maintaining responsiveness.
+4. The system shall support scheduled distributions to be executed at a future date and time.
 
 ### 3.4 Wallet Management
+1. The system shall display the user's current wallet balance
+2. The system shall provide a secure method for users to top up their wallets via integrated payment gateways.
+3. Enable switching between wallet modes (Basic, plus, premium) 
+   Basic plan (0 - 19000ksh)
+     - Both safaricom and airtel addittinal cost of 4%
+   Plus plan (20,000 - 99999ksh)
+     - Both safaricom and airtel additional cost of 4%
+   Premium plan (100,000 - 399,999ksh)
+     - Both safaricom and airtel additional cost of 5%
+   Max plan (400,000+ ksh)
+     - Both safaricom and airtel additional cost of 6%   
+4. Recharging a wallet is based on the volume  of airtime top ups (total amount used for airtime topups)
 
-The system shall display the user's current wallet balance
-The system shall maintain a ledger for all the transactions made which will serve as a reference point for the waller balance
-The system shall provide a secure method for users to top up their wallets via integrated payment gateways.
-
-The system shall deduct the total cost of a bulk distribution from the user's wallet upon successful initiation.
-
-### 3.5 Transactions management
-
-The system will have a digital ledger that serves an audit trail for both credit/debit transactions
-Wallet top ups
-Wallet transactions
+### 3.5 Payment management
+1. The system will enable wallet recharges via mpesa paybill and additional payment methods if the need arises
+2. The system will provide show a transaction history of all the transactions made within the system
 
 ### 3.6 Reporting & Analytics
 
@@ -78,12 +71,8 @@ The system shall generate detailed transaction reports, including the status of 
 
 The system shall provide clear reasons for failed transactions (e.g., Invalid Number, Insufficient Balance).
 
-The system shall offer a dashboard with key metrics, such as total airtime distributed, number of recipients served, and distribution success rate.
+The system shall offer a dashboard with key metrics, such as total airtime distributed, number of recipients, and mobile network operators supported
 
-### 3.7 User management
-
-The systen will allow users to manage ther parsoanl details
-The system shall allow authenticated users to reset their password via a secure process.
 
 ## 4. Non-Functional Requirements
 
@@ -96,15 +85,13 @@ The system must handle concurrent bulk distribution requests without performance
 The user interface shall remain responsive during long-running bulk distribution tasks.
 
 ### 4.2 Security
-
-SEC-1: All communication between the client and server shall be secured using HTTPS/TLS.
-
-Sensitive data, including passwords and API keys, shall be encrypted at rest.
-
+All communication between the client and server shall be secured using HTTPS/TLS.
+Sensitive data, including passwords shall be encrypted at rest.
+The system will include a multifactor authenticatiion
 The system shall be resilient to common web vulnerabilities such as SQL injection, cross-site scripting (XSS), and cross-site request forgery (CSRF).
+Sessions will have short lifespan
 
 ### 4.3 Availability
-
 The system shall maintain a minimum uptime of 99.9%.
 
 ### 4.4 Usability
@@ -112,7 +99,8 @@ The system shall maintain a minimum uptime of 99.9%.
 The user interface shall be intuitive and easy to navigate, even for users with limited technical knowledge.
 
 The design shall be fully responsive to function seamlessly on desktop, tablet, and mobile devices.
-
+### 4.5 Realibility
+The system should handle retries on failed top ups
 ### 5. Technical Requirements & Assumptions
 
 API Integration: The system will require API integrations with mobile network operators for airtime distribution and with various payment gateways for account top-ups.
@@ -123,42 +111,5 @@ Asynchronous Processing: A message queue (e.g., RabbitMQ, Kafka) is assumed to b
 
 Hosting Environment: The application will be deployed on a cloud-based infrastructure (e.g., AWS, GCP, Azure) to ensure scalability and reliability.
 
-Technology Stack: The backend can be built with modern framework Node.js The frontend can use a framework like React, Angular, or Vue.js.
+Technology Stack: The backend can be built with modern framework Node.js The frontend can use a framework like React.
 
-## System components
-
-### Wallet component
-
-This will serve as a virtual wallet but its purposes are the same as a physical wallet where we can perform debit and credit
-This virtual wallert serves as a value manager, a quick lock up of money balance but in order to manage this balances we need some kind of source of truth like a virtual ledger that keeeps track of all the transactions in the system eg waller recharge/topups airtime purchase, wallet widthdraws and wallet holds that where the transactions management component comes in
-
-#### Functions the wallet will enable
-1. Enable getting the current wallet balance
-2. Notify users when a wallet balace ranges btw a certain upper threshold and lower threshold
-3. Enable adding a payment method eg bank transfer, card payment
-4. Auto-recharge a certain amount when wallet balance goes below certain amount(payment api)
-
-### Transaction management component
-
-Thsi serves as the source of truth
-Records every movement of value/money
-Covers:
-Airtime distribution (debits)
-Wallet recharges/top-ups (credits)
-Withdrawals (debits)
-Holds/locks (temporary debits or pending state)
-
-Holds and locks
-A hold (sometimes called a reservation or lock) is a temporary movement of funds.
-
-You use it when money is about to leave a wallet, but you don’t yet know if the operation will succeed.
-
-Instead of immediately deducting, you freeze the funds so they can’t be spent twice
-
-
-# Bulk top ups
-1. Parse csv files into memory and add each object as a top to the queue
-2. Vaidate the data via backfround job
-3. Detect the operator for each top up
-4. Make the top ups via bg kobs
-5 With each step real time prohress tracking is communicated to client
