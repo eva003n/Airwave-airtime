@@ -26,6 +26,7 @@ class Topup extends Model {
   declare status?: TopStatus;
   declare createdAt?: Date;
   declare updatedAt?: Date;
+  declare deletedAt?: Date;
 
   public override toJSON(): object {
     const attributes = { ...this.get() } as any;

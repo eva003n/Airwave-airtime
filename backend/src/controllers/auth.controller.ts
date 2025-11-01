@@ -25,44 +25,37 @@ import {
   NODE_ENV,
 } from "../config/env.js";
 import { Op } from "sequelize";
+import { sequelize } from "../config/database/postgres/postgres.js";
 
 const signUp = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { userName, email, password } = req.body as SignUpAuth;
 
-    const [ user, created ] = await User.findOrCreate({
-      where: {[ Op.or]: [{ email: email }, { username: userName }] },
-      defaults: {
-        username: userName,
-        email: email,
-      password: password,
-      },
+    const user = await User.findOne({
+      where: { [Op.or]: [{ email: email }, { username: userName }] },
     });
+     if (user)
+       return next(
+         ApiError.conflictRequest(
+           409,
+           req.originalUrl,
+           "Account already exist, kindly sign in to your account"
+         )
+       );
 
-      // const isUser = await User.findOne({ where: { or: [{ email: email }, { username: userName }] } });
+    const newUser = await sequelize.transaction(async (transaction) => await User.create(
+    {
+      username: userName,
+      email,
+      password,
+    },
+    { transaction } // ✅ pass the transaction object here
+  ));
 
-    if (!created)
-      return next(
-        ApiError.conflictRequest(
-          409,
-          req.originalUrl,
-          "Account already exist, kindly sign in to your account"
-        )
-      );
-
-    // const newUser = await User.create({
-    //   username: userName,
-    //   email: email,
-    //   password: password,
-    // });
     return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          user,
-          "Account created successfully, please login"
-        )
+        new ApiResponse(200, newUser, "Account created successfully, please login")
       );
   }
 );
@@ -83,7 +76,6 @@ const signIn = asyncHandler(
 
     //verify password
     const isValidPassword = await compare(password, isUser.password as string);
-    console.log(isUser.password)
 
     if (!isValidPassword)
       return next(
@@ -113,8 +105,8 @@ const signIn = asyncHandler(
 );
 const signOut = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const {id } = req.params as Id
-    const user = await User.findOne({ where: { id} });
+    const { id } = req.params as Id;
+    const user = await User.findOne({ where: { id } });
     if (!user)
       return next(
         ApiError.notFound(
@@ -123,8 +115,11 @@ const signOut = asyncHandler(
           "Account doesn't not exist"
         )
       );
-//make request idempotent
-    if(!user.refresh_token) return next(ApiError.unprocessable(422, req.originalUrl, "Already signed out"))
+    //make request idempotent
+    if (!user.refresh_token)
+      return next(
+        ApiError.unprocessable(422, req.originalUrl, "Already signed out")
+      );
 
     user.refresh_token = "";
     await user.save();
@@ -146,7 +141,9 @@ const tokenRefresh = asyncHandler(
         ApiError.unAuthorizedRequest(
           401,
           `${req.originalUrl}`,
-         NODE_ENV === "development"?  "No refresh token provided": "Unauthorized, please logout"
+          NODE_ENV === "development"
+            ? "No refresh token provided"
+            : "Unauthorized, please logout"
         )
       );
     }
@@ -194,7 +191,7 @@ const tokenRefresh = asyncHandler(
       .json(
         new ApiResponse(
           201,
-          { access_token:accessToken, expires_in: 900, token_type: "Bearer" },
+          { access_token: accessToken, expires_in: 900, token_type: "Bearer" },
           "Access token refreshed successfully"
         )
       );
@@ -204,7 +201,6 @@ const tokenRefresh = asyncHandler(
 const generateToken = (userId: string, userEmail: string) => {
   const jwtAccessTokenSecret: Secret = ACCESS_TOKEN_SECRET as string;
   const jwtRefreshTokenSecret: Secret = REFRESH_TOKEN_SECRET as string;
-
 
   const accessToken = jwt.sign(
     //header -> signing algorithm and token type

@@ -8,7 +8,6 @@ import {
 import ApiError from "./ApiError.js";
 import type { NextFunction } from "express";
 import { randomUUID } from "crypto";
-import { pub } from "../config/database/redis/redis.js";
 
 const OPERATOR_CODE_MAP: Record<string, number> = {
   Safaricom: 266,

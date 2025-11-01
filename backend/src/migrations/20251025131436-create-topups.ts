@@ -15,14 +15,7 @@ async function up({ context }: { context: QueryInterface }) {
       allowNull: false,
       unique: true,
     },
-    phone_number: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    operator: {
-      type: DataTypes.ENUM(...Object.values(MobileOperator)),
-      allowNull: false,
-    },
+
     airtime_amount: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -48,6 +41,11 @@ async function up({ context }: { context: QueryInterface }) {
     updatedAt: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
       defaultValue: DataTypes.NOW,
     },
   });

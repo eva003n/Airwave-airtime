@@ -62,11 +62,7 @@ Recipient.init(
     operator: {
       type: DataTypes.ENUM(...Object.values(MobileOperator)),
     },
-    // operator_code: {
-    //   type: DataTypes.INTEGER,
-    //   allowNull: false,
-    //   defaultValue: 266,
-    // },
+
     airtime_amount: {
       type: DataTypes.INTEGER,
       allowNull: false,

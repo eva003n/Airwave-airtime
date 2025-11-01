@@ -1,19 +1,26 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/database/postgres/postgres.js";
+import { randomInt } from "crypto";
 
 
 // server
 class Wallet extends Model {
-    declare id?: string;
-    declare user_id: string;
-    declare balance?: number;
-    declare currency_code?: string;
-    declare currency_name?: string;
-    declare active?: boolean;
-    declare lower_threshold?: number;
-    declare upper_threshold?: number;
-    declare createdAt?: Date;
-    declare updatedAt?: Date;
+  declare id?: string;
+  declare user_id: string;
+  declare balance?: number;
+  declare currency_code?: string;
+  declare currency_name?: string;
+  declare account_number?: number;
+  declare active?: boolean;
+  declare lower_threshold?: number;
+  declare upper_threshold?: number;
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
+
+  public static async generateAccountNo(instance: Wallet) {
+    const accNo = randomInt(80000000); // 8 numbers
+    instance.account_number = accNo; // e.g. 12345678
+  }
 }
 
 
@@ -37,6 +44,11 @@ Wallet.init(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
       defaultValue: 0.0,
+    },
+
+    account_number: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     currency_code: {
       type: DataTypes.STRING,
@@ -81,10 +93,12 @@ Wallet.init(
     indexes: [
       {
         unique: true,
-        fields: ["owner"],
+        fields: ["user_id", "account_number"],
       },
     ],
   }
 );
+
+Wallet.beforeValidate(Wallet.generateAccountNo);
 
 export default Wallet;

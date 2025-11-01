@@ -3,11 +3,11 @@ import  {
   DataTypes
 } from "sequelize";
 
-import { compare, hash } from "bcryptjs";
+import {hash } from "bcryptjs";
 
 
 import { sequelize } from "../config/database/postgres/postgres.js";
-import { randomBytes, randomInt } from "crypto";
+import  Wallet from "./Wallet.js";
 
 export enum UserRole {
   Admin = "admin",
@@ -20,7 +20,6 @@ class User extends Model {
   declare username: string;
   declare email: string;
   declare password?: string;
-  declare account_number: number;
   declare refresh_token?: string;
   declare avatar_url?: string;
   declare avatar_id?: string;
@@ -38,11 +37,14 @@ class User extends Model {
       )) as unknown as string;
     }
   }
-  public static async generateAccountNo(instance: User) {
-  const accNo = randomInt(80000000); // 8 numbers
-  instance.account_number = accNo ; // e.g. 12345678
-}
 
+public static async createUserWallet (wallet: Wallet, user: User) {
+  if(user.role && user.role !== "user" ) return;
+
+  await Wallet.create({user_id: user.id as string})
+
+
+}
 
 
 
@@ -81,10 +83,7 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    account_number: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
+
 
     role: {
       type: DataTypes.ENUM(...Object.values(UserRole)),
@@ -124,7 +123,7 @@ User.init(
     indexes: [
       {
         unique: true,
-        fields: ["email", "username", "account_number"],
+        fields: ["email", "username"],
       },
     ],
   }
@@ -134,4 +133,18 @@ export default User;
 
 //hooks
 User.beforeCreate(User.hashPassword);
-User.beforeCreate(User.generateAccountNo)
+
+User.afterCreate(async(user, options) =>{
+  if(user.role && user.role !== "user" ) return;
+
+  await Wallet.create({user_id: user.id as string}, {transaction: options.transaction})
+})
+
+//when user role changes to admin they do not need a wallet anymore
+
+User.afterUpdate(async (user) => {
+  if(user.changed("role") && user.role === "admin") {
+    await Wallet.destroy({where: {user_id: user.id}})
+
+  }
+})

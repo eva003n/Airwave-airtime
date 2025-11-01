@@ -1,6 +1,6 @@
 import { QueryInterface, DataTypes } from "sequelize";
 
- async function up({ context }: { context: QueryInterface }) {
+async function up({ context }: { context: QueryInterface }) {
   await context.createTable("wallets", {
     id: {
       type: DataTypes.UUID,
@@ -31,6 +31,10 @@ import { QueryInterface, DataTypes } from "sequelize";
       allowNull: false,
       defaultValue: "Kenyan Shilling",
     },
+    account_number: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
@@ -59,7 +63,7 @@ import { QueryInterface, DataTypes } from "sequelize";
   });
 }
 
- async function down({ context }: { context: QueryInterface }) {
+async function down({ context }: { context: QueryInterface }) {
   await context.dropTable("wallets");
 }
 

@@ -40,7 +40,7 @@ app.use(morganMiddleware);
 /*---Custom middleware--- */
 
 //API endpoints
-
+import homeRouter from "./routes/home.routes.js";
 import authRouter from "./routes/auth.routes.js";
 import recipientRouter from "./routes/recipient.routes.js";
 import topUpRouter from "./routes/topup.routes.js";
@@ -53,6 +53,8 @@ import notFoundRouter from "./routes/not-found.routes.js";
 import healthCheckRouter from "./routes/health.routes.js";
 import { serverAdapter } from "./config/Bullmq/bullboard.js";
 
+
+app.use("/", homeRouter)
 /*--Authentication--*/
 app.use("/api/v1/auth", authRouter);
 /*--Airtime recipients management-- */

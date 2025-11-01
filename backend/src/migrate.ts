@@ -62,3 +62,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(1);
     });
 }
+
+
+const command = process.argv[2]; // "up" or "down"
+console.log(command);
+
+(async () => {
+  if (command === "up") {
+    await migrator.up();
+  } else if (command === "down") {
+    await migrator.down();
+  } else {
+    logger.info("💡Use: pnpm migrate or pnpm migrate:undo");
+  }
+})();

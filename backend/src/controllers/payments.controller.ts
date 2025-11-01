@@ -6,18 +6,20 @@ import logger from "../logger/logger.winston.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
+import Wallet from "../models/Wallet.js";
 
 const receivePaymentConfirmation = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
     const { TransactionType, TransID, TransAmount, BillRefNumber } = req.body;
+    console.log(req.body)
 
-    const transaction = await Transaction.create({
-        reference: TransID,
-        transaction_type: TransactionType,
-        amount: TransAmount,
+    // const transaction = await Transaction.create({
+    //     reference: TransID,
+    //     transaction_type: TransactionType,
+    //     amount: TransAmount,
         
-    })
+    // })
   }
 );
 
@@ -26,8 +28,9 @@ const validatePayment = asyncHandler(
     // validate the account number exist
     const { BillRefNumber } = req.body
     console.log(BillRefNumber)
+    console.log(req.body)
 
-    const accountExist = await User.findOne({where: {account_number: BillRefNumber}})
+    const accountExist = await Wallet.findOne({where: {account_number: BillRefNumber}})
 
     if(!accountExist) return res.status(404).json({
       ResultCode: 1,
@@ -36,7 +39,7 @@ const validatePayment = asyncHandler(
 
     return res.status(202).json({
       ResultCode: 0,
-      ResultDesc: "Accepted validation request",
+      ResultDesc: "Accepted payment successfully",
     });
 
   }
@@ -57,11 +60,8 @@ const registerC2BUrl = asyncHandler(
       payload
     );
 
-    return res.status(201).json(new ApiResponse(201, response.data));
-    //   } catch (error) {
-
-    //     logger.error(`Failed to registerUrls to mpesa C2B api with error ${error.message}`)
-    //   }
+    return res.status(201).json(new ApiResponse(201, response.data, "Successfully registered C2B urls"));
+ 
   }
 );
 
