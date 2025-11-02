@@ -287,6 +287,15 @@ const AfricasTalkingTopUpSchema = z.object({
   ),
 });
 
+const mpesaC2BApiResponseSchema = z.object({
+  BillRefNumber: z.string(),
+  BusinessShortCode: z.string(),
+  TransID: z.string().optional(),
+  TransAmount: z.string().optional(),
+  TransactionType: z.string().optional(),
+  ThirdPartyTransID: z.string().optional()
+});
+
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -307,6 +316,9 @@ export type OperatorDetailApi = z.infer<typeof operatorDetailsSchemaApi>;
 export type WalletBalance = z.infer<typeof walletBalanceSchema>;
 export type ATTopUpResponse = z.infer<typeof AfricasTalkingTopUpSchema>;
 export type ATWallet = z.infer<typeof africasTalkingWalletBalanceSchema>
+
+// Mpesa api response type
+export type MpesaC2BResponse = z.infer<typeof mpesaC2BApiResponseSchema>;
 export {
   signUpSchema,
   signInSchema,
@@ -321,4 +333,6 @@ export {
   topUpCsvSchema,
   cookieSchema,
   walletBalanceSchema,
+  mpesaC2BApiResponseSchema,
+
 };
