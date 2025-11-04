@@ -10,6 +10,7 @@ import { logOutUser } from ".";
 import type { IUser } from "@/interfaces/user.interface";
 import type { TokenResponse, UserData } from "@/validation/validators";
 
+const env = getItem<"Live" | "Sandbox">("env");
 class ApiClient {
   private clientId: string;
   private clientSecret: string;
@@ -25,21 +26,26 @@ class ApiClient {
   constructor() {
     this.clientId = "";
     this.clientSecret = "";
-    this.audience = (import.meta as any).env?.VITE_API_BASE_URI || "http://localhost:8000/api/v1";
-    this.authUrl = (import.meta as any).env?.VITE_API_AUTH_URL || "http://localhost:8000/api/v1/auth/refresh-token";
+    this.audience = import.meta.env.VITE_API_BASE_URI;
+    this.authUrl = "/auth/refresh-token";
     this.isRefreshing = false;
 
     this.api = axios.create({
       baseURL:
-        (import.meta as any).env?.VITE_API_BASE_URI || "http://localhost:8000/api/v1",
+        env === "Live"
+          ? import.meta.env.VITE_API_BASE_URI
+          : import.meta.env.VITE_SANDBOX_API_BASE_URL,
       headers: {
         "Content-Type": "application/json",
+        "x-env": `${getItem<"Live" | "Sandbox">("env")}`,
       },
       timeout: 120000, // 2mins
       withCredentials: true, //ensure that client sends cookies in reqyests and makes sure the client doesnt ignore cookies set by backend
     });
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
+        // set xustom header for the environment
+        config.headers["x-env"] = getItem<"Live" | "Sandbox">("env");
         // Always attach the current access token
         if (this.token) {
           config.headers.Authorization = `Bearer ${this.token}`;
@@ -55,11 +61,11 @@ class ApiClient {
           _retry: boolean;
         };
 
-        //handle 401 unauthorized 
+        //handle 401 unauthorized
 
         if (error.response?.status == 401 && !failedRequest._retry) {
           failedRequest._retry = true;
-          console.log(error.response.status)
+          console.log(error.response.status);
           //If refresh already in progress, queue this request
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
@@ -89,13 +95,12 @@ class ApiClient {
 
             return this.api(failedRequest); // retry once
           } catch (error) {
-
             const confirmed = await showSessionExpiredAlert();
             const user = getItem<UserData>("user");
             if (confirmed) {
               await logOutUser(user.id);
               this.clearAuthAndLogout();
-            } 
+            }
             // else {
             //   await logOutUser(user.id);
             //   this.clearAuthAndLogout();
@@ -110,28 +115,32 @@ class ApiClient {
   }
 
   public async getAccessToken(): Promise<string> {
-   try {
+    try {
+      //get current data in milliseconds and convert to seconds
+      const now = Math.floor(Date.now() / 1000);
+      if (this.token && now < this.tokenExpiry) return this.token;
 
-     //get current data in milliseconds and convert to seconds
-     const now = Math.floor(Date.now() / 1000);
-     if (this.token && now < this.tokenExpiry) return this.token;
-     
+      //use axios to avoid interceptor recursion
+      const response = await axios.get<TokenResponse>(
+        `${this.audience}${this.authUrl}`,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+            "x-env": `${getItem<"Live" | "Sandbox">("env")}`,
+          },
+        }
+      );
 
-     //use axios to avoid interceptor recursion
-     const response = await axios.get<TokenResponse>(this.authUrl, {
-      withCredentials: true
-     });
+      //  const {access_token, expires_in} = response.data.data
 
-    //  const {access_token, expires_in} = response.data.data
-
-     this.token = response.data.data.access_token;
-     this.tokenExpiry = response.data.data.expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request
-     return response.data.data.access_token;
-   } catch (error) {
-    // console.log(error)
-    throw error;
-    
-   }
+      this.token = response.data.data.access_token;
+      this.tokenExpiry = response.data.data.expires_in - 60; // -60 as a safety buffer to refresh the token 1 minute before to avoid unauthorized errors mid-request
+      return response.data.data.access_token;
+    } catch (error) {
+      // console.log(error)
+      throw error;
+    }
   }
 
   private clearAuthAndLogout() {
@@ -141,7 +150,7 @@ class ApiClient {
     this.tokenExpiry = 0;
     window.location.href = "/";
   }
-  
+
   public async request<T>(
     method: string,
     url: string,

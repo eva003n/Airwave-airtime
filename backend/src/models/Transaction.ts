@@ -21,6 +21,10 @@ export enum TransactionStatus {
   Successful = "Success",
   Failed = "Failed",
 }
+export enum TransactionType {
+  CREDIT = "Credit",
+  DEBIT = "Debit"
+}
 
 class Transaction extends Model {
   declare id?: string;
@@ -29,9 +33,9 @@ class Transaction extends Model {
   declare amount: number;
   declare wallet_id: string;
   declare status?: string;
-  declare createdAt: Date;
-  declare updatedAt: Date;
-  declare deletedAt: Date;
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
+  declare deletedAt?: Date;
 }
 
 Transaction.init(
@@ -49,7 +53,7 @@ Transaction.init(
     },
 
     transaction_type: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...Object.values(TransactionType)),
       allowNull: false,
     },
     amount: {

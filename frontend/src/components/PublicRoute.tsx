@@ -17,10 +17,20 @@ if(user) {
 
 
 
-  if (user ) {
+  if (user && user.role === "user" ) {
+    console.log("user logged in")
     return  <Navigate to="/dashboard" replace={true} />
     
-  } else {
+  } 
+  else if(user && user.role === "admin") {
+      console.log("Admin logged in");
+
+
+    return <Navigate to="/admin/dashboard" replace={true} />;
+
+
+  }
+  else {
     return <Outlet />;
   }
 };

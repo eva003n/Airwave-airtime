@@ -38,6 +38,7 @@ app.use(express.static("public"));
 app.use(morganMiddleware);
 
 /*---Custom middleware--- */
+app.use(setEnvironment)
 
 //API endpoints
 import homeRouter from "./routes/home.routes.js";
@@ -52,9 +53,10 @@ import paymentRouter from "./routes/payment.routes.js"
 import notFoundRouter from "./routes/not-found.routes.js";
 import healthCheckRouter from "./routes/health.routes.js";
 import { serverAdapter } from "./config/Bullmq/bullboard.js";
+import setEnvironment from "./middlewares/env.middleware.js";
 
 
-app.use("/", homeRouter)
+app.use("/api/v1", homeRouter)
 /*--Authentication--*/
 app.use("/api/v1/auth", authRouter);
 /*--Airtime recipients management-- */
@@ -64,7 +66,7 @@ app.use("/api/v1/top-ups", topUpRouter);
 /*-- User management -- */
 app.use("/api/v1/users", userRouter);
 /*-- Wallet management -- */
-app.use("/api/v1/wallet", walletRouter);
+app.use("/api/v1/wallets", walletRouter);
 /*-- Transaction management -- */
 app.use("/api/v1/transactions", transactionRouter);
 /* -- Reports and analytics -- */

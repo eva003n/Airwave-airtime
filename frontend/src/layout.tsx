@@ -8,29 +8,57 @@ import { LogOut } from "lucide-react";
 import type { Id } from "./validation/validators";
 import { useAuth } from "./context/authcontext";
 import { Button } from "./components/ui/button";
+import { useState } from "react";
+import ModeSwitch from "./components/ModeSwitch";
 
 const AppLayout = () => {
-  const {logOut} = useAuth()
-
+  const {logOut, user} = useAuth()
+  const [open, setOpen] = useState<boolean>(() => {
+    // Load from localStorage on mount
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sidebarOpen") === "true";
+    }
+    return true; // default open
+  });
   const handleLogOut = async () => {
     await logOut()
 
   }
+
+    const handleOpenChange = (next: boolean) => {
+      setOpen(next);
+      localStorage.setItem("sidebarOpen", String(next)); // Save
+    };
   return (
-    <SidebarProvider className="bg-zinc-950 ">
+    <SidebarProvider
+      className="bg-zinc-950 "
+      open={open}
+      onOpenChange={handleOpenChange}
+    >
       <AppSidebar />
       <div className="w-full relative isolate ">
         <Header className="sticky top-0 z-50  shadow-md bg-sidebar px-4 w-full flex justify-between">
           <div>
             <SidebarTrigger className="size-9" />
           </div>
-          
-          <Button  variant="ghost" onClick={handleLogOut} className="flex gap-2 items-center cursor-pointer">
-            <LogOut size={16}/> <span className="text-[.9rem] font-medium hover:underline ">Log out</span>
-          </Button>
-          {/* <div>
-                <ToggleSwitch/>
-            </div> */}
+
+          <div className="flex gap-6 items-center">
+            {user && user.role === "admin" && (
+              <div>
+                <ModeSwitch />
+              </div>
+            )}
+            <Button
+              variant="ghost"
+              onClick={handleLogOut}
+              className="flex gap-2 items-center cursor-pointer"
+            >
+              <LogOut size={16} />{" "}
+              <span className="text-[.9rem] font-medium hover:underline ">
+                Log out
+              </span>
+            </Button>
+          </div>
         </Header>
         <main className="bg-sidebar overflow-y-auto min-h-[calc(100svh-36px)]   ">
           {<Outlet />}

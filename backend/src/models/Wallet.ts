@@ -3,6 +3,13 @@ import { sequelize } from "../config/database/postgres/postgres.js";
 import { randomInt } from "crypto";
 
 
+
+export enum WalletTypes {
+  BASIC = "Basic",
+  PLUS = "Plus",
+  PREMIUM = "Premium",
+  MAX = "Max"
+}
 // server
 class Wallet extends Model {
   declare id?: string;
@@ -11,6 +18,7 @@ class Wallet extends Model {
   declare currency_code?: string;
   declare currency_name?: string;
   declare account_number?: number;
+  declare wallet_type?: string;
   declare active?: boolean;
   declare lower_threshold?: number;
   declare upper_threshold?: number;
@@ -49,6 +57,7 @@ Wallet.init(
     account_number: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      
     },
     currency_code: {
       type: DataTypes.STRING,
@@ -59,6 +68,11 @@ Wallet.init(
       type: DataTypes.STRING,
       allowNull: false,
       defaultValue: "Kenyan Shilling",
+    },
+    wallet_type: {
+      type: DataTypes.ENUM(...Object.values(WalletTypes)),
+      allowNull: false,
+      defaultValue: WalletTypes.BASIC
     },
     active: {
       type: DataTypes.BOOLEAN,

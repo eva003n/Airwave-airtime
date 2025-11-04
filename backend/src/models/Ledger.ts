@@ -2,22 +2,18 @@
 
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../config/database/postgres/postgres.js";
+import Transaction from "./Transaction.js";
 
-export enum TransactionType {
-  DEBIT = "Debit",
-  CREDIT = "Credit",
-}
+
 class Ledger extends Model {
   declare id?: string;
   declare transaction_id: string;
   declare wallet_id: string;
-  declare transaction_type: string; //debit or credit
-  declare amount: number;
   declare balance_before: number;
   declare balance_after: number;
-  declare createdAt: Date;
-  declare updatedAt: Date;
-  declare deletedAt: Date;
+  declare createdAt?: Date;
+  declare updatedAt?: Date;
+  declare deletedAt?: Date;
 }
 
 Ledger.init(
@@ -37,14 +33,6 @@ Ledger.init(
       },
     },
 
-    transaction_type: {
-      type: DataTypes.ENUM(...Object.values(TransactionType)),
-      allowNull: false,
-    },
-    amount: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
     balance_before: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
@@ -72,3 +60,11 @@ Ledger.init(
 );
 
 export default Ledger
+
+Ledger.beforeCreate(async (ledger, options) => {
+  const transaction = await Transaction.findByPk(ledger.transaction_id)
+
+
+})
+
+//balance_after = balance_before + (credit - debit)

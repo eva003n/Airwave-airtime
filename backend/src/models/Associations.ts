@@ -2,6 +2,8 @@ import User from "./User.js";
 import Recipient from "./Recipient.js";
 import Topup from "./Topup.js";
 import Wallet from "./Wallet.js";
+import Transaction from "./Transaction.js";
+import Ledger from "./Ledger.js";
 
 let associationsDefined = false;
 
@@ -65,6 +67,41 @@ const defineAssociations = () => {
   Topup.belongsTo(Recipient, {
     foreignKey: "recipient_id",
     as: "recipient",
+  });
+
+  // wallet and transaction
+  Wallet.hasMany(Transaction, {
+    sourceKey: "id",
+    foreignKey: "wallet_id",
+    as: "transactions",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+  Transaction.belongsTo(Wallet, {
+    foreignKey: "wallet_id",
+    as: "transaction"
+  });
+
+  //ledger and wallet
+  Wallet.hasMany(Ledger, {
+    sourceKey: "id",
+    foreignKey: "wallet_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+  Ledger.belongsTo(Wallet, {
+    foreignKey: "wallet_id",
+  });
+
+  // Transaction and ledger
+  Transaction.hasOne(Ledger, {
+    sourceKey: "id",
+    foreignKey: "transaction_id",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  Ledger.belongsTo(Transaction, {
+    foreignKey: "transaction_id",
   });
   associationsDefined = true;
 };

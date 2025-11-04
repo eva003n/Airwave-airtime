@@ -16,13 +16,43 @@ import {
 
 import logoImage from "/images/Airwave-logo.png";
 
-import { AlarmCheckIcon, CardSim, LayoutDashboard,LogOut, Plus, Settings, UserPlus, Wallet } from "lucide-react";
+import { AlarmCheckIcon, BadgeDollarSign, Book, CardSim, LayoutDashboard,LogOut, Plus, Settings, Settings2, UserPlus, Users2, Wallet } from "lucide-react";
 import Logo from "./Logo";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { fa } from "zod/v4/locales";
+import { getItem } from "@/utils";
+import type { UserData } from "@/validation/validators";
 
-const items = [
+const ADMINLINKS = [
+  {
+    title: "Dashboard",
+    url: "/admin/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Users",
+    url: "/admin/users",
+    icon: Users2,
+  },
+  {
+    title: "Transactions",
+    url: "/admin/transactions",
+    icon: BadgeDollarSign,
+  },
+  {
+    title: "Ledger",
+    url: "/admin/ledger",
+    icon: Book,
+  },
+  {
+    title: "Settings",
+    url: "/admin/settings",
+    icon: Settings2,
+  },
+];
+
+const USERLINKS = [
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -46,14 +76,13 @@ const items = [
   {
     title: "Wallet",
     url: "/wallet",
-    icon: Wallet
+    icon: Wallet,
   },
-  // {
-  //   title: "Settings",
-  //   url: "/settings",
-  //   icon: Settings,
-  // },
 ];
+
+const user = getItem<UserData>("user")
+
+const items = user && user.role === "user"? USERLINKS : ADMINLINKS
 
 
 export function AppSidebar() {
@@ -96,7 +125,7 @@ useEffect(() => {
         <SidebarGroupContent>
           <SidebarMenu className={`${!open && "items-center"}`}>
             {items.map((item) => (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem key={item.title} title={item.title}>
                 <SidebarMenuButton asChild>
                   <Link to={item.url}>
                     <item.icon />

@@ -6,6 +6,7 @@ import "./index.css";
 import { AuthProvider } from "./context/authprovider";
 import { ToastContainer, Slide } from "react-toastify";
 import { TopupProvider } from "./context/topup.provider";
+import EnvProvider from "./context/Environment/Env.provider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -26,9 +27,11 @@ createRoot(document.getElementById("root")!).render(
         toastClassName="rounded-2xl shadow-lg font-medium "
       />
       <AuthProvider>
-        <TopupProvider>
-          <App />
-        </TopupProvider>
+        <EnvProvider>
+          <TopupProvider>
+            <App />
+          </TopupProvider>
+        </EnvProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

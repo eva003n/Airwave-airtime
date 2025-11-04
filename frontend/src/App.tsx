@@ -19,6 +19,8 @@ import Dashboard from "./pages/Dashboard/Dashboard.tsx";
 import BulkTopUpQueue from "./pages/Jobs/Topupjobs.tsx";
 import TopupLayout from "./layouts/TopupLayout.tsx";
 import TopUpsPage from "./pages/Topups/Topups.tsx";
+import PrivateRoute from "./components/PrivateRoute.tsx";
+import DashboardPage from "./pages/Admin/Dashboard/Dashboard.tsx";
 
 const App = () => {
   return (
@@ -34,6 +36,27 @@ const App = () => {
         </Route>
         <Route element={<AppLayout />}>
           <Route element={<ProtectedRoute />}>
+            {/* ------- Admin routes ------- */}
+
+            <Route element={<PrivateRoute />}>
+              {/* Dashboard (Analytics and reports) */}
+              <Route
+                index
+                path="/admin/dashboard"
+                element={<DashboardPage/>}
+              ></Route>
+              {/*  User management  */}
+              <Route path="/admin/users" element={<h1>Users</h1>}/>
+              {/*  Transactions management  */}
+              <Route path="/admin/transactions" element={<h1>Transactions</h1>}/>
+              {/*  Ledger management  */}
+              <Route path="/admin/ledger" element={<h1>Ledger</h1>}/>
+              {/*  Settings management  */}
+              <Route path="/admin/settings" element={<h1>Settings</h1>}/>
+
+            </Route>
+
+            {/* ------- Users routes ------- */}
             {/* Dashboard (Analytics and reports) */}
             <Route index path="/dashboard" element={<Dashboard />}></Route>
             {/* Recipient managemant */}
@@ -57,8 +80,6 @@ const App = () => {
               path="/transactions"
               element={<h1 className="text-white">Transactions</h1>}
             ></Route>
-            {/*  User management  */}
-            <Route path="/users"></Route>\
           </Route>
         </Route>
         {/* 404 page */}

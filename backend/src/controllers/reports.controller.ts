@@ -3,13 +3,15 @@ import asyncHandler from "../utils/asyncHandler.js";
 import Recipient from "../models/Recipient.js";
 import Topup from "../models/Topup.js";
 import { reloadlyClient } from "../config/reloadly/reloadlyclient.js";
-import type { WalletBalance } from "../middlewares/validators/validators.js";
+import type { Id, WalletBalance } from "../middlewares/validators/validators.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { literal, Op, fn, col } from "sequelize";
+import Wallet from "../models/Wallet.js";
 
 const getAnalytics = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     //total recipients that are active in the  system
+    const {id} = req.params as Id
 
     const totalRecipients = (
       await Recipient.findAndCountAll({ where: { active: true } })
@@ -19,10 +21,8 @@ const getAnalytics = asyncHandler(
     const totalTopUps = (await Topup.findAndCountAll()).count;
 
     //wallet balance
-    const balanceInfo = await reloadlyClient.request<WalletBalance>(
-      "GET",
-      "accounts/balance"
-    );
+    const wallet = await Wallet.findOne({where: {user_id: id}});
+    const walletBalance = Number(wallet?.balance) || 0;
 
     const recipientGrowth = await getRecipientGrowth();
     const topUpTrends = await getTopUpTrends();
@@ -30,7 +30,7 @@ const getAnalytics = asyncHandler(
     const analytics = {
       totalRecipients,
       totalTopUps,
-      walletBalance: balanceInfo.data.balance,
+      walletBalance,
       recipientGrowth,
       topUpTrends,
     };

@@ -7,7 +7,12 @@ import { TopupContext, upsertTopup } from "./topup.context";
 import { apiClient } from "@/api/apiclient";
 import { TopUpService } from "@/db/topup.service";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URI || "http://localhost:8000/api/v1";
+
+const env = getItem<"Live" | "Sandbox">("env");
+const API_BASE =
+  env === "Live"
+    ? import.meta.env.VITE_API_BASE_URI
+    : import.meta.env.VITE_SANDBOX_API_BASE_URL;
 
 export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
   children,

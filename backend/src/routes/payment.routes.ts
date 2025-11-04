@@ -11,6 +11,6 @@ const router = Router()
 // Recieve payments from a customer
 router.route("/paybill/validate-payment").post( validatePayment)
 router.route("/paybill/confirm-payment").post( receivePaymentConfirmation)
-router.route("/register-C2B").post(registerC2BUrl)
+router.route("/register-C2B").post(receivePayment)
 
 export default router;

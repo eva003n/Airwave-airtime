@@ -1,5 +1,5 @@
 import { QueryInterface, DataTypes } from "sequelize";
-import { TransactionStatus } from "../models/Transaction.js";
+import { TransactionStatus, TransactionType } from "../models/Transaction.js";
 
  async function up({ context }: { context: QueryInterface }) {
   await context.createTable("transactions", {
@@ -16,7 +16,7 @@ import { TransactionStatus } from "../models/Transaction.js";
     },
 
     transaction_type: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(...Object.values(TransactionType)),
       allowNull: false,
     },
     amount: {

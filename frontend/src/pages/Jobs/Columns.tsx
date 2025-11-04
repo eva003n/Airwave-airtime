@@ -77,6 +77,12 @@ const topUpColumns = (
   {
     accessorKey: "phone",
     header: "Phone number",
+    cell: ({row}) => {
+      const phone = row.getValue<string>("phone")
+
+      return <div className="text-right font-medium">+{phone}</div>;
+
+    }
   },
   {
     accessorKey: "amount",

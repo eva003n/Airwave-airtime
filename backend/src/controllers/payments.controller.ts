@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
-import { BASE_URL, MPESA_BASE_URL, MPESA_SHORT_CODE } from "../config/env.js";
+import { AFRICAS_TALKING_PAYBILL, BASE_URL, MPESA_BASE_URL, MPESA_INITIATOR, MPESA_SHORT_CODE } from "../config/env.js";
 import { mpesaClient } from "../config/mpesa/mpesa.js";
 import logger from "../logger/logger.winston.js";
 import ApiResponse from "../utils/ApiResponse.js";
@@ -53,18 +53,27 @@ const receivePaymentConfirmation = asyncHandler(
       if (!newTransaction) return transaction.rollback();
 
       // update the transaction status
-      newTransaction.set({status: "Sucess"})
+      newTransaction.set({status: "Success"})
       await newTransaction.save({transaction})
 
-      const balanceAfter =
-        (wallet?.balance as number) + parseFloat(TransAmount as string);
+      // first get the last balance from ledger for particulat wallet
+      const walletId = wallet.id
+      const lastLedger = await Ledger.findOne({where: {wallet_id: walletId}, order: [["createdAt", "DESC"]],
+      transaction
+      })
+
+      
+      const balanceBefore = Number(lastLedger ? lastLedger.balance_after : 0);
+      const amount = Number(newTransaction.amount);
+
+      const balanceAfter = balanceBefore + amount;
+
+      // Record transaction
       await Ledger.create(
         {
           wallet_id: wallet?.id as string,
           transaction_id: newTransaction?.id as string,
-          amount: parseFloat(TransAmount as string),
-          transaction_type: "Credit",
-          balance_before: wallet?.balance as number,
+          balance_before: balanceBefore,
           balance_after: balanceAfter,
         },
         { transaction });
@@ -86,7 +95,6 @@ const receivePaymentConfirmation = asyncHandler(
 const validatePayment = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     // validate the account number exist
-    console.log(req.body);
     const {
       BillRefNumber,
       BusinessShortCode,
@@ -99,7 +107,6 @@ const validatePayment = asyncHandler(
       where: { account_number: BillRefNumber },
     });
 
-    console.log(wallet)
     if (!wallet)
       return res.json({
         ResultCode: ResponseCodes.invalidAccount,
@@ -111,7 +118,7 @@ const validatePayment = asyncHandler(
       const transactionData = await Transaction.create(
         {
           reference: TransID as string,
-          transaction_type: TransactionType as string,
+          transaction_type: "Credit",
           amount: parseFloat(TransAmount as string),
           wallet_id: wallet.id as string,
         },
@@ -120,13 +127,11 @@ const validatePayment = asyncHandler(
 
       return transactionData
     });
-console.log(newTransaction);
 
     if(!newTransaction) return res.json({
       ResultCode: ResponseCodes.otherError,
       ResultDesc: "Rejected",
     });
-console.log("id is " + newTransaction.id)
     return res.json({
       ResultCode: 0,
       ThirdPartyTransID: newTransaction.id,
@@ -139,7 +144,7 @@ const registerC2BUrl = asyncHandler(
   async (Req: Request, res: Response, next: NextFunction) => {
     //   try {
     const payload = {
-      ShortCode: "600998",
+      ShortCode: "600999",
       ResponseType: "Cancelled",
       ConfirmationURL: `https://dung-polycarpic-katherina.ngrok-free.dev/api/v1/payments/paybill/confirm-payment`,
       ValidationURL: `https://dung-polycarpic-katherina.ngrok-free.dev/api/v1/payments/paybill/validate-payment`,
@@ -161,9 +166,9 @@ const registerC2BUrl = asyncHandler(
 const receivePayment = asyncHandler(
   async (Req: Request, res: Response, next: NextFunction) => {
     const payload = {
-      ShortCode: "600998",
+      ShortCode: "600999",
       CommandID: "CustomerPayBillOnline",
-      Amount: "100",
+      Amount: "50000",
       Msisdn: "254708374149",
       BillRefNumber: "29789252",
     };
@@ -185,6 +190,35 @@ const receivePayment = asyncHandler(
       );
   }
 );
+
+// make paymnet to africas talking using paybill thus B2B
+const makePayment = async (amount: number, accountNumber: number) => {
+
+  const payload = {
+    Initiator: MPESA_INITIATOR,
+    SecurityCredential:
+      "FKXl/KPzT8hFOnozI+unz7mXDgTRbrlrZ+C1Vblxpbz7jliLAFa0E/…../uO4gzUkABQuCxAeq+0Hd0A==",
+    "Command ID": "BusinessPayBill",
+    SenderIdentifierType: "4",
+    RecieverIdentifierType: "4",
+    Amount: amount,
+    PartyA: MPESA_SHORT_CODE,
+    PartyB: AFRICAS_TALKING_PAYBILL,
+    AccountReference: accountNumber,
+    Requester: "254700000000",
+    Remarks: "OK",
+    QueueTimeOutURL: "http://0.0.0.0:0000/ResultsListener.php",
+    ResultURL: "http://0.0.0.0:8888/TimeOutListener.php",
+    Occassion: "Payment"
+  };
+
+  const response = await mpesaClient.request(
+    "POST",
+    "/mpesa/b2b/v1/paymentrequest"
+  );
+
+
+}
 export {
   receivePaymentConfirmation,
   validatePayment,

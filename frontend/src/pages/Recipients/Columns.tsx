@@ -81,6 +81,11 @@ const recipientColumns = (
   {
     accessorKey: "phone_number",
     header: "Phone",
+    cell: ({ row }) => {
+      const phone = row.getValue<string>("phone_number");
+
+      return <div className=" font-medium">+{phone}</div>;
+    },
   },
   {
     accessorKey: "operator",

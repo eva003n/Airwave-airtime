@@ -1,5 +1,4 @@
 import { QueryInterface, DataTypes } from "sequelize";
-import { TransactionType } from "../models/Ledger.js";
 
 async function up({ context }: { context: QueryInterface }) {
   await context.createTable("ledgers", {
@@ -17,14 +16,7 @@ async function up({ context }: { context: QueryInterface }) {
         key: "id",
       },
     },
-    transaction_type: {
-      type: DataTypes.ENUM(...Object.values(TransactionType)),
-      allowNull: false,
-    },
-    amount: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
+  
     balance_before: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,

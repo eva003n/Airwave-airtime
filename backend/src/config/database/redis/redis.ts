@@ -5,14 +5,16 @@ import {Redis} from "ioredis"
 //connection to redis running in local machine or docker
 const connection = new Redis(
    {
-  host: REDIS_HOST || "redis",
-  port: Number(REDIS_PORT) || 6379,
+  host: REDIS_HOST ,
+  port: Number(REDIS_PORT) ,
+  username: REDIS_USER,
+  password: REDIS_PASSWORD,
   maxRetriesPerRequest: null,
-  // retryStrategy: (times: number) => {
-  //   const delay = Math.min(times * 2000, 15000);
-  //   logger.info(`⏳ Retrying Redis connection in ${delay / 1000}s`);
-  //   return delay;
-  // },
+  retryStrategy: (times: number) => {
+    const delay = Math.min(times * 2000, 15000);
+    logger.info(`⏳ Retrying Redis connection in ${delay / 1000}s`);
+    return delay;
+  },
 }
 )
 

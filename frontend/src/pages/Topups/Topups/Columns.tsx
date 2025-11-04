@@ -82,6 +82,11 @@ const topUpColumns = (
   {
     accessorKey: "recipient.phone_number",
     header: "Phone",
+    accessorFn: (row) => row.recipient?.phone_number, // this makes it work
+    cell: ({ getValue }) => {
+      const phone = getValue<string>();
+      return <div className="font-medium">+{phone}</div>;
+    },
   },
   {
     accessorKey: "recipient.operator",

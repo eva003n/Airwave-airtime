@@ -1,4 +1,5 @@
 import { QueryInterface, DataTypes } from "sequelize";
+import { WalletTypes } from "../models/Wallet.js";
 
 async function up({ context }: { context: QueryInterface }) {
   await context.createTable("wallets", {
@@ -39,6 +40,11 @@ async function up({ context }: { context: QueryInterface }) {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+    wallet_type: {
+      type: DataTypes.ENUM(...Object.values(WalletTypes)),
+      allowNull: false,
+      defaultValue: WalletTypes.BASIC,
     },
     lower_threshold: {
       type: DataTypes.DECIMAL(10, 2),

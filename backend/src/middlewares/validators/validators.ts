@@ -4,6 +4,7 @@ import {
   KUNITY_BRANCHES,
   KUNITY_DEPARTMENTS,
   OPERATORS,
+  WALLET_TYPES,
 } from "../../constants.js";
 
 const signUpSchema = z.object({
@@ -296,6 +297,15 @@ const mpesaC2BApiResponseSchema = z.object({
   ThirdPartyTransID: z.string().optional()
 });
 
+const walletUpdateSchema = z.object(
+  {
+    userId: z.string(),
+    wallet_type: z.enum(WALLET_TYPES).optional(),
+    lower_threshold: z.transform(Number).pipe(z.number({error: "Invalid input not a number"})).optional(),
+    upper_threshold: z.transform(Number).pipe(z.number({error: "Invalid input not a number"})).optional(),
+  }
+) 
+
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -309,6 +319,7 @@ export type PaginateData = z.infer<typeof paginateSchema>;
 export type BulkTopUpData = z.infer<typeof topUpCsvSchema>;
 export type CookieData = z.infer<typeof cookieSchema>;
 export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
+export type WalletType = z.infer<typeof walletUpdateSchema>;
 
 //reloadly api response types
 export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;
@@ -333,6 +344,7 @@ export {
   topUpCsvSchema,
   cookieSchema,
   walletBalanceSchema,
+  walletUpdateSchema,
   mpesaC2BApiResponseSchema,
 
 };

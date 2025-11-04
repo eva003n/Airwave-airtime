@@ -1,4 +1,4 @@
-import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS } from "@/constants";
+import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS, WALLET_TYPES } from "@/constants";
 import { object, z } from "zod";
 
 const signUpSchema = z.object({
@@ -393,14 +393,23 @@ export const bulkTopUpSchema = z.object({
 
 export const walletBalanceSchema = z.object({
   data: z.object({
-    balance: z.number(),
-    currencyCode: z.string(),
-    currencyName: z.string(),
-    updatedAt: z.date(),
-    lowBalanceThreshold: z.number(),
-    maxLowBalanceThreshold: z.number(),
+    balance: z.string(),
+    account_number: z.string(),
+    wallet_type: z.enum(WALLET_TYPES),
+    currency_code: z.string(),
+    currency_name: z.string(),
+    lower_threshold: z.string(),
+    upper_threshold: z.string(),
   }),
 });
+
+export const walletFormSchema = z.object({
+  lower_threshold: z.string().optional(), // ensures it's typed properly,
+  upper_threshold: z.string().optional(), // ensures it's typed properly,
+  wallet_type: z.enum(WALLET_TYPES),
+  account_number: z.string(),
+  userId: z.string(),
+}); 
 
 const analyticsSchema = z.object({
   data: z.object({
@@ -434,6 +443,7 @@ export type OperatorDatail = z.infer<typeof operatorDetailsSchema>;
 export type SingleTopUpForm = z.infer<typeof singleTopUpSchema>;
 export type ParsedRecipient = z.infer<typeof csvDataSchema>;
 export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
+export type WalletForm = z.infer<typeof walletFormSchema>;
 
 //Api responses types
 export type RecipientData = z.infer<typeof recipientDataSchema>;
@@ -445,5 +455,5 @@ export type TokenResponse = z.infer<typeof refreshTokenSchema>;
 export type OperatorDetect = z.infer<typeof operatorDetailsSchemaApi>;
 export type TopUpData = z.infer<typeof topUpDataSchema>;
 export type TopUpDataApi = z.infer<typeof topUpDataApiSchema>
-export type WalletBalance = z.infer<typeof walletBalanceSchema>
+export type WalletData = z.infer<typeof walletBalanceSchema>
 export type Analytics = z.infer<typeof analyticsSchema>

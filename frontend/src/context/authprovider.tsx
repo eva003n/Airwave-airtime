@@ -55,10 +55,15 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return requestHandler(
       () => logInUser(data),
       (response: AxiosResponse<UserDataApi>) => {
+        const user = getItem<UserData>("user");
+
         setUser(response.data.data.user);
         setItem("user", JSON.stringify(response.data.data.user));
         setLoading(false);
-       navigate("/dashboard", { replace: true });
+
+        user && user.role === "user"
+          ? navigate("/dashboard", { replace: true })
+          : navigate("/admin/dashboard", { replace: true });
 
         toast.success(response.data.message);
         return response;
@@ -100,7 +105,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           toast.success("Sign out successfully");
           navigate("/", { replace: true });
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
 
         return response;

@@ -1,3 +1,4 @@
+import { getItem } from "@/utils";
 import type {
   ILogin,
   ISignUp,
@@ -21,8 +22,10 @@ import type {
   SignUpAuth,
   SingleTopUpForm,
   TopUpDataApi,
+  UserData,
   UserDataApi,
-  WalletBalance,
+  WalletData,
+  WalletForm,
 } from "../validation/validators";
 import { apiClient } from "./apiclient";
 
@@ -95,13 +98,17 @@ const startBulkTopUps = async () => {
 }
 
 // wallet management
-const getWalletBalance = async() => {
-  return apiClient.request<WalletBalance>("GET", "/wallet/balance")
+const getWalletBalance = async(id: string) => {
+  return apiClient.request<WalletData>("GET", `/wallets/${id}`)
+}
+const updateWallet = async(data: WalletForm) => {
+  return apiClient.request<{message: string}>("PUT", `/wallets`, data);
+
 }
 
 //Report management
-const getAnalyticsData = async() => {
-  return apiClient.request<Analytics>("GET", "/reports")
+const getAnalyticsData = async(id: string) => {
+  return apiClient.request<Analytics>("GET", `/reports/${id}`)
 }
 
 
@@ -125,6 +132,7 @@ export {
 
   //Wallet management
   getWalletBalance,
+  updateWallet,
 
   //report management
 getAnalyticsData
