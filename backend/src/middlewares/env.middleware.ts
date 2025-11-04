@@ -7,7 +7,7 @@ const setEnvironment = asyncHandler(
       async (req: Request, res: Response, next: NextFunction) => {
         const mode = req.headers["x-env"] 
         app.set("env", mode)
-
+        
         return next()
       }
 );

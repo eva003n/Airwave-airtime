@@ -37,7 +37,11 @@ class ApiClient {
           : import.meta.env.VITE_SANDBOX_API_BASE_URL,
       headers: {
         "Content-Type": "application/json",
-        "x-env": `${getItem<"Live" | "Sandbox">("env")}`,
+        "x-env": `${
+          getItem<"Live" | "Sandbox">("env") === "Live"
+            ? "production"
+            : "development"
+        }`,
       },
       timeout: 120000, // 2mins
       withCredentials: true, //ensure that client sends cookies in reqyests and makes sure the client doesnt ignore cookies set by backend
@@ -45,7 +49,7 @@ class ApiClient {
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         // set xustom header for the environment
-        config.headers["x-env"] = getItem<"Live" | "Sandbox">("env");
+        config.headers["x-env"] = getItem<"Live" | "Sandbox">("env") === "Live"? "production" : "development";
         // Always attach the current access token
         if (this.token) {
           config.headers.Authorization = `Bearer ${this.token}`;
@@ -127,7 +131,7 @@ class ApiClient {
           withCredentials: true,
           headers: {
             "Content-Type": "application/json",
-            "x-env": `${getItem<"Live" | "Sandbox">("env")}`,
+            "x-env": `${getItem<"Live" | "Sandbox">("env") === "Live" ? "production" : "development"}`,
           },
         }
       );

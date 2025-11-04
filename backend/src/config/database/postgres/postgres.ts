@@ -2,6 +2,7 @@ import { Sequelize } from "sequelize";
 import { NODE_ENV } from "../../env.js";
 import logger from "../../../logger/logger.winston.js";
 import config, { type ConfigEnv } from "./config.js";
+import { app } from "../../../app.js";
 
 const env = (NODE_ENV as keyof ConfigEnv) || "development";
 const dbConfig = config[env];
