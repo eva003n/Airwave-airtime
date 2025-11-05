@@ -32,9 +32,8 @@ const signInSchema = z.object({
     ),
 });
 
-const userSchema = z.object({
+export const userSchema = z.object({
   id: z
-    .string()
     .uuid()
     .refine(
       (val) =>
@@ -42,14 +41,24 @@ const userSchema = z.object({
           val
         ),
       { message: "Invalid UUID v4 format" }
-    ),
+    )
+    .optional(),
   username: z.string().min(1, "Username is required"),
+  email: z.email(),
   role: z.enum(["user", "admin"]), // Adjust roles as needed
-  avatar_url: z.string(),
-  avatar_id: z.uuid().nullable(),
-  is_MFA_enabled: z.boolean(),
-  createdAt: z.coerce.date(), // coerce ISO string into Date
-  updatedAt: z.coerce.date(),
+  avatar_url: z.string().optional(),
+  avatar_id: z.uuid().nullable().optional(),
+  is_MFA_enabled: z.number(),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(30)
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+      "At least 1 uppercase,1 lowercase,1 number, 1 special character"
+    ),
+  createdAt: z.string().optional(), // coerce ISO string into Date
+  updatedAt: z.string().optional(),
 });
 
 const userDataApiSchema = z.object({
@@ -57,6 +66,15 @@ const userDataApiSchema = z.object({
     user: userSchema,
   }),
   message: z.string(),
+});
+
+const usersDataApiSchema = z.object({
+  data: z.object({
+    users: z.array(userSchema),
+    currentPage: z.number(),
+    totalPages: z.number(),
+    totalItems: z.number(),
+  }),
 });
 const recipientSchema = z.object({
   name: z
@@ -459,6 +477,7 @@ export type BulkTopUpForm = z.infer<typeof bulkTopUpSchema>;
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
 export type RecipientForm = z.infer<typeof recipientSchema>;
+export type UserForm = z.infer<typeof userSchema>;
 export { signUpSchema, signInSchema, recipientSchema };
 export type PaginateData = z.infer<typeof paginateSchema>;
 export type Id = z.infer<typeof IdSchema>;
@@ -481,3 +500,4 @@ export type TopUpDataApi = z.infer<typeof topUpDataApiSchema>
 export type WalletData = z.infer<typeof walletBalanceSchema>
 export type Analytics = z.infer<typeof analyticsSchema>
 export type AnalyticsAdmin = z.infer<typeof analyticsAdminSchema>
+export type UsersDataApi = z.infer<typeof usersDataApiSchema>

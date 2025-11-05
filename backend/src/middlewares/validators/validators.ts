@@ -1,4 +1,4 @@
-import { minLength, object, string, z } from "zod";
+import { boolean, minLength, object, string, z } from "zod";
 import { MobileOperator } from "../../models/Recipient.js";
 import {
   KUNITY_BRANCHES,
@@ -271,7 +271,7 @@ const walletBalanceSchema = z.object({
 });
 const africasTalkingWalletBalanceSchema = z.object({
 data: z.object({
-  userData: z.object({
+  UserData: z.object({
     balance: z.string()
   })
 })
@@ -305,7 +305,33 @@ const walletUpdateSchema = z.object(
     upper_threshold: z.transform(Number).pipe(z.number({error: "Invalid input not a number"})).optional(),
   }
 ) 
-
+export const userSchema = z.object({
+  id: z
+    .uuid()
+    .refine(
+      (val) =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          val
+        ),
+      { message: "Invalid UUID v4 format" }
+    ).optional(),
+  username: z.string().min(5, "Username is required"),
+  email: z.email(),
+  role: z.enum(["user", "admin"]), // Adjust roles as needed
+  avatar_url: z.string().optional(),
+  avatar_id: z.uuid().nullable().optional(),
+  is_MFA_enabled: z.coerce.boolean("Can only accept true or false value"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(30)
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+      "At least 1 uppercase,1 lowercase,1 number, 1 special character"
+    ),
+  createdAt: z.string().optional(), // coerce ISO string into Date
+  updatedAt: z.string().optional(),
+});
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -320,6 +346,7 @@ export type BulkTopUpData = z.infer<typeof topUpCsvSchema>;
 export type CookieData = z.infer<typeof cookieSchema>;
 export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
 export type WalletType = z.infer<typeof walletUpdateSchema>;
+export type UserData = z.infer<typeof userSchema>;
 
 //reloadly api response types
 export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;

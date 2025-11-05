@@ -25,6 +25,8 @@ import type {
   TopUpDataApi,
   UserData,
   UserDataApi,
+  UserForm,
+  UsersDataApi,
   WalletData,
   WalletForm,
 } from "../validation/validators";
@@ -116,6 +118,25 @@ const getAdminAnalyticsData = async () => {
   return apiClient.request<AnalyticsAdmin>("GET", "/reports/admin");
 };
 
+// User management
+/* ---- Admin ---- */
+const getAllUsers = async () => {
+  return apiClient.request<UsersDataApi>("GET", "/users")
+}
+
+const createUser = async (data: UserForm) => {
+  return apiClient.request<{message: string}>("POST", "/users", data)
+}
+const updateUser = async (id: Id, data: UserForm) => {
+  return apiClient.request<{message: string}>("PUT", `/users/${id}`, data)
+}
+const getUser = async (id: Id) => {
+  return apiClient.request<{data: UserData}>("GET", `/users/${id}`,)
+}
+const deleteUser = async (id: Id) => {
+  return apiClient.request<{message: string}>("DELETE", `/users/${id}`)
+}
+
 
 export {
   signUpUser,
@@ -141,5 +162,10 @@ export {
 
   //report management
 getAnalyticsData,
-getAdminAnalyticsData
+getAdminAnalyticsData,
+getAllUsers,
+createUser,
+getUser,
+updateUser,
+deleteUser
 };

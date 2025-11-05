@@ -46,11 +46,15 @@ const KUNITY_DEPARTMENTS = [
   "Operations",
 ];
 
+const USERROLES = ["admin", "user"]
 const WALLET_TYPES = ["Basic", "Plus", "Premium"]
+const MFA_MODES = [1, 0]
 export {
 KUNITY_BRANCHES,
 OPERATORS,
 MONTHS_SHORT,
 KUNITY_DEPARTMENTS,
-WALLET_TYPES
+WALLET_TYPES,
+USERROLES,
+MFA_MODES,
 }

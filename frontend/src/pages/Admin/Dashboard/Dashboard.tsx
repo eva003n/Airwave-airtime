@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import {
   Users,
@@ -22,7 +22,9 @@ import {
 } from "recharts";
 import { getAdminAnalyticsData, getAnalyticsData } from "@/api";
 import { getItem } from "@/utils";
-import type { UserData } from "@/validation/validators";
+import type { AnalyticsAdmin, UserData } from "@/validation/validators";
+import { MONTHS_SHORT } from "@/constants";
+import { getMonth } from "@/utils/formatdate";
 
 export const STATSDATA: StatCardProps[] = [
   {
@@ -79,20 +81,32 @@ const topUpData = [
 ];
 
 const DashboardPage = () => {
-  const [stats, setStats] = useState<{
-    totalUsers: number;
-    totalTransactions: number;
-    walletBalance: number;
-    totalTopUps: number;
-  }>();
+  const [analytics, setAnalytics] = useState<AnalyticsAdmin>();
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       const response = await getAdminAnalyticsData();
-      setStats(response.data.data.stats);
+      setAnalytics(response.data);
     };
     fetchAnalytics();
   }, []);
+
+  const transactionGrowthData = useMemo(() => {
+    if (!analytics?.data?.transactionGrowth) return; // fallback sample
+    return analytics.data?.transactionGrowth.map((r: any) => ({
+      month: MONTHS_SHORT[getMonth(r.month)],
+      count: Number(r.count ?? r.transaction ?? 0), // tolerate different keys
+    }));
+  }, [analytics]);
+
+  const airtimePurchases = useMemo(() => {
+    if (!analytics?.data?.airtimePurchases) return ;
+    return analytics.data?.airtimePurchases.map((t: any) => ({
+      month: MONTHS_SHORT[getMonth(t.month)],
+      count: Number(t.count ?? t.topups ?? 0),
+    }));
+  }, [analytics])
+
   return (
     <section className="p-4 space-y-4 text-color min-h-screen">
       <h1 className="md:text-2xl font-semibold text-gray-700">
@@ -104,7 +118,7 @@ const DashboardPage = () => {
           title={"Total Users"}
           icon={Users}
           iconStyles={"text-blue-500 w-8 h-8 bg-blue-100 p-2 rounded-full"}
-          count={stats?.totalUsers || 0}
+          count={analytics?.data?.stats?.totalUsers || 0}
           description={"Active users"}
         />
         <StatsCard
@@ -112,7 +126,7 @@ const DashboardPage = () => {
           title={"Total Transactions"}
           icon={CreditCard}
           iconStyles={"text-green-500  w-8 h-8 bg-green-100 p-2 rounded-ful"}
-          count={stats?.totalTransactions || 0}
+          count={analytics?.data?.stats?.totalTransactions || 0}
           description={"Completed payments"}
         />
         <StatsCard
@@ -122,7 +136,7 @@ const DashboardPage = () => {
           iconStyles={
             "text-indigo-500  w-8 h-8  bg-indigo-100 p-2 rounded-full"
           }
-          count={stats?.walletBalance || 0}
+          count={analytics?.data?.stats?.walletBalance || 0}
           description={"App wallet deposits"}
         />
         <StatsCard
@@ -130,14 +144,14 @@ const DashboardPage = () => {
           title={"Airtime Purchases"}
           icon={PhoneCall}
           iconStyles={"text-orange-500  w-8 h-8 bg-orange-100 p-2 rounded-full"}
-          count={stats?.totalUsers || 0}
+          count={analytics?.data?.stats?.totalTopUps || 0}
           description={"Airtime distributions"}
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ChartComponent
-          title={"User growth in the last (5 months)"}
-          data={userData}
+          title={"Transaction growth last (5 months)"}
+          data={transactionGrowthData || []}
           chart={LineChart}
         >
           <>
@@ -149,16 +163,16 @@ const DashboardPage = () => {
             />
             <Line
               type="monotone"
-              dataKey="users"
+              dataKey="count"
               stroke="#6b7280" // gray-500
-              strokeWidth={3}
+              strokeWidth={2}
               dot={{ r: 4, fill: "#6b7280" }}
             />
           </>
         </ChartComponent>
         <ChartComponent
           title={"Airtime purchase Trends"}
-          data={topUpData}
+          data={airtimePurchases || []}
           chart={BarChart}
         >
           <>
@@ -167,7 +181,7 @@ const DashboardPage = () => {
             <YAxis stroke="#9ca3af" />
             <Tooltip />
             <Bar
-              dataKey="topups"
+              dataKey="count"
               fill="#6b7280" // gray-500
               radius={[8, 8, 0, 0]}
             />

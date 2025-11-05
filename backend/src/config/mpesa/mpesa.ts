@@ -4,10 +4,14 @@ import axios, {
   type AxiosResponse,
 } from "axios";
 import {
+  MPESA_SANDBOX_CUSTOMER_KEY,
+  MPESA_SANDBOX_CUSTOMER_SECRET,
+  MPESA_SANDBOX_BASE_URL,
+  MPESA_SANDBOX_AUTH_URL,
   MPESA_CUSTOMER_KEY,
-  MPESA_CUSTOMER_SECRET,
   MPESA_BASE_URL,
   MPESA_AUTH_URL,
+  NODE_ENV,
 } from "../env.js";
 import logger from "../../logger/logger.winston.js";
 import ApiError from "../../utils/ApiError.js";
@@ -28,13 +32,13 @@ class MpesaClient {
   private api: AxiosInstance;
 
   constructor() {
-    this.customerKey = MPESA_CUSTOMER_KEY || "";
-    this.customerSecret = MPESA_CUSTOMER_SECRET || "";
-    this.audience = MPESA_BASE_URL || "";
-    this.authUrl = MPESA_AUTH_URL || "";
+    this.customerKey = (NODE_ENV === "production"?  MPESA_CUSTOMER_KEY : MPESA_SANDBOX_CUSTOMER_KEY) as string;
+    this.customerSecret = (NODE_ENV === "production"? MPESA_SANDBOX_CUSTOMER_SECRET : MPESA_SANDBOX_CUSTOMER_SECRET) as string;
+    this.audience = (NODE_ENV === "production"? MPESA_BASE_URL : MPESA_SANDBOX_BASE_URL) as string ;
+    this.authUrl = (NODE_ENV === "production"? MPESA_AUTH_URL : MPESA_SANDBOX_AUTH_URL) as string;
 
     this.api = axios.create({
-      baseURL: MPESA_BASE_URL || "",
+      baseURL: this.audience,
       headers: {
         "Content-Type": "application/json",
       },

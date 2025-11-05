@@ -1,19 +1,14 @@
-import  {
-  Model,
-  DataTypes
-} from "sequelize";
+import { Model, DataTypes } from "sequelize";
 
-import {hash } from "bcryptjs";
-
+import { hash } from "bcryptjs";
 
 import { sequelize } from "../config/database/postgres/postgres.js";
-import  Wallet from "./Wallet.js";
+import Wallet from "./Wallet.js";
 
 export enum UserRole {
   Admin = "admin",
   User = "user",
 }
-
 
 class User extends Model {
   declare id?: string;
@@ -38,22 +33,22 @@ class User extends Model {
     }
   }
 
-public static async createUserWallet (wallet: Wallet, user: User) {
-  if(user.role && user.role !== "user" ) return;
+  public static async createUserWallet(wallet: Wallet, user: User) {
+    if (user.role && user.role !== "user") return;
 
-  await Wallet.create({user_id: user.id as string})
-
-
-}
+    await Wallet.create({ user_id: user.id as string });
+  }
 
 
-
-  public override toJSON(): object {
+  public override toJSON(showHidden = false): object {
     const attributes = { ...this.get() } as any;
+
+    if (!showHidden) {
+      delete attributes.email;
+    }
     delete attributes.password;
     delete attributes.verification_secret;
     delete attributes.refresh_token;
-    delete attributes.email;
     return attributes;
   }
 }
@@ -83,7 +78,6 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-
 
     role: {
       type: DataTypes.ENUM(...Object.values(UserRole)),
@@ -133,18 +127,21 @@ export default User;
 
 //hooks
 User.beforeCreate(User.hashPassword);
+User.afterUpdate(User.hashPassword);
 
-User.afterCreate(async(user, options) =>{
-  if(user.role && user.role !== "user" ) return;
+User.afterCreate(async (user, options) => {
+  if (user.role && user.role !== "user") return;
 
-  await Wallet.create({user_id: user.id as string}, {transaction: options.transaction})
-})
+  await Wallet.create(
+    { user_id: user.id as string },
+    { transaction: options.transaction }
+  );
+});
 
 //when user role changes to admin they do not need a wallet anymore
 
 User.afterUpdate(async (user) => {
-  if(user.changed("role") && user.role === "admin") {
-    await Wallet.destroy({where: {user_id: user.id}})
-
+  if (user.changed("role") && user.role === "admin") {
+    await Wallet.destroy({ where: { user_id: user.id } });
   }
-})
+});

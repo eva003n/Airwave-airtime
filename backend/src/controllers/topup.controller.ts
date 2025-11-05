@@ -26,9 +26,9 @@ import { Index } from "sequelize-typescript";
 import { connection, sub } from "../config/database/redis/redis.js";
 import { jobProducer } from "../queues/producer.js";
 import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
-import { AFRICAS_TALKING_USERNAME } from "../config/env.js";
 import { randomInt, randomUUID } from "crypto";
 import { getCurrency } from "../utils/index.js";
+import { AFRICAS_TALKING_SANDBOX_USERNAME, AFRICAS_TALKING_USERNAME, NODE_ENV } from "../config/env.js";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
@@ -181,11 +181,11 @@ const sendTopUp = asyncHandler(
       );
 
     const topResponse = (
-      await africasTalkingClient.send<{}, ATTopUpResponse>(
+      await africasTalkingClient.post<{}, ATTopUpResponse>(
         "/version1/airtime/send",
         //payload send to reloadly airtime api
         {
-          username: AFRICAS_TALKING_USERNAME,
+          username:NODE_ENV === "production"? AFRICAS_TALKING_USERNAME : AFRICAS_TALKING_SANDBOX_USERNAME,
           recipients: [
             {
               phoneNumber: phone_number,

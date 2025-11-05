@@ -1,6 +1,4 @@
 import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
-import { AFRICAS_TALKING_USERNAME } from "../config/env.js";
-import { reloadlyClient } from "../config/reloadly/reloadlyclient.js";
 import type { ATWallet, Id, WalletType } from "../middlewares/validators/validators.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -70,7 +68,7 @@ const getATWalletBalance = async () => {
   
     const response = await africasTalkingClient.get<ATWallet>("/version1/user")
 
-    return getCurrency(response.data.userData.balance);
+    return getCurrency(response.data.UserData.balance);
   
 }
 

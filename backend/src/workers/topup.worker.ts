@@ -86,7 +86,7 @@ const sendTopUp = async (
   // console.log(topResponse.data)
 
   const topResponse = (
-    await africasTalkingClient.send<{}, ATTopUpResponse>(
+    await africasTalkingClient.post<{}, ATTopUpResponse>(
       "/version1/airtime/send",
       //payload send to reloadly airtime api
       {

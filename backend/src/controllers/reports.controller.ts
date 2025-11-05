@@ -56,7 +56,7 @@ type MonthlyRecipientGrowth = {
 
 type MonthlyTransactionGrowth = {
   month: Date; // month start
-  count: number; // new recipients in that month
+  count: number; 
 } & Transaction;
 
 type MonthlyTopUpTrend = {
@@ -150,13 +150,11 @@ const getAdminAnalytics = asyncHandler(
 
     // africas talking wallet balance
     const walletBalance = 
-      await africasTalkingClient.get<ATWallet>("/version1/user")
+      (await africasTalkingClient.get<ATWallet>("/version1/user")).data.UserData.balance
     ;
-    console.log(walletBalance)
-    console.log(africasTalkingClient.)
 
 
-    // const balance = getCurrency(walletBalance)
+    const balance = getCurrency(walletBalance)
 
     // airtime purchase
     const totalTopUps = (await Topup.findAndCountAll()).count;
@@ -164,7 +162,7 @@ const getAdminAnalytics = asyncHandler(
     const stats = {
         totalUsers,
         totalTransactions,
-        // walletBalance: balance,
+        walletBalance: balance,
         totalTopUps,
       }
     

@@ -4,13 +4,14 @@ import axios, {
   type AxiosResponse,
 } from "axios";
 import {
-  RELOADLY_CLIENT_ID,
-  RELOADLY_CLIENT_SECRET,
-  RELOADLY_AUDIENCE,
-  RELOADLY_AUTH_URL,
+
+  AFRICAS_TALKING_SANDBOX_API_KEY,
+  AFRICAS_TALKING_SANDBOX_USERNAME,
+  AFRICAS_TALKING_AIRTIME_API_SANDBOX_URI,
+  NODE_ENV,
+  AFRICAS_TALKING_AIRTIME_API,
   AFRICAS_TALKING_API_KEY,
   AFRICAS_TALKING_USERNAME,
-  AFRICAS_TALKING_AIRTIME_API_URI,
 } from "../env.js";
 import logger from "../../logger/logger.winston.js";
 import ApiError from "../../utils/ApiError.js";
@@ -24,15 +25,21 @@ interface TokenResponse {
 
 class ApiClient {
   private api: AxiosInstance;
+  private audience: string;
+  private apiKey : string;
+  private userName: string;
 
   constructor() {
+    this.audience = (NODE_ENV === "production"? AFRICAS_TALKING_AIRTIME_API : 
+      AFRICAS_TALKING_AIRTIME_API_SANDBOX_URI) as string, // Change if using other africas talking APIs
+    this.apiKey = (NODE_ENV === "production"?  AFRICAS_TALKING_API_KEY : AFRICAS_TALKING_SANDBOX_API_KEY) as string
+    this.userName = (NODE_ENV === "production"? AFRICAS_TALKING_USERNAME :AFRICAS_TALKING_SANDBOX_USERNAME) as string
+
     this.api = axios.create({
-      baseURL:
-        AFRICAS_TALKING_AIRTIME_API_URI ||
-        "https://api.sandbox.africastalking.com", // Change if using other africas talking APIs
+      baseURL: this.audience,
       headers: {
-        "Content-Type": "application/json",
-        apikey: AFRICAS_TALKING_API_KEY,
+        "Content-Type": "application/x-www-form-urlencoded",
+        apikey: this.apiKey ,
         Accept: "application/json",
       },
       timeout: 120000, // 2mins
@@ -72,14 +79,14 @@ class ApiClient {
     );
   }
 
-  public async send<T, D>(url: string, data: T): Promise<AxiosResponse<D>> {
+  public async post<T, D>(url: string, data: T): Promise<AxiosResponse<D>> {
     return this.api.post<D>(url, data);
   }
 
   public async get<T>(url: string): Promise<T> {
     return this.api.get(url, {
       params: {
-        username: AFRICAS_TALKING_USERNAME || "sandbox",
+        username: this.userName,
       },
     });
   }

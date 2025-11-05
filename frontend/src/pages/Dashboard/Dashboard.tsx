@@ -63,7 +63,7 @@ const recipientGrowthData = useMemo(() => {
   if (!analytics?.data?.recipientGrowth) return ; // fallback sample
   return analytics.data?.recipientGrowth.map((r: any) => ({
     month: MONTHS_SHORT[getMonth(r.month)],
-    recipients: Number(r.recipients ?? r.count ?? 0), // tolerate different keys
+    recipients: Number(r.count ?? r.recipients ?? 0), // tolerate different keys
   }));
 }, [analytics]);
   return (

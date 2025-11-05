@@ -159,7 +159,7 @@ const deleteRecipient = asyncHandler(
 
     return res
       .status(201)
-      .json(new ApiResponse(200, null, "Recipient deleted successfully"));
+      .json(new ApiResponse(201, null, "Recipient deleted successfully"));
   }
 );
 

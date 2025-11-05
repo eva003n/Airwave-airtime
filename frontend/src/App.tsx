@@ -21,6 +21,9 @@ import TopupLayout from "./layouts/TopupLayout.tsx";
 import TopUpsPage from "./pages/Topups/Topups.tsx";
 import PrivateRoute from "./components/PrivateRoute.tsx";
 import DashboardPage from "./pages/Admin/Dashboard/Dashboard.tsx";
+import UserManagementPage from "./pages/Admin/Users/Users.tsx";
+import CreateUserPage from "./pages/Admin/Users/Createuser.tsx";
+import EditUserPage from "./pages/Admin/Users/Edituser.tsx";
 
 const App = () => {
   return (
@@ -43,17 +46,25 @@ const App = () => {
               <Route
                 index
                 path="/admin/dashboard"
-                element={<DashboardPage/>}
+                element={<DashboardPage />}
               ></Route>
               {/*  User management  */}
-              <Route path="/admin/users" element={<h1>Users</h1>}/>
-              {/*  Transactions management  */}
-              <Route path="/admin/transactions" element={<h1>Transactions</h1>}/>
-              {/*  Ledger management  */}
-              <Route path="/admin/ledger" element={<h1>Ledger</h1>}/>
-              {/*  Settings management  */}
-              <Route path="/admin/settings" element={<h1>Settings</h1>}/>
+              <Route path="/admin/users">
+                <Route index element={<UserManagementPage />} />
+                <Route path="user" element={<CreateUserPage />} />
+                <Route path="user/:id" element={<EditUserPage />} />
 
+              </Route>
+              <Route path="/admin/users" element={<UserManagementPage />} />
+              {/*  Transactions management  */}
+              <Route
+                path="/admin/transactions"
+                element={<h1>Transactions</h1>}
+              />
+              {/*  Ledger management  */}
+              <Route path="/admin/ledger" element={<h1>Ledger</h1>} />
+              {/*  Settings management  */}
+              <Route path="/admin/settings" element={<h1>Settings</h1>} />
             </Route>
 
             {/* ------- Users routes ------- */}
