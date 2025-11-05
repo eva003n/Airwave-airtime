@@ -11,9 +11,13 @@ async function up({ context }: { context: QueryInterface }) {
       defaultValue: DataTypes.UUIDV4,
     },
     transaction_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
       unique: true,
+      references: {
+        model: "transactions",
+        key: "id",
+      },
     },
 
     airtime_amount: {
@@ -23,10 +27,18 @@ async function up({ context }: { context: QueryInterface }) {
     recipient_id: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: "recipients",
+        key: "id",
+      },
     },
     user_id: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: "users",
+        key: "id",
+      },
     },
     status: {
       type: DataTypes.ENUM(...Object.values(TopStatus)),

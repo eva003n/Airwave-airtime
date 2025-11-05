@@ -1,7 +1,7 @@
 import { QueryInterface, DataTypes } from "sequelize";
 import { TransactionStatus, TransactionType } from "../models/Transaction.js";
 
- async function up({ context }: { context: QueryInterface }) {
+async function up({ context }: { context: QueryInterface }) {
   await context.createTable("transactions", {
     id: {
       type: DataTypes.UUID,
@@ -30,8 +30,8 @@ import { TransactionStatus, TransactionType } from "../models/Transaction.js";
       allowNull: false,
       references: {
         model: "wallets",
-        key: "id"
-      }
+        key: "id",
+      },
     },
     status: {
       type: DataTypes.ENUM(...Object.values(TransactionStatus)),
@@ -55,8 +55,8 @@ import { TransactionStatus, TransactionType } from "../models/Transaction.js";
   });
 }
 
- async function down({ context }: { context: QueryInterface }) {
-  await context.dropTable("transactions")
+async function down({ context }: { context: QueryInterface }) {
+  await context.dropTable("transactions");
 }
 
 export { up, down };

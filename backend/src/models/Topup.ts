@@ -43,7 +43,7 @@ Topup.init(
       defaultValue: DataTypes.UUIDV4,
     },
     transaction_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
       unique: true,
     },

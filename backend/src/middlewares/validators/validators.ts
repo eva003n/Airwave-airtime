@@ -166,13 +166,13 @@ const reloadlyTopResponseSchema = z.object({
 });
 const IdSchema = z.object({
   id: z
-    .uuid()
+    .uuid("Id does't meet requirements")
     .refine(
       (val) =>
         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
           val
         ),
-      { message: "ID must be  valid" }
+      { message: "ID must be valid" }
     ),
 });
 

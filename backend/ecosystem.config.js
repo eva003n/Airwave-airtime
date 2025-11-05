@@ -1,12 +1,14 @@
 export const apps = [
   // Process 1: Main HTTP API
   {
-    name: "airwave-airtime-api",
+    name: "airwave-airtime-sandbox-api",
     // script: "./index.js", //docker
     script: "dist/index.js", //local
+  
     // watch: ["."],
     env: {
       NODE_ENV: "development",
+      PORT: 8000,
       PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
     },
   },
@@ -19,6 +21,20 @@ export const apps = [
     // watch: ["."],
     env: {
       NODE_ENV: "development",
+      PORT: 8100,
+      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
+    },
+  },
+
+  // Production service
+  {
+    name: "airwave-airtime-api",
+    // script: "./workers/topup.worker.js", //docker
+    script: "dist/index.js", 
+    // watch: ["."],
+    env: {
+      NODE_ENV: "production",
+      PORT: 8080,
       PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
     },
   },

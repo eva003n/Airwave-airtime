@@ -49,6 +49,18 @@ const protectRoute = asyncHandler(
   }
 );
 
+
+const privateRoute = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      if(req.user && req.user.role !== "admin") {
+        return next(ApiError.forbiddenRequest(403, req.originalUrl, "Forbidden request, contact administator "))
+      }
+
+      next();
+
+    }
+)
 export {
-  protectRoute
+  protectRoute,
+  privateRoute,
 }

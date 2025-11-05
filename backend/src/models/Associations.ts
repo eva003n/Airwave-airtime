@@ -4,12 +4,14 @@ import Topup from "./Topup.js";
 import Wallet from "./Wallet.js";
 import Transaction from "./Transaction.js";
 import Ledger from "./Ledger.js";
+import logger from "../logger/logger.winston.js";
 
 let associationsDefined = false;
 
 const defineAssociations = () => {
   if (associationsDefined) return;
   //  User owns many recipients and topups
+  logger.info("✅ Defining associations ")
   User.hasMany(Recipient, {
     sourceKey: "id",
     foreignKey: "user_id",
@@ -79,7 +81,6 @@ const defineAssociations = () => {
   });
   Transaction.belongsTo(Wallet, {
     foreignKey: "wallet_id",
-    as: "transaction"
   });
 
   //ledger and wallet

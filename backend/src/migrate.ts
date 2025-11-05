@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 
 import logger from "./logger/logger.winston.js";
 import { sequelize } from "./config/database/postgres/postgres.js";
+import { DB_NAME, NODE_ENV } from "./config/env.js";
 
 // Recreate __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -14,40 +15,59 @@ console.log(__dirname)
 
 // const env = (NODE_ENV as keyof ConfigEnv) || "development";
 
+const isProd = NODE_ENV === "production" || "development";
 
 // Configure Umzug
 const migrator = new Umzug({
   // migration files path
   migrations: {
     // ESM-compatible glob (you can use .ts in dev, .js in prod)
-    glob: ["src/migrations/*.{ts,js}", { cwd: path.resolve(__dirname, "..") }],
+    // glob: ["src/migrations/*.{ts,js}", { cwd: path.resolve(__dirname, "..") }],
+    glob: [
+      isProd
+        ? "dist/migrations/*.js" // compiled migrations
+        : "src/migrations/*.ts", // raw TS files
+      { cwd: path.resolve(__dirname, "..") },
+    ],
   },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({ sequelize }),
-  logger: logger,
+  logger: logger
 });
 
 // Helper functions
 export const runMigrations = async () => {
-  logger.info("🔍 Searching for pending database migrations...");
+  logger.info(`Running migrations in ${NODE_ENV} environment`)
+  logger.info(
+    `🔍 Searching for pending database migrations (Database -> ${sequelize.config.database})`
+  );
   const pending = await migrator.pending();
   if (pending.length === 0) {
     logger.info("✅ No pending migrations. Database is up to date.");
     return;
   }else  {
+  logger.info(
+    `🔍 Searching for pending database migrations (Database -> ${sequelize.config.database})`
+  );
+
     logger.info(`🔄 Found ${pending.length} pending migrations.`);
   }
   const result = await migrator.up();
   logger.info(
-    "✅ Database migrations done...",
-    result.map((m) => m.name)
+    `✅ Database migrations done (Database -> ${sequelize.config.database})`,
+    result.map((m) => JSON.stringify(m.name))
   );
 };
 
 export const revertLastMigration = async () => {
-  logger.info("⏳ Reverting last database migration...");
+    logger.info(`Rerveting migrations in ${NODE_ENV} environment`);
+
+  logger.info(`⏳ Reverting last database migration (Database -> ${sequelize.config.database})`);
   const result = await migrator.down();
-  logger.info("⏪ Reverted database migration...", result?.[0]?.name);
+  logger.info(
+    "⏪ Reverted database migration...",
+    JSON.stringify(result?.[0]?.name)
+  );
 };
 
 // ESM-safe entrypoint check

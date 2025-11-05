@@ -10,11 +10,11 @@ const connection = new Redis(
   username: REDIS_USER,
   password: REDIS_PASSWORD,
   maxRetriesPerRequest: null,
-  retryStrategy: (times: number) => {
-    const delay = Math.min(times * 2000, 15000);
-    logger.info(`⏳ Retrying Redis connection in ${delay / 1000}s`);
-    return delay;
-  },
+  // retryStrategy: (times: number) => {
+  //   const delay = Math.min(times * 2000, 15000);
+  //   logger.info(`⏳ Retrying Redis connection in ${delay / 1000}s`);
+  //   return delay;
+  // },
 }
 )
 

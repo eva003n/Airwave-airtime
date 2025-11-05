@@ -17,6 +17,5 @@ await runMigrations();
 
 
 app.listen(port, () => {
-  logger.info(`🚀 Local -> ${serverUrl}🚀`);
-  // logger.info(`🚀 Public -> ${publicUrl}🚀`);
+  logger.info(`🚀 ${serverUrl} 🚀`);
 });

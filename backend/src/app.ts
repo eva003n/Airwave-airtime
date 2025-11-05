@@ -14,7 +14,7 @@ const app = express();
 //configure cross origin resource sharing
 app.use(
   cors({
-    origin: CORS_ORIGIN_URLS?.split(",") || "http://localhost:5173",
+    origin: CORS_ORIGIN_URLS?.split(","),
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     optionsSuccessStatus: 200,

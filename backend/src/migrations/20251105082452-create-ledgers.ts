@@ -16,7 +16,7 @@ async function up({ context }: { context: QueryInterface }) {
         key: "id",
       },
     },
-  
+
     balance_before: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
@@ -52,7 +52,7 @@ async function up({ context }: { context: QueryInterface }) {
 }
 
 async function down({ context }: { context: QueryInterface }) {
-  await context.dropTable("ledgers")
+  await context.dropTable("ledgers");
 }
 
 export { up, down };
