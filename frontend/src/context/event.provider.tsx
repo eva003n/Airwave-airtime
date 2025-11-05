@@ -3,18 +3,18 @@ import { getItem } from "@/utils";
 import type { UserData } from "@/validation/validators";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useState, useRef, useEffect } from "react";
-import { TopupContext, upsertTopup } from "./topup.context";
+import { EventConsumerContext, upsertTopup } from "./event.context";
 import { apiClient } from "@/api/apiclient";
 import { TopUpService } from "@/db/topup.service";
 
+const env = getItem<"Live" | "Sandbox">("env") || "Live";
 
-const env = getItem<"Live" | "Sandbox">("env");
 const API_BASE =
   env === "Live"
     ? import.meta.env.VITE_API_BASE_URI
     : import.meta.env.VITE_SANDBOX_API_BASE_URL;
 
-export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
+export const EventConsumerProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [isConnected, setIsConnected] = useState(false);
@@ -22,18 +22,17 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
   const [token, setToken] = useState("");
-  
 
-  const topups = useLiveQuery(
-    () => db.topups.orderBy("createdAt").reverse().toArray(),
-    [] 
-  ) || [];
+  const topups =
+    useLiveQuery(
+      () => db.topups.orderBy("createdAt").reverse().toArray(),
+      []
+    ) || [];
 
-  
   // Function to start SSE connection
   const connectStream = () => {
-    const user = getItem<UserData>("user")
-    if(!user) return
+    const user = getItem<UserData>("user");
+    if (!user) return;
     const url = `${API_BASE}/top-ups/progress/${user.id}`;
     const eventSource = new EventSource(url, { withCredentials: true });
 
@@ -43,31 +42,27 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
     eventSource.addEventListener("topup", async (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log(data)
+        console.log(data);
         await TopUpService.add(data);
       } catch (err) {
         console.error("Error parsing SSE data:", err);
       }
-    })
+    });
 
     eventSource.onopen = () => {
       console.log("SSE connection established");
     };
 
-
     eventSource.onerror = async (error) => {
       if (eventSource?.readyState === EventSource.CLOSED) {
-      await handleSessionExpired();
-
+        await handleSessionExpired();
       }
 
       console.warn("SSE error or disconnect:", error);
-        setIsConnected(false);
-        eventSource.close();
+      setIsConnected(false);
+      eventSource.close();
 
-      
-          scheduleReconnect();
-        
+      scheduleReconnect();
     };
   };
 
@@ -82,25 +77,23 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
     }, 5000);
   };
 
-  const handleSessionExpired = async() => {
-   
+  const handleSessionExpired = async () => {
     const newToken = await apiClient.getAccessToken();
-    if(newToken) setToken(newToken)
-   
+    if (newToken) setToken(newToken);
   };
 
-//   const checkTokenValidity = async (): Promise<boolean> => {
-//     try {
-//       const res = await fetch(`${API_BASE}/auth/check`, {
-//         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-//         },
-//       });]
-//       return res.ok;
-//     } catch {
-//       return false;
-//     }
-//   };
+  //   const checkTokenValidity = async (): Promise<boolean> => {
+  //     try {
+  //       const res = await fetch(`${API_BASE}/auth/check`, {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+  //         },
+  //       });]
+  //       return res.ok;
+  //     } catch {
+  //       return false;
+  //     }
+  //   };
 
   // Cleanup old topups every 24 hours
   const cleanupOldTopups = async (hours = 24) => {
@@ -109,12 +102,10 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
     await db.topups.where("createdAt").below(cutoff.toISOString()).delete();
   };
 
-
   useEffect(() => {
     connectStream();
     cleanupOldTopups();
 
-    
     return () => {
       eventSourceRef.current?.close();
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
@@ -122,8 +113,10 @@ export const TopupProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [token, eventSourceRef]);
 
   return (
-    <TopupContext.Provider value={{ topups, isConnected, reconnecting }}>
+    <EventConsumerContext.Provider
+      value={{ topups, isConnected, reconnecting }}
+    >
       {children}
-    </TopupContext.Provider>
+    </EventConsumerContext.Provider>
   );
 };

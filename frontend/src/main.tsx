@@ -5,7 +5,7 @@ import App from "./App";
 import "./index.css";
 import { AuthProvider } from "./context/authprovider";
 import { ToastContainer, Slide } from "react-toastify";
-import { TopupProvider } from "./context/topup.provider";
+import { EventConsumerProvider } from "./context/event.provider";
 import EnvProvider from "./context/Environment/Env.provider";
 
 createRoot(document.getElementById("root")!).render(
@@ -28,9 +28,9 @@ createRoot(document.getElementById("root")!).render(
       />
       <AuthProvider>
         <EnvProvider>
-          <TopupProvider>
+          <EventConsumerProvider>
             <App />
-          </TopupProvider>
+          </EventConsumerProvider>
         </EnvProvider>
       </AuthProvider>
     </BrowserRouter>

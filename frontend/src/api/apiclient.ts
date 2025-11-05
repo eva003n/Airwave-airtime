@@ -10,7 +10,7 @@ import { logOutUser } from ".";
 import type { IUser } from "@/interfaces/user.interface";
 import type { TokenResponse, UserData } from "@/validation/validators";
 
-const env = getItem<"Live" | "Sandbox">("env");
+const env = getItem<"Live" | "Sandbox">("env") || "Live";
 class ApiClient {
   private clientId: string;
   private clientSecret: string;
@@ -26,7 +26,9 @@ class ApiClient {
   constructor() {
     this.clientId = "";
     this.clientSecret = "";
-    this.audience = import.meta.env.VITE_API_BASE_URI;
+    this.audience =  env === "Live"
+          ? import.meta.env.VITE_API_BASE_URI
+          : import.meta.env.VITE_SANDBOX_API_BASE_URL;
     this.authUrl = "/auth/refresh-token";
     this.isRefreshing = false;
 
@@ -38,7 +40,7 @@ class ApiClient {
       headers: {
         "Content-Type": "application/json",
         "x-env": `${
-          getItem<"Live" | "Sandbox">("env") === "Live"
+          env === "Live"
             ? "production"
             : "development"
         }`,
@@ -48,8 +50,10 @@ class ApiClient {
     });
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
+        const env = getItem<"Live" | "Sandbox">("env") || "Live"
+
         // set xustom header for the environment
-        config.headers["x-env"] = getItem<"Live" | "Sandbox">("env") === "Live"? "production" : "development";
+        config.headers["x-env"] = env === "Live"? "production" : "development";
         // Always attach the current access token
         if (this.token) {
           config.headers.Authorization = `Bearer ${this.token}`;
@@ -124,6 +128,9 @@ class ApiClient {
       const now = Math.floor(Date.now() / 1000);
       if (this.token && now < this.tokenExpiry) return this.token;
 
+      //get latest environment
+        const env = getItem<"Live" | "Sandbox">("env") || "Live";
+
       //use axios to avoid interceptor recursion
       const response = await axios.get<TokenResponse>(
         `${this.audience}${this.authUrl}`,
@@ -131,7 +138,7 @@ class ApiClient {
           withCredentials: true,
           headers: {
             "Content-Type": "application/json",
-            "x-env": `${getItem<"Live" | "Sandbox">("env") === "Live" ? "production" : "development"}`,
+            "x-env": env === "Live" ? "production" : "development",
           },
         }
       );

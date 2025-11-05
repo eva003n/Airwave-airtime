@@ -20,7 +20,7 @@ import { TopUpService } from "@/db/topup.service";
 import { TopUpDataTable } from "./Datatable";
 import topUpColumns from "./Columns";
 import { apiClient } from "@/api/apiclient";
-import { useTopups } from "@/context/topup.context";
+import { useEventConsumer } from "@/context/event.context";
 import { startBulkTopUps } from "@/api";
 import { toast } from "react-toastify";
 
@@ -94,7 +94,7 @@ const jobQueue = [
 
 type TopUp = {
   id: string; // unique ID from backend
-  name:string,
+  name: string;
   phone: string;
   amount: number;
   branch: string;
@@ -133,23 +133,23 @@ const getStatusBadge = (status: string) => {
 };
 
 export default function BulkTopUpQueue() {
-// const [topups, setTopups] = useState(
-//   useLiveQuery(() => db.topups.orderBy("createdAt").reverse().toArray(), []) || []
-// )
-  const { topups, isConnected, reconnecting } = useTopups();
-const [pages, setPages] = useState(1);
-const [page, setPage] = useState(1);
-const [token, setToken] = useState("");
+  // const [topups, setTopups] = useState(
+  //   useLiveQuery(() => db.topups.orderBy("createdAt").reverse().toArray(), []) || []
+  // )
+  const { topups, isConnected, reconnecting } = useEventConsumer();
+  const [pages, setPages] = useState(1);
+  const [page, setPage] = useState(1);
+  const [token, setToken] = useState("");
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this airtime topup?")) return;
-    TopUpService.delete(id)
+    TopUpService.delete(id);
   };
 
   const handleStart = async () => {
-    const response = await startBulkTopUps()
-    toast.success(response.data.message)
-  }
+    const response = await startBulkTopUps();
+    toast.success(response.data.message);
+  };
 
   return (
     <div className="p-4 ">

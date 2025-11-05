@@ -8,7 +8,7 @@ const ModeSwitch = () => {
   const handleModeChange = (checked: boolean) => {
     setEnabled(checked);
 
-    if (mode === "Live") {
+    if (!enabled) {
       switchMode("Sandbox");
     } else {
       switchMode("Live");
@@ -19,7 +19,11 @@ const ModeSwitch = () => {
     <div className="flex items-center space-x-2">
       <Switch
         id="mode"
-        className={`${!enabled? "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" : "bg-gray-300"}`}
+        className={`${
+          enabled
+            ? "bg-gray-300"
+            : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+        }`}
         checked={enabled}
         onCheckedChange={(checked) => handleModeChange(checked)}
       />

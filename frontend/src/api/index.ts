@@ -8,6 +8,7 @@ import type {
 
 import type {
   Analytics,
+  AnalyticsAdmin,
   Id,
   OperatorDatail,
   OperatorDetect,
@@ -110,6 +111,10 @@ const updateWallet = async(data: WalletForm) => {
 const getAnalyticsData = async(id: string) => {
   return apiClient.request<Analytics>("GET", `/reports/${id}`)
 }
+/* ---- Admin ---- */
+const getAdminAnalyticsData = async () => {
+  return apiClient.request<AnalyticsAdmin>("GET", "/reports/admin");
+};
 
 
 export {
@@ -135,5 +140,6 @@ export {
   updateWallet,
 
   //report management
-getAnalyticsData
+getAnalyticsData,
+getAdminAnalyticsData
 };

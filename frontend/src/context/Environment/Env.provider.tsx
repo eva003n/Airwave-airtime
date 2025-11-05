@@ -7,9 +7,9 @@ import { apiClient } from "@/api/apiclient";
 // Provides the mode the application should run in Live or sandbox
 const EnvProvider = ({ children }: { children: React.ReactNode }) => {
   const [mode, setMode] = useState<"Live" | "Sandbox">(() =>
-    getItem<"Live" | "Sandbox">("env")
+    getItem<"Live" | "Sandbox">("env") || "Live"
   );
-    const [enabled, setEnabled] = useState(false);
+    const [enabled, setEnabled] = useState(() => getItem<"Live" | "Sandbox">("env") === "Sandbox");
   
 
   const switchMode = (value: "Live" | "Sandbox") => {
@@ -22,7 +22,7 @@ const EnvProvider = ({ children }: { children: React.ReactNode }) => {
     //send header to backend
      apiClient.request("GET", "/")
 
-    if (!env) return setItem("env", JSON.stringify("Live"));
+    // if (!env) return setItem("env", JSON.stringify("Live"));
 
     setMode(env);
   }, [enabled]);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Users,
@@ -20,6 +20,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { getAdminAnalyticsData, getAnalyticsData } from "@/api";
+import { getItem } from "@/utils";
+import type { UserData } from "@/validation/validators";
 
 export const STATSDATA: StatCardProps[] = [
   {
@@ -76,22 +79,60 @@ const topUpData = [
 ];
 
 const DashboardPage = () => {
+  const [stats, setStats] = useState<{
+    totalUsers: number;
+    totalTransactions: number;
+    walletBalance: number;
+    totalTopUps: number;
+  }>();
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      const response = await getAdminAnalyticsData();
+      setStats(response.data.data.stats);
+    };
+    fetchAnalytics();
+  }, []);
   return (
     <section className="p-4 space-y-4 text-color min-h-screen">
       <h1 className="md:text-2xl font-semibold text-gray-700">
         Dashboard Overview
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {STATSDATA.map((data) => (
-          <StatsCard
-            key={data.title}
-            title={data.title}
-            icon={data.icon}
-            iconStyles={data.iconStyles}
-            count={data.count}
-            description={data.description}
-          />
-        ))}
+        <StatsCard
+          key={"Total Users"}
+          title={"Total Users"}
+          icon={Users}
+          iconStyles={"text-blue-500 w-8 h-8 bg-blue-100 p-2 rounded-full"}
+          count={stats?.totalUsers || 0}
+          description={"Active users"}
+        />
+        <StatsCard
+          key={"Total Transactions"}
+          title={"Total Transactions"}
+          icon={CreditCard}
+          iconStyles={"text-green-500  w-8 h-8 bg-green-100 p-2 rounded-ful"}
+          count={stats?.totalTransactions || 0}
+          description={"Completed payments"}
+        />
+        <StatsCard
+          key={"Wallet balance"}
+          title={"Wallet balance"}
+          icon={Wallet}
+          iconStyles={
+            "text-indigo-500  w-8 h-8  bg-indigo-100 p-2 rounded-full"
+          }
+          count={stats?.walletBalance || 0}
+          description={"App wallet deposits"}
+        />
+        <StatsCard
+          key={"Airtime Purchases"}
+          title={"Airtime Purchases"}
+          icon={PhoneCall}
+          iconStyles={"text-orange-500  w-8 h-8 bg-orange-100 p-2 rounded-full"}
+          count={stats?.totalUsers || 0}
+          description={"Airtime distributions"}
+        />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ChartComponent
@@ -121,15 +162,15 @@ const DashboardPage = () => {
           chart={BarChart}
         >
           <>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="month" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" />
-              <Tooltip />
-              <Bar
-                dataKey="topups"
-                fill="#6b7280" // gray-500
-                radius={[8, 8, 0, 0]}
-              />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="month" stroke="#9ca3af" />
+            <YAxis stroke="#9ca3af" />
+            <Tooltip />
+            <Bar
+              dataKey="topups"
+              fill="#6b7280" // gray-500
+              radius={[8, 8, 0, 0]}
+            />
           </>
         </ChartComponent>
       </div>

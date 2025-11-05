@@ -9,20 +9,19 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, type TopUp } from "../db/db";
 import { TopUpService } from "@/db/topup.service";
 
-type TopupContextType = {
+type EventContextType = {
   topups: TopUp[];
   isConnected: boolean;
   reconnecting: boolean;
 }
 
-const TopupContext = createContext<TopupContextType>({
+export const EventConsumerContext = createContext<EventContextType>({
   topups: [],
   isConnected: false,
   reconnecting: false,
 });
 
-export const useTopups = () => useContext(TopupContext);
-
+export const useEventConsumer = () => useContext(EventConsumerContext)
 
 // Helper function to safely upsert into Dexie
 async function upsertTopup(data: TopUp) {
@@ -40,6 +39,5 @@ async function upsertTopup(data: TopUp) {
   }
 }
 export {
-    TopupContext,
     upsertTopup
 }

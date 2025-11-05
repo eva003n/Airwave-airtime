@@ -431,6 +431,29 @@ const analyticsSchema = z.object({
     ),
   }),
 });
+const analyticsAdminSchema = z.object({
+  data: z.object({
+    stats: z.object({
+        totalUsers: z.number(),
+        totalTransactions: z.number(),
+        walletBalance: z.number(),
+        totalTopUps: z.number(),
+      }),
+    transactionGrowth: z.array(
+      z.object({
+        month: z.string(),
+        count: z.number(),
+      })
+    ),
+    airtimePurchases: z.array(
+      z.object({
+        month: z.number(),
+        totalAirtime: z.number(),
+        totalTopups: z.number(),
+      })
+    ),
+  }),
+});
 
 export type BulkTopUpForm = z.infer<typeof bulkTopUpSchema>;
 export type SignUpAuth = z.infer<typeof signUpSchema>;
@@ -457,3 +480,4 @@ export type TopUpData = z.infer<typeof topUpDataSchema>;
 export type TopUpDataApi = z.infer<typeof topUpDataApiSchema>
 export type WalletData = z.infer<typeof walletBalanceSchema>
 export type Analytics = z.infer<typeof analyticsSchema>
+export type AnalyticsAdmin = z.infer<typeof analyticsAdminSchema>
