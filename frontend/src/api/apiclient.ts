@@ -11,6 +11,7 @@ import type { IUser } from "@/interfaces/user.interface";
 import type { TokenResponse, UserData } from "@/validation/validators";
 
 const env = getItem<"Live" | "Sandbox">("env") || "Live";
+const user = getItem<UserData>("user")
 class ApiClient {
   private clientId: string;
   private clientSecret: string;
@@ -44,6 +45,7 @@ class ApiClient {
             ? "production"
             : "development"
         }`,
+        "x-clientId": user?.id
       },
       timeout: 120000, // 2mins
       withCredentials: true, //ensure that client sends cookies in reqyests and makes sure the client doesnt ignore cookies set by backend
@@ -106,7 +108,7 @@ class ApiClient {
             const confirmed = await showSessionExpiredAlert();
             const user = getItem<UserData>("user");
             if (confirmed) {
-              await logOutUser(user.id);
+              await logOutUser(user.id as string);
               this.clearAuthAndLogout();
             }
             // else {

@@ -6,6 +6,7 @@ import {
   OPERATORS,
   WALLET_TYPES,
 } from "../../constants.js";
+import asyncHandler from "../../utils/asyncHandler.js";
 
 const signUpSchema = z.object({
   userName: z
@@ -332,6 +333,21 @@ export const userSchema = z.object({
   createdAt: z.string().optional(), // coerce ISO string into Date
   updatedAt: z.string().optional(),
 });
+
+const validateTopUpATSchema = z.object({
+  transactionId: z.string(),
+  phoneNumber: z.string(),
+  sourceIpAddress: z.string(),
+  currencyCode: z.string(),
+  amount: z.number()
+})
+const ATTopUpStatusSchema = z.object({
+  requestId: z.string(),
+  status: z.enum(["Success", "Failed"]),
+  phoneNumber: z.string(),
+  value: z.string(),
+  discount: z.string()
+});
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -354,6 +370,8 @@ export type OperatorDetailApi = z.infer<typeof operatorDetailsSchemaApi>;
 export type WalletBalance = z.infer<typeof walletBalanceSchema>;
 export type ATTopUpResponse = z.infer<typeof AfricasTalkingTopUpSchema>;
 export type ATWallet = z.infer<typeof africasTalkingWalletBalanceSchema>
+export type ATValidateTopUp = z.infer<typeof validateTopUpATSchema>
+export type ATTopUpStatus = z.infer<typeof ATTopUpStatusSchema>
 
 // Mpesa api response type
 export type MpesaC2BResponse = z.infer<typeof mpesaC2BApiResponseSchema>;

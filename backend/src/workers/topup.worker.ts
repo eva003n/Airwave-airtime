@@ -69,22 +69,6 @@ const sendTopUp = async (
 
   if (!recipient) throw new Error("Recipient does not exist or is deleted");
 
-  // const topResponse = await reloadlyClient.request<ReloadlyTopUp>(
-  //   "POST",
-  //   "/topups",
-  //   //payload send to reloadly airtime api
-  //   {
-  //     amount: airtimeAmount,
-  //     operatorId: operatorCode,
-  //     recipientPhone: {
-  //       countryCode: "KE",
-  //       number: phoneNumber,
-  //     },
-  //   }
-  // );
-
-  // console.log(topResponse.data)
-
   const topResponse = (
     await africasTalkingClient.post<{}, ATTopUpResponse>(
       "/version1/airtime/send",
@@ -102,22 +86,6 @@ const sendTopUp = async (
     )
   ).data;
 
-  const status =
-    topResponse.responses[0]?.status === "Sent"
-      ? TopStatus.Successful
-      : TopStatus.Failed;
-
-  const amount = parseInt(
-    topResponse.responses[0]?.amount.replace("KES", "").trim() as string
-  );
-  const id = await randomInt(600000);
-  const topUp = await Topup.create({
-    transaction_id: id,
-    status,
-    airtime_amount: amount,
-    recipient_id: recipient.id || "",
-    user_id: job.data.userId,
-  });
 };
 
 let topUpWorker: Worker;
@@ -201,7 +169,7 @@ const startWorker = async () => {
       const payload = {
         id: job.id,
         ...job.data,
-        status: "Success",
+        status: "Processing",
         updatedAt: new Date().toISOString(),
       };
       await pub.publish("topup_updates", JSON.stringify(payload));
