@@ -37,8 +37,14 @@ app.use(express.static("public"));
 //logging http requests
 app.use(morganMiddleware);
 
+
 /*---Custom middleware--- */
+import setEnvironment from "./middlewares/env.middleware.js";
+import interceptRequest from "./middlewares/connect.middleware.js";
+
 app.use(setEnvironment)
+
+app.use(interceptRequest)
 
 //API endpoints
 import homeRouter from "./routes/home.routes.js";
@@ -53,7 +59,7 @@ import paymentRouter from "./routes/payment.routes.js"
 import notFoundRouter from "./routes/not-found.routes.js";
 import healthCheckRouter from "./routes/health.routes.js";
 import { serverAdapter } from "./config/Bullmq/bullboard.js";
-import setEnvironment from "./middlewares/env.middleware.js";
+
 
 
 app.use("/api/v1", homeRouter)
