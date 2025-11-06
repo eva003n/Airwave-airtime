@@ -2,6 +2,7 @@ import axios, {
   AxiosError,
   type AxiosInstance,
   type AxiosResponse,
+  type InternalAxiosRequestConfig,
 } from "axios";
 import {
 
@@ -16,6 +17,7 @@ import {
 import logger from "../../logger/logger.winston.js";
 import ApiError from "../../utils/ApiError.js";
 import ReloadlyError from "../../utils/ServiceError.js";
+import { randomUUID } from "crypto";
 
 interface TokenResponse {
   access_token: string;
@@ -23,18 +25,22 @@ interface TokenResponse {
   token_type: string;
 }
 
+//generate once for each request
+const IDEMPOTENCY_KEY = randomUUID()
+
 class ApiClient {
   private api: AxiosInstance;
   private audience: string;
   private apiKey : string;
   private userName: string;
+  private idempotencyKey: string
 
   constructor() {
     this.audience = (NODE_ENV === "production"? AFRICAS_TALKING_AIRTIME_API : 
       AFRICAS_TALKING_AIRTIME_API_SANDBOX_URI) as string, // Change if using other africas talking APIs
     this.apiKey = (NODE_ENV === "production"?  AFRICAS_TALKING_API_KEY : AFRICAS_TALKING_SANDBOX_API_KEY) as string
     this.userName = (NODE_ENV === "production"? AFRICAS_TALKING_USERNAME :AFRICAS_TALKING_SANDBOX_USERNAME) as string
-
+    this.idempotencyKey = IDEMPOTENCY_KEY
     this.api = axios.create({
       baseURL: this.audience,
       headers: {
@@ -44,6 +50,15 @@ class ApiClient {
       },
       timeout: 120000, // 2mins
     });
+
+    this.api.interceptors.request.use(
+      async (config: InternalAxiosRequestConfig) => {
+        config.headers["Idempotency-Key"] = this.idempotencyKey
+
+        return config
+      },
+      (error: any) => Promise.reject(error)
+    )
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error: AxiosError<{ message: string }>) => {
