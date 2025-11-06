@@ -1,6 +1,8 @@
 import { reloadlyClient } from "../config/reloadly/reloadlyclient.js";
 import type {
   ATTopUpResponse,
+  ATTopUpStatus,
+  ATValidateTopUp,
   BulkTopUpData,
   Id,
   OperatorDatail,
@@ -28,7 +30,15 @@ import { jobProducer } from "../queues/producer.js";
 import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
 import { randomInt, randomUUID } from "crypto";
 import { getCurrency } from "../utils/index.js";
-import { AFRICAS_TALKING_SANDBOX_USERNAME, AFRICAS_TALKING_USERNAME, NODE_ENV } from "../config/env.js";
+import {
+  AFRICAS_TALKING_SANDBOX_USERNAME,
+  AFRICAS_TALKING_USERNAME,
+  NODE_ENV,
+} from "../config/env.js";
+import { sequelize } from "../config/database/postgres/postgres.js";
+import Transaction from "../models/Transaction.js";
+import Wallet from "../models/Wallet.js";
+import Ledger from "../models/Ledger.js";
 
 /*Uploading cvs */
 //https://blog.logrocket.com/complete-guide-csv-files-node-js/
@@ -185,7 +195,10 @@ const sendTopUp = asyncHandler(
         "/version1/airtime/send",
         //payload send to reloadly airtime api
         {
-          username:NODE_ENV === "production"? AFRICAS_TALKING_USERNAME : AFRICAS_TALKING_SANDBOX_USERNAME,
+          username:
+            NODE_ENV === "production"
+              ? AFRICAS_TALKING_USERNAME
+              : AFRICAS_TALKING_SANDBOX_USERNAME,
           recipients: [
             {
               phoneNumber: phone_number,
@@ -197,16 +210,12 @@ const sendTopUp = asyncHandler(
       )
     ).data;
 
-
-   
     const status =
       topResponse.responses[0]?.status === "Sent"
         ? TopStatus.Successful
         : TopStatus.Failed;
 
-    const amount = getCurrency(
-      topResponse.responses[0]?.amount as string
-    );
+    const amount = getCurrency(topResponse.responses[0]?.amount as string);
     const id = await randomInt(600000);
     const topUp = await Topup.create({
       transaction_id: id,
@@ -219,18 +228,6 @@ const sendTopUp = asyncHandler(
     return res
       .status(200)
       .json(new ApiResponse(200, topUp, "Successfully topped up "));
-  }
-);
-
-const getTopUpStatus = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params as Id;
-
-    const topUp = await reloadlyClient.request("GET", `/${id}/status`);
-
-    return res
-      .status(200)
-      .json(new ApiResponse(200, topUp.data, "Top up fetched successfully"));
   }
 );
 
@@ -387,28 +384,128 @@ const getBulkTopUpStatus = asyncHandler(
   }
 );
 
-//key value strore to keep track of client connections
-const connectedClients = new Map();
+const validateTopup = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const {
+      transactionId,
+      phoneNumber,
+      sourceIpAddress,
+      currencyCode,
+      amount,
+    }: ATValidateTopUp = req.body;
 
-const manageClientConnections = (clientId: string, res: Response) => {
-  // Make sure uniqye clients are added and prevent overwritting
+    // check for airtime recipient in the system
+    const recipient = await Recipient.findOne({
+      where: { phone_number: phoneNumber },
+    });
 
-  if (!connectedClients.has(clientId)) {
-    connectedClients.set(clientId, new Set());
+    // cancel top up if recipient does exist
+    if (!recipient) return res.json({ status: "Failed" });
+
+    return res.json({
+      status: "Validated",
+    });
   }
+);
 
-  //if existing connected client and the user has opened another tab or using another device
-  connectedClients.get(clientId).add(res);
+const getTopUpStatus = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { phoneNumber, status, value, discount, requestId }: ATTopUpStatus =
+      req.body;
 
-  //client disconnect remove the response stream
-  res.on("close", () => {
-    connectedClients.get(clientId).delete(res);
-    if (connectedClients.get(clientId).size === 0) {
-      //free up memory, by deletion a client who has no open connections
-      connectedClients.delete(clientId);
-    }
-  });
-};
+    // format money amount
+    const amount = getCurrency(value);
+
+    // create an atomic transaction
+    await sequelize.transaction(async (transaction) => {
+      // check for airtime recipient in the system
+      const recipient = await Recipient.findOne({
+        where: { phone_number: phoneNumber },
+        transaction,
+      });
+      // abort transaction
+      if (!recipient) transaction.rollback();
+
+      // get wallet associated with transation
+      const wallet = await Wallet.findOne({
+        where: { user_id: recipient?.user_id },
+        transaction,
+      });
+
+      // abort transaction
+      if (!wallet) transaction.rollback();
+
+      // create double entry transaction (credit | debit)
+      const debitTransaction = await Transaction.create(
+        {
+          reference: requestId,
+          transaction_type: "Debit", // Money moces from system to recipient account
+          amount,
+          wallet_id: wallet?.id,
+        },
+        { transaction }
+      );
+
+      const creditTransaction = await Transaction.create(
+        {
+          reference: requestId,
+          transaction_type: "Credit", // Money top ups recipient airtime
+          amount,
+          wallet_id: wallet?.id,
+        },
+        { transaction }
+      );
+
+      // Calculate balances and record in system ledger
+      // get last transaction balances
+      const lastLedger = await Ledger.findOne({
+        where: { wallet_id: wallet?.id },
+        order: [["createdAt", "DESC"]],
+        transaction,
+      });
+
+      const balanceBeforeDebit = Number(
+        lastLedger ? lastLedger.balance_after : 0
+      );
+
+      const currentAmount = Number(debitTransaction.amount); // money moving out
+      // money remaining
+      const balanceAfterDebit = balanceBeforeDebit - currentAmount; // debit
+
+      // System ledger can only record the debit for a airtime top up credit is recorded on external service
+      await Ledger.create(
+        {
+          wallet_id: wallet?.id,
+          transaction_id: debitTransaction?.id,
+          balance_before: balanceBeforeDebit,
+          balance_after: balanceAfterDebit,
+        },
+        { transaction }
+      );
+
+      // After transactions are complete record the top up for history tracking
+      const topUp = await Topup.create(
+        {
+          transaction_id: debitTransaction?.id,
+          status,
+          airtime_amount: amount,
+          recipient_id: recipient?.id,
+          user_id: recipient?.user_id,
+        },
+        { transaction }
+      );
+    });
+
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, null, "Top up received successfully"));
+  }
+);
+
+
+
+
 
 const enqueueTopUps = async (data: BulkTopUpData[], id: string) => {
   return await jobProducer.addJobs<BulkTopUpData>(
@@ -447,7 +544,14 @@ const getPaginatedTopUps = async (
         model: Recipient,
         where,
         as: "recipient",
-        attributes: ["id", "name", "branch", "phone_number", "department", "operator"],
+        attributes: [
+          "id",
+          "name",
+          "branch",
+          "phone_number",
+          "department",
+          "operator",
+        ],
       },
     ],
   });
@@ -465,6 +569,7 @@ export {
   createBulkTopUps,
   sendBulkTopUps,
   getTopUps,
+  validateTopup,
   getTopUpStatus,
   autoDetectOperator,
   getOperators,
