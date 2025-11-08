@@ -23,6 +23,7 @@ const connection = new Redis({
   tls: parsed.protocol === "redis:"? {} : undefined
 });
 
+connection.on("error", (err) => logger.info(`Redis connection error ${err.message}`))
 // Separate clients for Pub/Sub to avoid interference
 export const pub = new Redis(connection.options);
 export const sub = new Redis(connection.options);
