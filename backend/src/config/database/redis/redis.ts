@@ -20,7 +20,7 @@ const connection = new Redis({
   username: NODE_ENV === "production"? parsed.username : REDIS_USER,
   password: NODE_ENV === "production"? parsed.password || undefined : REDIS_PASSWORD,
   maxRetriesPerRequest: null,
-  tls: parsed.protocol === "redis:"? {} : undefined,
+  tls: parsed.protocol === "rediss:"? {} : undefined,
   connectTimeout: 15000 //15s
 });
 
