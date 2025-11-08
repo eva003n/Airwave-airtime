@@ -9,6 +9,7 @@ import { NODE_ENV } from "../config/env.js";
 export enum UserRole {
   Admin = "admin",
   User = "user",
+  Test = "test",
 }
 
 class User extends Model {

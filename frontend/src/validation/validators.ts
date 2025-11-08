@@ -45,7 +45,7 @@ export const userSchema = z.object({
     .optional(),
   username: z.string().min(1, "Username is required"),
   email: z.email(),
-  role: z.enum(["user", "admin"]), // Adjust roles as needed
+  role: z.enum(["user", "admin", "test"]), // Adjust roles as needed
   avatar_url: z.string().optional(),
   avatar_id: z.uuid().nullable().optional(),
   is_MFA_enabled: z.boolean(),

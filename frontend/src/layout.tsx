@@ -46,7 +46,7 @@ const AppLayout = () => {
           </div>
 
           <div className="flex gap-6 items-center">
-            {user && (import.meta.env.VITE_ENV === "development") && (
+            {user && user.role === "test" && (
               <div>
                 <ModeSwitch />
               </div>
