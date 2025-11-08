@@ -83,6 +83,7 @@ User.init(
     role: {
       type: DataTypes.ENUM(...Object.values(UserRole)),
       defaultValue: "user",
+      allowNull: false
     },
 
     refresh_token: {

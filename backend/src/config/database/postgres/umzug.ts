@@ -3,15 +3,14 @@ import { Umzug, SequelizeStorage } from "umzug";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import logger from "./logger/logger.winston.js";
-import { sequelize } from "./config/database/postgres/postgres.js";
-import { DB_NAME, NODE_ENV } from "./config/env.js";
+import logger from "../../../logger/logger.winston.js";
+import { sequelize } from "./postgres.js";
+import { DB_NAME, NODE_ENV } from "../../env.js";
 
 // Recreate __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-console.log(__dirname)
-
+console.log(__dirname);
 
 // const env = (NODE_ENV as keyof ConfigEnv) || "development";
 
@@ -27,17 +26,17 @@ const migrator = new Umzug({
       isProd
         ? "dist/migrations/*.js" // compiled migrations
         : "src/migrations/*.ts", // raw TS files
-      { cwd: path.resolve(__dirname, "..") },
+      { cwd: path.resolve(__dirname, "../../../../") },
     ],
   },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({ sequelize }),
-  logger: logger
+  logger: logger,
 });
 
 // Helper functions
 export const runMigrations = async () => {
-  logger.info(`Running migrations in ${NODE_ENV} environment`)
+  logger.info(`Running migrations in ${NODE_ENV} environment`);
   logger.info(
     `🔍 Searching for pending database migrations (Database -> ${sequelize.config.database})`
   );
@@ -45,10 +44,10 @@ export const runMigrations = async () => {
   if (pending.length === 0) {
     logger.info("✅ No pending migrations. Database is up to date.");
     return;
-  }else  {
-  logger.info(
-    `🔍 Searching for pending database migrations (Database -> ${sequelize.config.database})`
-  );
+  } else {
+    logger.info(
+      `🔍 Searching for pending database migrations (Database -> ${sequelize.config.database})`
+    );
 
     logger.info(`🔄 Found ${pending.length} pending migrations.`);
   }
@@ -57,12 +56,16 @@ export const runMigrations = async () => {
     `✅ Database migrations done (Database -> ${sequelize.config.database})`,
     result.map((m) => JSON.stringify(m.name))
   );
+
+  NODE_ENV === "development" && (await runSeeders());
 };
 
 export const revertLastMigration = async () => {
-    logger.info(`Rerveting migrations in ${NODE_ENV} environment`);
+  logger.info(`Rerveting migrations in ${NODE_ENV} environment`);
 
-  logger.info(`⏳ Reverting last database migration (Database -> ${sequelize.config.database})`);
+  logger.info(
+    `⏳ Reverting last database migration (Database -> ${sequelize.config.database})`
+  );
   const result = await migrator.down();
   logger.info(
     "⏪ Reverted database migration...",
@@ -73,7 +76,7 @@ export const revertLastMigration = async () => {
 // ESM-safe entrypoint check
 if (import.meta.url === `file://${process.argv[1]}`) {
   runMigrations()
-    .then(() => {
+    .then(async () => {
       logger.info("✅ All database migrations completed");
       process.exit(0);
     })
@@ -82,7 +85,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(1);
     });
 }
-
 
 const command = process.argv[2]; // "up" or "down"
 console.log(command);
@@ -96,3 +98,40 @@ console.log(command);
     logger.info("💡Use: pnpm migrate or pnpm migrate:undo");
   }
 })();
+
+const seeder = new Umzug({
+  migrations: {
+    glob: [
+      "dist/seeders/*.js",
+      { cwd: path.resolve(__dirname, "../../../../") }, // backend/config/database/postgres --> backend/dist
+    ],
+  },
+  context: sequelize.getQueryInterface(),
+  storage: new SequelizeStorage({
+    sequelize,
+    modelName: "SequelizeSeedersMeta",
+  }),
+  logger: logger,
+});
+
+const runSeeders = async () => {
+  try {
+    logger.info(`Running seeders for ${sequelize.config.database}`);
+    await seeder.up();
+
+    const pending = await seeder.pending();
+    if (pending.length === 0) {
+      logger.info("✅ No pending seeders. Database is up to date.");
+      return;
+    } else {
+      logger.info(
+        `🔍 Searching for pending database seeders (Database -> ${sequelize.config.database})`
+      );
+
+      logger.info(`🔄 Found ${pending.length} pending seeders.`);
+      logger.info("✅ All seeders executed successfully.");
+    }
+  } catch (error) {
+    logger.error(`❌ Database seeding failed ${error}`);
+  }
+};

@@ -11,20 +11,26 @@ import {
 } from "../../env.js";
 import { Redis, type RedisOptions } from "ioredis";
 
+const url = REDIS_URL ? REDIS_URL : "http://localhost:6379";
+
 //connection to redis running in local machine or docker
-const parsed = new URL(REDIS_URL as string)
+const parsed = new URL(url)
 
 const connection = new Redis({
-  host: (NODE_ENV === "production" ? parsed.hostname : REDIS_HOST ) as string,
-  port: NODE_ENV === "production" ? Number(parsed.port) : Number(REDIS_PORT),
-  username: NODE_ENV === "production"? parsed.username : REDIS_USER,
-  password: NODE_ENV === "production"? parsed.password || undefined : REDIS_PASSWORD,
+  host: parsed.hostname,
+  port: Number(parsed.port),
+  username: parsed.username,
+  password: parsed.password || undefined,
   maxRetriesPerRequest: null,
-  tls: parsed.protocol === "rediss:"? {} : undefined,
+  tls: parsed.protocol === "rediss:" || parsed.protocol === "postgres:"? {} : undefined,
   connectTimeout: 15000 //15s
 });
 
-connection.on("error", (err) => logger.info(`Redis connection error ${err.message}`))
+connection.on("error", (err) => {
+  logger.info(`❌ Redis connection error ${err.message}`)
+  }
+)
+
 // Separate clients for Pub/Sub to avoid interference
 export const pub = new Redis(connection.options);
 export const sub = new Redis(connection.options);

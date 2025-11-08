@@ -14,7 +14,7 @@ import { app } from "../app.js";
 import type User from "../models/User.js";
 import { generateQueueEvents } from "./index.js";
 import { connectDatabase } from "../config/database/postgres/postgres.js";
-import { runMigrations } from "../migrate.js";
+import { runMigrations } from "../config/database/postgres/umzug.js";
 import { topUpQueue } from "../queues/topup.queue.js";
 import logger from "../logger/logger.winston.js";
 import { UpdatedAt } from "sequelize-typescript";
@@ -85,7 +85,6 @@ const sendTopUp = async (
       }
     )
   ).data;
-
 };
 
 let topUpWorker: Worker;

@@ -2,7 +2,7 @@ import { PORT, SERVER_URL, NODE_ENV } from "./config/env.js";
 import { app } from "./app.js";
 import logger from "./logger/logger.winston.js";
 import { connectDatabase } from "./config/database/postgres/postgres.js";
-import { runMigrations } from "./migrate.js";
+import { runMigrations } from "./config/database/postgres/umzug.js";
 
 const port = PORT;
 
@@ -13,7 +13,6 @@ const serverUrl =
 await connectDatabase();
 //run database migrations
 await runMigrations();
-
 
 
 app.listen(port, () => {
