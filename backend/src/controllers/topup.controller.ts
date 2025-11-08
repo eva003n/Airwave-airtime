@@ -494,6 +494,10 @@ const getTopUpStatus = asyncHandler(
         },
         { transaction }
       );
+
+      // update wallet balance
+      wallet?.set({balance: balanceAfterDebit})
+      await wallet?.save({transaction})
     });
 
 

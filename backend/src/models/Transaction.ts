@@ -49,7 +49,6 @@ Transaction.init(
     reference: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
 
     transaction_type: {
@@ -81,12 +80,12 @@ Transaction.init(
     tableName: "transactions",
     timestamps: true,
     paranoid: true,
-    indexes: [
-        {
-            unique: true,
-            fields: ["reference"]
-        }
-    ]
+    // indexes: [
+    //     {
+    //         unique: true,
+    //         fields: ["reference"]
+    //     }
+    // ]
   }
 );
 

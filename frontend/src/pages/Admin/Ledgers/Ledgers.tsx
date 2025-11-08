@@ -3,21 +3,20 @@ import { Button } from "@/components/ui/button";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Edit, Pen, Trash2 } from "lucide-react";
-import userColumns, { type UserColumn } from "./Columns";
 import { DataTable } from "./Datatable";
 import { Link } from "react-router-dom";
-import { deleteRecipient, deleteUser, getAllRecipients, getAllUsers } from "@/api";
-import type { RecipientData, RecipientDataApi, UserData, } from "@/validation/validators";
+import { deleteRecipient, deleteTransactionAdmin, deleteUser, getAllRecipients, getAllUsers, getLedgers, getTransactions } from "@/api";
+import type { LedgerData, RecipientData, RecipientDataApi, TransactionData, UserData, } from "@/validation/validators";
 import type { AxiosResponse } from "axios";
 import  { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
-import type { ColumnDef } from "@tanstack/react-table";
+import ledgerColumns from "./Columns";
 
 
-const UserManagementPage = () => {
+const LedgerManagementPage = () => {
   const [search, setSearch] = useState("");
-  const [users, setUsers] =
-    useState<UserData[]>([]);
+  const [ledgers, setLedgers] =
+    useState<LedgerData[]>([]);
 
   const [page, setPage] = useState(0)
   const [pages, setPages] = useState(0)
@@ -25,7 +24,7 @@ const UserManagementPage = () => {
   const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-      const fetchUsers = async() => {
+      const fetchTransactions = async() => {
         const name = searchParams.get("name") || ""
         
         setSearch(name)
@@ -34,8 +33,8 @@ const UserManagementPage = () => {
 
         try {
 
-            const response = await getAllUsers()
-            setUsers(response.data.data.users)
+            const response = await getLedgers()
+            setLedgers(response.data.data.ledgers)
 
             setPage(response.data.data.currentPage)
             setPages(response.data.data.totalPages)
@@ -44,12 +43,16 @@ const UserManagementPage = () => {
 
           setLoading(false)
         } catch (error) {
+            setLoading(false);
+
           // console.log(error.message)
+        }finally {
+            setLoading(false)
         }
        
 
       }
-      fetchUsers()
+      fetchTransactions()
     }, [page, name])
 
   // const filtered = recipients.filter(
@@ -62,8 +65,8 @@ const UserManagementPage = () => {
       if (!confirm("Are you sure you want to delete this recipient?")) return;
   
       try {
-        const response = await deleteUser(id);
-        setUsers((prev) => prev.filter((user) => user.id !== id));
+        const response = await deleteTransactionAdmin(id);
+        setLedgers((prev) => prev.filter((t) => t.id !== id))
          // instantly reflect change
          toast.success(response.data.message)
       } catch (error) {
@@ -94,13 +97,13 @@ const UserManagementPage = () => {
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle className="md:text-2xl font-semibold text-gray-700">
-            User Management
+            Ledger book
           </CardTitle>
           <CardDescription className="py-2 text-gray-500">
-            Manage your user details, all in one place.
+            See all tranaction details, all in one place
           </CardDescription>
         </div>
-        <Link to={"/admin/users/user"}>
+        {/* <Link to={"/admin/users/user"}>
           <Button
             //   variant={"link"}
 
@@ -108,12 +111,12 @@ const UserManagementPage = () => {
           >
             Add User
           </Button>
-        </Link>
+        </Link> */}
       </CardHeader>
       <CardContent>
         <DataTable
-          columns={userColumns(handleDelete)}
-          data={users}
+        columns={ledgerColumns()}
+          data={ledgers}
           pages={pages}
           page={page}
           setPage={setPage}
@@ -128,4 +131,4 @@ const UserManagementPage = () => {
   );
 }
 
-export default UserManagementPage
+export default LedgerManagementPage

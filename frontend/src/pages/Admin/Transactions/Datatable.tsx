@@ -49,7 +49,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import type { RecipientData, UserData } from "@/validation/validators";
+import type { RecipientData, TransactionData } from "@/validation/validators";
 import { deleteRecipient } from "@/api";
 import { toast } from "react-toastify";
 import { KUNITY_BRANCHES, KUNITY_DEPARTMENTS } from "@/constants";
@@ -69,8 +69,6 @@ interface DataTableProps<TData, TValue> {
   pages: number;
   page: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
-  // setUsers: React.Dispatch<React.SetStateAction<UserData[]>>;
-  // users: RecipientData[];
   name: string;
   loading: boolean,
   setSearch: React.Dispatch<React.SetStateAction<string>>;
@@ -116,13 +114,13 @@ export function DataTable<TData, TValue>({
      
         <div className="flex gap-2 ">
           <Input
-            placeholder="Search by name"
+            placeholder="Search by account"
             value={
-              (table.getColumn("name")?.getFilterValue() as string) ?? ""
+              (table.getColumn("account.account_number")?.getFilterValue() as string) ?? ""
               // (table.getColumn("phone")?.getFilterValue() as string)
             }
             onChange={(e) => {
-              table.getColumn("name")?.setFilterValue(e.target.value);
+              table.getColumn("account.account_number")?.setFilterValue(e.target.value);
               // setSearch(e.target.value);
               // handleSearchParam("name", e.target.value);
 
@@ -166,7 +164,7 @@ export function DataTable<TData, TValue>({
       </div>
       <Table className="bg-white">
         <TableCaption className="text-gray-400">
-          List of users.
+          List of transactions.
         </TableCaption>
 
         <TableHeader>
@@ -243,7 +241,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  {loading ? "Loading userss..." : " No user data yet."}
+                  {loading ? "Loading transactions..." : " No transaction data yet."}
                 </TableCell>
               </TableRow>
             )}

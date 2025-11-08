@@ -10,6 +10,7 @@ import type {
   Analytics,
   AnalyticsAdmin,
   Id,
+  LedgerDataApi,
   OperatorDatail,
   OperatorDetect,
   PaginateData,
@@ -23,10 +24,13 @@ import type {
   SignUpAuth,
   SingleTopUpForm,
   TopUpDataApi,
+  TransactionData,
+  TransactionDataApi,
   UserData,
   UserDataApi,
   UserForm,
   UsersDataApi,
+  UserUpdateForm,
   WalletData,
   WalletForm,
 } from "../validation/validators";
@@ -127,7 +131,7 @@ const getAllUsers = async () => {
 const createUser = async (data: UserForm) => {
   return apiClient.request<{message: string}>("POST", "/users", data)
 }
-const updateUser = async (id: Id, data: UserForm) => {
+const updateUser = async (id: Id, data: UserUpdateForm) => {
   return apiClient.request<{message: string}>("PUT", `/users/${id}`, data)
 }
 const getUser = async (id: Id) => {
@@ -137,6 +141,18 @@ const deleteUser = async (id: Id) => {
   return apiClient.request<{message: string}>("DELETE", `/users/${id}`)
 }
 
+const getTransactions = async () => {
+  return apiClient.request<TransactionDataApi>("GET", `/transactions/admin`);
+
+}
+const deleteTransactionAdmin = async (id: Id) => {
+  return apiClient.request<{ message: string }>("DELETE", `/transactions/admin/${id}`);
+};
+
+
+const getLedgers = async () => {
+  return apiClient.request<LedgerDataApi>("GET", `/ledgers/admin`);
+};
 
 export {
   signUpUser,
@@ -167,5 +183,8 @@ getAllUsers,
 createUser,
 getUser,
 updateUser,
-deleteUser
+deleteUser,
+getTransactions,
+deleteTransactionAdmin,
+getLedgers,
 };

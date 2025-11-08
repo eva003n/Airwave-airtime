@@ -27,7 +27,7 @@ import { getDateByDay } from "@/utils/formatdate";
 
 const userColumns = (
   handleDelete: (id: string) => void
-): ColumnDef<UserColumn>[] => [
+): ColumnDef<UserData>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -90,11 +90,18 @@ const userColumns = (
   {
     accessorKey: "is_MFA_enabled",
     header: "MFA enabled",
-    // cell: ({ row }) => {
-     
-
-    //   return <div className="text-right font-medium">{row.getValue("is_MFA_enabled")}</div>;
-    // },
+    cell: ({ row }) => {
+      const enabled = row.getValue<boolean>("is_MFA_enabled");
+      const color =
+        !enabled
+          ? "bg-blue-100 text-blue-700"
+          : "bg-green-100 text-green-700"
+      return (
+        <Badge className={`${color} px-3 py-1 rounded-full`}>
+          {String(enabled)}
+        </Badge>
+      );
+    },
   },
 
   {
@@ -139,7 +146,7 @@ const userColumns = (
             <DropdownMenuItem>
               <button
                 className="flex gap-2 items-center"
-                onClick={() => handleDelete(user.id)}
+                onClick={() => handleDelete(user?.id as string)}
               >
                 <Trash2 /> Delete
               </button>

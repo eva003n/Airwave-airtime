@@ -11,7 +11,7 @@ import type { IUser } from "@/interfaces/user.interface";
 import type { TokenResponse, UserData } from "@/validation/validators";
 
 const env = getItem<"Live" | "Sandbox">("env") || "Live";
-const user = getItem<UserData>("user")
+const user = getItem<UserData>("user");
 class ApiClient {
   private clientId: string;
   private clientSecret: string;
@@ -27,9 +27,10 @@ class ApiClient {
   constructor() {
     this.clientId = "";
     this.clientSecret = "";
-    this.audience =  env === "Live"
-          ? import.meta.env.VITE_API_BASE_URI
-          : import.meta.env.VITE_SANDBOX_API_BASE_URL;
+    this.audience =
+      env === "Live"
+        ? import.meta.env.VITE_API_BASE_URI
+        : import.meta.env.VITE_SANDBOX_API_BASE_URL;
     this.authUrl = "/auth/refresh-token";
     this.isRefreshing = false;
 
@@ -37,25 +38,25 @@ class ApiClient {
       baseURL:
         env === "Live"
           ? import.meta.env.VITE_API_BASE_URI
-          : import.meta.env.VITE_SANDBOX_API_BASE_URL,
+          : import.meta.env.VITE_SANDBOX_API_BASE_URL, // fallback base url
       headers: {
         "Content-Type": "application/json",
-        "x-env": `${
-          env === "Live"
-            ? "production"
-            : "development"
-        }`,
-        "x-clientId": user?.id
+        "x-env": `${env === "Live" ? "production" : "development"}`,
+        "x-clientId": user?.id,
       },
       timeout: 120000, // 2mins
       withCredentials: true, //ensure that client sends cookies in reqyests and makes sure the client doesnt ignore cookies set by backend
     });
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
-        const env = getItem<"Live" | "Sandbox">("env") || "Live"
-
-        // set xustom header for the environment
-        config.headers["x-env"] = env === "Live"? "production" : "development";
+        const env = getItem<"Live" | "Sandbox">("env") || "Live"; // get ltest env variable
+        (config.baseURL =
+          env === "Live"
+            ? import.meta.env.VITE_API_BASE_URI
+            : import.meta.env.VITE_SANDBOX_API_BASE_URL), // call appropriate api based that env
+          // set xustom header for the environment
+          (config.headers["x-env"] =
+            env === "Live" ? "production" : "development");
         // Always attach the current access token
         if (this.token) {
           config.headers.Authorization = `Bearer ${this.token}`;
@@ -75,7 +76,6 @@ class ApiClient {
 
         if (error.response?.status == 401 && !failedRequest._retry) {
           failedRequest._retry = true;
-          console.log(error.response.status);
           //If refresh already in progress, queue this request
           if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
@@ -92,6 +92,8 @@ class ApiClient {
           try {
             //force token refresh
             const newToken = await this.getAccessToken();
+            
+            await this.detectNetworkError(error)
 
             // retry all queued requests
             this.refreshQueue.forEach((cb: any) => cb());
@@ -124,6 +126,11 @@ class ApiClient {
     );
   }
 
+  private async detectNetworkError(error: AxiosError) {
+    if (error.code === "Network Errpr")
+      return alert("No internet connection. Please try again.");
+  }
+
   public async getAccessToken(): Promise<string> {
     try {
       //get current data in milliseconds and convert to seconds
@@ -131,7 +138,7 @@ class ApiClient {
       if (this.token && now < this.tokenExpiry) return this.token;
 
       //get latest environment
-        const env = getItem<"Live" | "Sandbox">("env") || "Live";
+      const env = getItem<"Live" | "Sandbox">("env") || "Live";
 
       //use axios to avoid interceptor recursion
       const response = await axios.get<TokenResponse>(

@@ -54,6 +54,7 @@ import topUpRouter from "./routes/topup.routes.js";
 import userRouter from "./routes/user.routes.js";
 import walletRouter from "./routes/wallet.routes.js";
 import transactionRouter from "./routes/transaction.routes.js"
+import ledgerRouter from "./routes/ledger.routes.js"
 import reportRouter from "./routes/report.routes.js";
 import paymentRouter from "./routes/payment.routes.js"
 import notFoundRouter from "./routes/not-found.routes.js";
@@ -75,6 +76,8 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/wallets", walletRouter);
 /*-- Transaction management -- */
 app.use("/api/v1/transactions", transactionRouter);
+/*-- Ledger management -- */
+app.use("/api/v1/ledgers", ledgerRouter);
 /* -- Reports and analytics -- */
 app.use("/api/v1/reports", reportRouter);
 /* -- Payments -- */

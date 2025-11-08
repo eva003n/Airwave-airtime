@@ -48,7 +48,7 @@ export const userSchema = z.object({
   role: z.enum(["user", "admin"]), // Adjust roles as needed
   avatar_url: z.string().optional(),
   avatar_id: z.uuid().nullable().optional(),
-  is_MFA_enabled: z.number(),
+  is_MFA_enabled: z.boolean(),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters long")
@@ -56,6 +56,40 @@ export const userSchema = z.object({
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
       "At least 1 uppercase,1 lowercase,1 number, 1 special character"
+    ),
+  createdAt: z.string().optional(), // coerce ISO string into Date
+  updatedAt: z.string().optional(),
+});
+
+export const updateUserSchema = z.object({
+  id: z
+    .uuid()
+    .refine(
+      (val) =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          val
+        ),
+      { message: "Invalid UUID v4 format" }
+    )
+    .optional(),
+  username: z.string().min(1, "Username is required").optional(),
+  email: z.email().optional(),
+  role: z.enum(["user", "admin"]).optional(), // Adjust roles as needed
+  avatar_url: z.string().nullable().optional(),
+  avatar_id: z.uuid().nullable().optional(),
+  is_MFA_enabled: z.boolean(),
+  password: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        !val ||
+        val === "" ||
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,30}$/.test(val),
+      {
+        message:
+          "Password must be 8–30 chars, include 1 uppercase, 1 lowercase, 1 number, and 1 special character",
+      }
     ),
   createdAt: z.string().optional(), // coerce ISO string into Date
   updatedAt: z.string().optional(),
@@ -369,6 +403,51 @@ const topUpDataApiSchema = z.object({
   }),
 });
 
+export const transactionDataSchema = z.object({
+  id: z.string(),
+  amount: z.string(),
+  transaction_type: z.string(),
+  status: z.enum(["Success", "Failed", "Pending"]),
+  createdAt: z.date(),
+  deletedAt: z.date(),
+  account: z.object({
+    account_number: z.number(),
+    wallet_type: z.string()
+  }),
+});
+
+export const ledgerDataSchema = z.object({
+  id: z.string(),
+  transaction_id: z.string(),
+  createdAt: z.date(),
+  deletedAt: z.date(),
+  accountInfo: z.object({
+    account_number: z.number(),
+    wallet_type: z.string(),
+  }),
+  transInfo: z.object({
+    transaction_type: z.string(),
+  }),
+  balance_before: z.number(),
+  balance_after: z.number(),
+});
+const transactionDataApiSchema = z.object({
+  data: z.object({
+    currentPage: z.number(),
+    transactions: z.array(transactionDataSchema),
+    totaItems: z.number(),
+    totalPages: z.number(),
+  }),
+});
+const ledgerDataApiSchema = z.object({
+  data: z.object({
+    currentPage: z.number(),
+    ledgers: z.array(ledgerDataSchema),
+    totaItems: z.number(),
+    totalPages: z.number(),
+  }),
+});
+
 export const csvDataSchema = z.object({
   name: z.string("Name is required"),
   phone: z
@@ -473,11 +552,13 @@ const analyticsAdminSchema = z.object({
   }),
 });
 
+
 export type BulkTopUpForm = z.infer<typeof bulkTopUpSchema>;
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
 export type RecipientForm = z.infer<typeof recipientSchema>;
 export type UserForm = z.infer<typeof userSchema>;
+export type UserUpdateForm = z.infer<typeof updateUserSchema>;
 export { signUpSchema, signInSchema, recipientSchema };
 export type PaginateData = z.infer<typeof paginateSchema>;
 export type Id = z.infer<typeof IdSchema>;
@@ -486,6 +567,8 @@ export type SingleTopUpForm = z.infer<typeof singleTopUpSchema>;
 export type ParsedRecipient = z.infer<typeof csvDataSchema>;
 export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
 export type WalletForm = z.infer<typeof walletFormSchema>;
+export type TransactionData = z.infer<typeof transactionDataSchema>;
+export type LedgerData = z.infer<typeof ledgerDataSchema>;
 
 //Api responses types
 export type RecipientData = z.infer<typeof recipientDataSchema>;
@@ -501,3 +584,5 @@ export type WalletData = z.infer<typeof walletBalanceSchema>
 export type Analytics = z.infer<typeof analyticsSchema>
 export type AnalyticsAdmin = z.infer<typeof analyticsAdminSchema>
 export type UsersDataApi = z.infer<typeof usersDataApiSchema>
+export type TransactionDataApi = z.infer<typeof transactionDataApiSchema>;
+export type LedgerDataApi = z.infer<typeof ledgerDataApiSchema>;

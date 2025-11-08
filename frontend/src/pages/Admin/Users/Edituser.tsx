@@ -15,8 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { recipientSchema, userSchema, type RecipientForm, type UserData, type UserForm } from "@/validation/validators";
-import { getItem,  } from "@/utils";
+import { recipientSchema, updateUserSchema, userSchema, type RecipientForm, type UserData, type UserForm, type UserUpdateForm } from "@/validation/validators";
+import { getItem, handleValidationError,  } from "@/utils";
 import { createRecipient, createUser, getRecipient, getUser, updateUser } from "@/api";
 import { toast } from "react-toastify";
 import { MFA_MODES, USERROLES } from "@/constants";
@@ -28,9 +28,10 @@ const EditUserPage = () => {
     control,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<UserForm>({
-    resolver: zodResolver(userSchema),
+  } = useForm<UserUpdateForm>({
+    resolver: zodResolver(updateUserSchema),
     defaultValues: {
+      password: ""
     },
     //validation using zod schema
   });
@@ -43,11 +44,7 @@ const EditUserPage = () => {
           const recipientData = await getUser(id);
           const data = recipientData.data.data;
   
-          reset({
-            ...data,
-            
-
-          });
+          reset(data);
         }
       };
       fetchUser();
@@ -56,14 +53,14 @@ const EditUserPage = () => {
     }, [reset]);
 
 
-  const onSubmit: SubmitHandler<UserForm> = async (data) => {
+  const onSubmit: SubmitHandler<UserUpdateForm> = async (data) => {
     try {
       const response = await updateUser(id as string, data);
       toast.success(response.data.message);
     } catch (error) {
       toast.error(error.response.data.message || error.message);
     } finally {
-      reset();
+      // reset();
     }
   };
 
@@ -74,7 +71,7 @@ const EditUserPage = () => {
           <ChevronLeft size={30} strokeWidth={2} /> Back
         </Button>
       </Link>
-      <Card className="w-full max-w-[65rem] mx-auto   border-0 rounded-2xl backdrop-blur-sm">
+      <Card className="w-full max-w-[65rem] mx-auto   border-0 rounded-2xl backdrop-blur-sm bg-white">
         <CardHeader className="text-center pb-2">
           <CardTitle className="md:text-2xl font-semibold text-gray-700">
             Edit User
@@ -183,26 +180,20 @@ const EditUserPage = () => {
                       >
                         MFA enabled
                       </Label>
+
                       <Select
-                        onValueChange={field.onChange}
-                        value={String(field.value)}
+                        onValueChange={(val) => field.onChange(val === "true")} //  Convert string → boolean
+                        value={String(field.value)} //  Convert boolean → string for UI
                       >
                         <SelectTrigger className="w-full focus:ring-2 focus:ring-gray-500">
-                          <SelectValue placeholder="Select MFA " />
+                          <SelectValue placeholder="Select MFA" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
-                          {MFA_MODES.map((is_MFA_enabled) => (
-                            <SelectItem
-                              key={String(is_MFA_enabled)}
-                              value={
-                                is_MFA_enabled ? "true" : "false"
-                              }
-                            >
-                              {is_MFA_enabled? "true" : "false"}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="true">true</SelectItem>
+                          <SelectItem value="false">false</SelectItem>
                         </SelectContent>
                       </Select>
+
                       {errors.is_MFA_enabled && (
                         <div className="text-rose-500 text-[.8rem]">
                           {errors.is_MFA_enabled.message}
@@ -223,7 +214,6 @@ const EditUserPage = () => {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="e.g. 500"
                     {...register("password", {
                       required: "Passowrd is required",
                     })}
@@ -245,6 +235,7 @@ const EditUserPage = () => {
               <Button
                 disabled={isSubmitting}
                 // onClick={() => handleValidationError(errors)}
+                // onClick={() => reset()}
                 className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white"
               >
                 {isSubmitting ? "Saving" : "Save user"}

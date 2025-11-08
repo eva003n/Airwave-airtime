@@ -10,9 +10,12 @@ import { useAuth } from "./context/authcontext";
 import { Button } from "./components/ui/button";
 import { useState } from "react";
 import ModeSwitch from "./components/ModeSwitch";
+import { useEnv } from "./context/Environment/env.context";
 
 const AppLayout = () => {
   const {logOut, user} = useAuth()
+    const { enabled } = useEnv();
+
   const [open, setOpen] = useState<boolean>(() => {
     // Load from localStorage on mount
     if (typeof window !== "undefined") {
@@ -43,7 +46,7 @@ const AppLayout = () => {
           </div>
 
           <div className="flex gap-6 items-center">
-            {user && user.role === "admin" && (
+            {user && (import.meta.env.VITE_ENV === "development") && (
               <div>
                 <ModeSwitch />
               </div>

@@ -81,7 +81,7 @@ const WalletPage = () => {
 
   useEffect(() => {
     (async () => {
-      const response = await getWalletBalance(user.id);
+      const response = await getWalletBalance(user.id as string);
 
       setWallet(response.data);
       setValue("wallet_type", response.data.data.wallet_type);
@@ -120,12 +120,15 @@ const WalletPage = () => {
                 />
               </CardAction>
               <CardTitle className="text-color text-2xl font-bold tabular-nums @[250px]/card:text-3xl flex gap-2">
-                <span>Ksh</span>
+                <span className="text-sm italic text-gray-500  align-top leading-none  font-medium mr-0.5">
+                  KES
+                </span>
                 <CountUp
                   start={0}
-                  end={Number(wallet?.data.balance || 0)}
+                  end={Number(wallet?.data?.balance || 0)}
                   duration={2}
                   separator=","
+                  decimals={2}
                 />
               </CardTitle>
             </CardHeader>
@@ -137,9 +140,9 @@ const WalletPage = () => {
               <label className="text-[.7rem]" htmlFor="notify">
                 Notify me when balance runs below threshold
               </label> */}
-              <Badge className="bg-slate-200 py-1 px-4">
+              <Badge className=" ">
                 Account Number
-                <strong className="tracking-wider">
+                <strong className="py-1 px-4 bg-slate-200 tracking-widest italic text-gray-400">
                   {wallet?.data.account_number}
                 </strong>
               </Badge>

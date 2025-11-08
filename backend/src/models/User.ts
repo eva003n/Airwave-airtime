@@ -4,6 +4,7 @@ import { hash } from "bcryptjs";
 
 import { sequelize } from "../config/database/postgres/postgres.js";
 import Wallet from "./Wallet.js";
+import { NODE_ENV } from "../config/env.js";
 
 export enum UserRole {
   Admin = "admin",
@@ -38,7 +39,6 @@ class User extends Model {
 
     await Wallet.create({ user_id: user.id as string });
   }
-
 
   public override toJSON(showHidden = false): object {
     const attributes = { ...this.get() } as any;
@@ -127,21 +127,33 @@ export default User;
 
 //hooks
 User.beforeCreate(User.hashPassword);
-User.afterUpdate(User.hashPassword);
+User.beforeUpdate(User.hashPassword);
 
 User.afterCreate(async (user, options) => {
   if (user.role && user.role !== "user") return;
 
   await Wallet.create(
-    { user_id: user.id as string },
+    {
+      user_id: user.id as string,
+      balance: NODE_ENV === "production" ? 0 : 129168,
+    },
     { transaction: options.transaction }
   );
 });
 
 //when user role changes to admin they do not need a wallet anymore
 
-User.afterUpdate(async (user) => {
+User.afterUpdate(async (user, options) => {
   if (user.changed("role") && user.role === "admin") {
     await Wallet.destroy({ where: { user_id: user.id } });
+  }
+
+  if (user.changed("role") && user.role === "user") {
+    await Wallet.create(
+      {
+        user_id: user.id as string,
+        balance: NODE_ENV === "production" ? 0 : 129168,
+      },
+    );
   }
 });

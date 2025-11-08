@@ -31,6 +31,8 @@ const CreateUserPage = () => {
   } = useForm<UserForm>({
     resolver: zodResolver(userSchema),
     defaultValues: {
+      role: "user",
+      is_MFA_enabled: false
     },
     //validation using zod schema
   });
@@ -53,7 +55,7 @@ const CreateUserPage = () => {
           <ChevronLeft size={30} strokeWidth={2} /> Back
         </Button>
       </Link>
-      <Card className="w-full max-w-[65rem] mx-auto   border-0 rounded-2xl backdrop-blur-sm">
+      <Card className="w-full max-w-[65rem] mx-auto   border-0 rounded-2xl backdrop-blur-sm bg-white">
         <CardHeader className="text-center pb-2">
           <CardTitle className="md:text-2xl font-semibold text-gray-700">
             Add User
@@ -162,26 +164,20 @@ const CreateUserPage = () => {
                       >
                         MFA enabled
                       </Label>
+
                       <Select
-                        onValueChange={field.onChange}
-                        value={String(field.value)}
+                        onValueChange={(val) => field.onChange(val === "true")} // ✅ Convert string → boolean
+                        value={String(field.value)} // ✅ Convert boolean → string for UI
                       >
                         <SelectTrigger className="w-full focus:ring-2 focus:ring-gray-500">
-                          <SelectValue placeholder="Select MFA " />
+                          <SelectValue placeholder="Select MFA" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
-                          {MFA_MODES.map((is_MFA_enabled) => (
-                            <SelectItem
-                              key={String(is_MFA_enabled)}
-                              value={
-                                is_MFA_enabled ? "true" : "false"
-                              }
-                            >
-                              {is_MFA_enabled ? "true" : "false"}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="true">true</SelectItem>
+                          <SelectItem value="false">false</SelectItem>
                         </SelectContent>
                       </Select>
+
                       {errors.is_MFA_enabled && (
                         <div className="text-rose-500 text-[.8rem]">
                           {errors.is_MFA_enabled.message}
@@ -202,7 +198,6 @@ const CreateUserPage = () => {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="e.g. 500"
                     {...register("password", {
                       required: "Passowrd is required",
                     })}

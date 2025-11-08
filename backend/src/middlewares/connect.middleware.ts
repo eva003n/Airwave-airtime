@@ -4,8 +4,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 const interceptRequest = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const clientId = req.headers["x-clientId"]
-    console.log(req.headers)
+    const clientId = req.headers["x-clientid"]
     console.log("client id" + clientId)
 
     clientId  && manageClientConnections(clientId as string, res)

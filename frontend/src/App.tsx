@@ -24,6 +24,8 @@ import DashboardPage from "./pages/Admin/Dashboard/Dashboard.tsx";
 import UserManagementPage from "./pages/Admin/Users/Users.tsx";
 import CreateUserPage from "./pages/Admin/Users/Createuser.tsx";
 import EditUserPage from "./pages/Admin/Users/Edituser.tsx";
+import TransactionManagementPage from "./pages/Admin/Transactions/Transactions.tsx";
+import LedgerManagementPage from "./pages/Admin/Ledgers/Ledgers.tsx";
 
 const App = () => {
   return (
@@ -59,10 +61,10 @@ const App = () => {
               {/*  Transactions management  */}
               <Route
                 path="/admin/transactions"
-                element={<h1>Transactions</h1>}
+                element={<TransactionManagementPage/>}
               />
               {/*  Ledger management  */}
-              <Route path="/admin/ledger" element={<h1>Ledger</h1>} />
+              <Route path="/admin/ledger" element={<LedgerManagementPage/>} />
               {/*  Settings management  */}
               <Route path="/admin/settings" element={<h1>Settings</h1>} />
             </Route>

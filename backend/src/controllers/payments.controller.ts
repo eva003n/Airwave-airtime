@@ -1,6 +1,12 @@
 import type { Request, Response, NextFunction } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
-import { AFRICAS_TALKING_PAYBILL, BASE_URL, MPESA_BASE_URL, MPESA_INITIATOR, MPESA_SHORT_CODE } from "../config/env.js";
+import {
+  AFRICAS_TALKING_PAYBILL,
+  BASE_URL,
+  MPESA_BASE_URL,
+  MPESA_INITIATOR,
+  MPESA_SHORT_CODE,
+} from "../config/env.js";
 import { mpesaClient } from "../config/mpesa/mpesa.js";
 import logger from "../logger/logger.winston.js";
 import ApiResponse from "../utils/ApiResponse.js";
@@ -10,7 +16,6 @@ import Wallet from "../models/Wallet.js";
 import type { MpesaC2BResponse } from "../middlewares/validators/validators.js";
 import { sequelize } from "../config/database/postgres/postgres.js";
 import Ledger from "../models/Ledger.js";
-
 
 const ResponseCodes = {
   invalidAccount: "C2B00012",
@@ -31,10 +36,11 @@ const receivePaymentConfirmation = asyncHandler(
 
     // console.log(req.body)
 
-    if(!ThirdPartyTransID) return res.json({
-      ResultCode: ResponseCodes.otherError,
-      ResultDesc: "Rejected",
-    });
+    if (!ThirdPartyTransID)
+      return res.json({
+        ResultCode: ResponseCodes.otherError,
+        ResultDesc: "Rejected",
+      });
 
     // perform an atomic transaction thus if one operation fails all do
     await sequelize.transaction(async (transaction) => {
@@ -44,25 +50,26 @@ const receivePaymentConfirmation = asyncHandler(
         transaction,
       });
 
-      if(!wallet) return transaction.rollback();
+      if (!wallet) return transaction.rollback();
 
       const newTransaction = await Transaction.findByPk(ThirdPartyTransID, {
         transaction,
       });
-// aborts the transaction if the transaction with the given id does not exist
+      // aborts the transaction if the transaction with the given id does not exist
       if (!newTransaction) return transaction.rollback();
 
       // update the transaction status
-      newTransaction.set({status: "Success"})
-      await newTransaction.save({transaction})
+      newTransaction.set({ status: "Success" });
+      await newTransaction.save({ transaction });
 
       // first get the last balance from ledger for particulat wallet
-      const walletId = wallet.id
-      const lastLedger = await Ledger.findOne({where: {wallet_id: walletId}, order: [["createdAt", "DESC"]],
-      transaction
-      })
+      const walletId = wallet.id;
+      const lastLedger = await Ledger.findOne({
+        where: { wallet_id: walletId },
+        order: [["createdAt", "DESC"]],
+        transaction,
+      });
 
-      
       const balanceBefore = Number(lastLedger ? lastLedger.balance_after : 0);
       const amount = Number(newTransaction.amount);
 
@@ -76,12 +83,12 @@ const receivePaymentConfirmation = asyncHandler(
           balance_before: balanceBefore,
           balance_after: balanceAfter,
         },
-        { transaction });
+        { transaction }
+      );
 
-        //update wallet balance
-        wallet.set({ balance: balanceAfter });
-        await wallet.save({transaction})
-
+      //update wallet balance
+      wallet.set({ balance: balanceAfter });
+      await wallet.save({ transaction });
     });
 
     return res.json({
@@ -90,7 +97,6 @@ const receivePaymentConfirmation = asyncHandler(
     });
   }
 );
-
 
 const validatePayment = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -113,28 +119,43 @@ const validatePayment = asyncHandler(
         ResultDesc: "Rejected",
       });
 
-    const newTransaction = await sequelize.transaction(async (transaction) => {
+    // record double entry transaction
+    const creditTransaction = await sequelize.transaction(
+      async (transaction) => {
+        // credit transaction
+        const transactionData = await Transaction.create(
+          {
+            reference: TransID as string,
+            transaction_type: "Credit",
+            amount: parseFloat(TransAmount as string),
+            wallet_id: wallet.id as string,
+          },
+          { transaction }
+        );
+        //debit
+        const debitTransaction = await Transaction.create(
+          {
+            reference: TransID as string,
+            transaction_type: "Debit",
+            status: "Success",
+            amount: parseFloat(TransAmount as string),
+            wallet_id: wallet.id as string,
+          },
+          { transaction }
+        );
 
-      const transactionData = await Transaction.create(
-        {
-          reference: TransID as string,
-          transaction_type: "Credit",
-          amount: parseFloat(TransAmount as string),
-          wallet_id: wallet.id as string,
-        },
-        { transaction }
-      );
+        return transactionData;
+      }
+    );
 
-      return transactionData
-    });
-
-    if(!newTransaction) return res.json({
-      ResultCode: ResponseCodes.otherError,
-      ResultDesc: "Rejected",
-    });
+    if (!creditTransaction)
+      return res.json({
+        ResultCode: ResponseCodes.otherError,
+        ResultDesc: "Rejected",
+      });
     return res.json({
       ResultCode: 0,
-      ThirdPartyTransID: newTransaction.id,
+      ThirdPartyTransID: creditTransaction.id,
       ResultDesc: "Accepted",
     });
   }
@@ -193,7 +214,6 @@ const receivePayment = asyncHandler(
 
 // make paymnet to africas talking using paybill thus B2B
 const makePayment = async (amount: number, accountNumber: number) => {
-
   const payload = {
     Initiator: MPESA_INITIATOR,
     SecurityCredential:
@@ -209,16 +229,14 @@ const makePayment = async (amount: number, accountNumber: number) => {
     Remarks: "OK",
     QueueTimeOutURL: "http://0.0.0.0:0000/ResultsListener.php",
     ResultURL: "http://0.0.0.0:8888/TimeOutListener.php",
-    Occassion: "Payment"
+    Occassion: "Payment",
   };
 
   const response = await mpesaClient.request(
     "POST",
     "/mpesa/b2b/v1/paymentrequest"
   );
-
-
-}
+};
 export {
   receivePaymentConfirmation,
   validatePayment,

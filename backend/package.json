@@ -11,6 +11,7 @@
     "dev": "nodemon",
     "pm2-start": "tsc -b && pm2 start ecosystem.config.js",
     "make:migration": "tsx src/make-migrations.ts",
+    "make:seeder": "tsx src/make-seeder.ts",
     "migrate": "tsx src/migrate.ts up",
     "migrate:undo": "tsx src/migrate.ts down",
     "docker build": "docker buildx build -f ./backend.Dockerfile",

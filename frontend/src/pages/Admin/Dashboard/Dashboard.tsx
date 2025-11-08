@@ -25,6 +25,7 @@ import { getItem } from "@/utils";
 import type { AnalyticsAdmin, UserData } from "@/validation/validators";
 import { MONTHS_SHORT } from "@/constants";
 import { getMonth } from "@/utils/formatdate";
+import { useEnv } from "@/context/Environment/env.context";
 
 export const STATSDATA: StatCardProps[] = [
   {
@@ -82,6 +83,7 @@ const topUpData = [
 
 const DashboardPage = () => {
   const [analytics, setAnalytics] = useState<AnalyticsAdmin>();
+  const {enabled} = useEnv()
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -89,7 +91,7 @@ const DashboardPage = () => {
       setAnalytics(response.data);
     };
     fetchAnalytics();
-  }, []);
+  }, [enabled]);
 
   const transactionGrowthData = useMemo(() => {
     if (!analytics?.data?.transactionGrowth) return; // fallback sample
@@ -138,6 +140,7 @@ const DashboardPage = () => {
           }
           count={analytics?.data?.stats?.walletBalance || 0}
           description={"App wallet deposits"}
+          currency={true}
         />
         <StatsCard
           key={"Airtime Purchases"}

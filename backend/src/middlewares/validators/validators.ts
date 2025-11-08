@@ -334,6 +334,40 @@ export const userSchema = z.object({
   updatedAt: z.string().optional(),
 });
 
+export const updateUserSchema = z.object({
+  id: z
+    .uuid()
+    .refine(
+      (val) =>
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          val
+        ),
+      { message: "Invalid UUID v4 format" }
+    )
+    .optional(),
+  username: z.string().min(1, "Username is required").optional(),
+  email: z.email().optional(),
+  role: z.enum(["user", "admin"]).optional(), // Adjust roles as needed
+  avatar_url: z.string().nullable().optional(),
+  avatar_id: z.uuid().nullable().optional(),
+  is_MFA_enabled: z.boolean(),
+  password: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        !val ||
+        val === "" ||
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,30}$/.test(val),
+      {
+        message:
+          "Password must be 8–30 chars, include 1 uppercase, 1 lowercase, 1 number, and 1 special character",
+      }
+    ),
+  createdAt: z.string().optional(), // coerce ISO string into Date
+  updatedAt: z.string().optional(),
+});
+
 const validateTopUpATSchema = z.object({
   transactionId: z.string(),
   phoneNumber: z.string(),
@@ -363,6 +397,7 @@ export type CookieData = z.infer<typeof cookieSchema>;
 export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
 export type WalletType = z.infer<typeof walletUpdateSchema>;
 export type UserData = z.infer<typeof userSchema>;
+export type UserUpdateForm = z.infer<typeof updateUserSchema>;
 
 //reloadly api response types
 export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;

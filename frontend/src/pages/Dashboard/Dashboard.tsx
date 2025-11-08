@@ -21,6 +21,8 @@ import { getMonth } from "@/utils/formatdate";
 import { MONTHS_SHORT } from "@/constants";
 import { getItem } from "@/utils";
 import { id } from "zod/v4/locales";
+import StatsCard from "@/components/shared/Dashboard/StatsCard";
+import { useEnv } from "@/context/Environment/env.context";
 
 // const recipientData = [
 //   { month: "May", recipients: 600 },
@@ -40,16 +42,18 @@ import { id } from "zod/v4/locales";
 
 export default function Dashboard() {
 const [analytics, setAnalytics] = useState<Analytics>()
+  const { enabled } = useEnv();
+
 useEffect(() => {
   const fetchAnalytics = async () => {
       const user = getItem<UserData>("user")
     
     
-    const response = await getAnalyticsData(user.id)
+    const response = await getAnalyticsData(user.id as string)
     setAnalytics(response.data)
   }
 fetchAnalytics()
-}, [])
+}, [enabled])
 
 const topUpTrendsData = useMemo(() => {
   if (!analytics?.data?.topUpTrends) return ;
@@ -75,75 +79,46 @@ const recipientGrowthData = useMemo(() => {
       {/* Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Total Recipients */}
-        <Card className="transition-all duration-300 border-gray-200 bg-white hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-gray-700 text-sm font-medium">
-              Total Recipients
-            </CardTitle>
-            <Users className="text-gray-500 w-5 h-5" />
-          </CardHeader>
-          <CardContent>
-            <CountUp
-              start={0}
-              end={analytics?.data?.totalRecipients || 0}
-              className="text-2xl font-bold text-gray-700"
-              duration={2}
-              separator=","
-            />
-            <p className="text-sm text-gray-500">Active recipients</p>
-          </CardContent>
-        </Card>
+
+        <StatsCard
+          key={"Total Recipients"}
+          title={"Total Recipients"}
+          icon={Users}
+          iconStyles={"text-blue-500 w-8 h-8 bg-blue-100 p-2 rounded-full"}
+          count={analytics?.data?.totalRecipients || 0}
+          description={"Active users"}
+        />
 
         {/* Total Top-Ups */}
-        <Card className="transition-all duration-300 border-gray-200 bg-white hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-gray-700 text-sm font-medium">
-              Total Top-Ups
-            </CardTitle>
-            <Phone className="text-gray-500 w-5 h-5" />
-          </CardHeader>
-          <CardContent>
-            <CountUp
-              start={0}
-              end={analytics?.data?.totalTopUps || 0}
-              className="text-2xl font-bold text-gray-700"
-              duration={2}
-              separator=","
-            />
-            <p className="text-sm text-gray-500">All-time distributions</p>
-          </CardContent>
-        </Card>
+        <StatsCard
+          key={"Total Top ups"}
+          title={"Total Top ups"}
+          icon={Phone}
+          iconStyles={"text-green-500  w-8 h-8 bg-green-100 p-2 rounded-full"}
+          count={analytics?.data?.totalTopUps || 0}
+          description={"Airtime top ups"}
+        />
 
         {/* Wallet Balance */}
-        <Card className="transition-all duration-300 border-gray-200 bg-white hover:shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-gray-700 text-sm font-medium">
-              Wallet Balance
-            </CardTitle>
-            <Wallet className="text-gray-500 w-5 h-5" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-gray-700 flex gap-2 items-center">
-              <span>KES</span>
-              <CountUp
-                start={0}
-                end={analytics?.data?.walletBalance || 0}
-                className="text-2xl font-bold text-gray-700"
-                duration={2}
-                separator=","
-              />
-            </p>
-            <p className="text-sm text-gray-500">Float balance</p>
-          </CardContent>
-        </Card>
+        <StatsCard
+          key={"Wallet balance"}
+          title={"Wallet balance"}
+          icon={Wallet}
+          iconStyles={
+            "text-indigo-500  w-8 h-8  bg-indigo-100 p-2 rounded-full"
+          }
+          count={analytics?.data?.walletBalance || 0}
+          description={"Float balance"}
+          currency={true}
+        />
 
         {/* Supported Operators */}
         <Card className="transition-all duration-300 border-gray-200 bg-white hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-gray-700 text-sm font-medium">
-              Operators
+              Mobile operators
             </CardTitle>
-            <Signal className="text-gray-500 w-5 h-5" />
+            <Signal className="text-orange-500  w-8 h-8 bg-orange-100 p-2 rounded-full" />
           </CardHeader>
           <CardContent className="space-y-2">
             <CountUp
@@ -154,11 +129,11 @@ const recipientGrowthData = useMemo(() => {
               separator=","
             />
             <ListContainer className="flex gap-4 items-center">
-              <List className="flex gap-1 items-center">
+              <List className="flex gap-1 text-sm text-gray-400 items-center">
                 <CardSim size={16} className="text-green-400" />
                 Safaricom
               </List>
-              <List className="flex gap-1 items-center">
+              <List className="flex gap-1 text-sm text-gray-400 items-center">
                 <CardSim size={16} className="text-red-400" />
                 Airtel
               </List>

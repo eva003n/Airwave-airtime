@@ -14,17 +14,17 @@ export const apps = [
   },
 
   // Process 2: Worker for topups
-  {
-    name: "topups-worker",
-    // script: "./workers/topup.worker.js", //docker
-    script: "dist/workers/topup.worker.js", //docker
-    // watch: ["."],
-    env: {
-      NODE_ENV: "development",
-      PORT: 8100,
-      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
-    },
-  },
+  // {
+  //   name: "topups-worker",
+  //   // script: "./workers/topup.worker.js", //docker
+  //   script: "dist/workers/topup.worker.js", //docker
+  //   // watch: ["."],
+  //   env: {
+  //     NODE_ENV: "development",
+  //     PORT: 8100,
+  //     PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
+  //   },
+  // },
 
   // Production service
   {

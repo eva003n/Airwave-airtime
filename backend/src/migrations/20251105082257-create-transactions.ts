@@ -12,7 +12,6 @@ async function up({ context }: { context: QueryInterface }) {
     reference: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
 
     transaction_type: {

@@ -26,7 +26,10 @@ const defineAssociations = () => {
   // Recipient belongs to a user (the owner of recipient)
   Recipient.belongsTo(User, {
     foreignKey: "user_id",
-    as: "owner",
+    // Recipients cannot exist without a user so delete all associated recipients when user is deleted
+    onDelete: "CASCADE",
+    // when i update user id which is rare, update user_id column in recipient table as well
+    onUpdate: "CASCADE",
   });
 
   User.hasMany(Topup, {
@@ -41,6 +44,8 @@ const defineAssociations = () => {
   Topup.belongsTo(User, {
     foreignKey: "user_id",
     as: "distributor", // changed from 'user'
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
 
   User.hasOne(Wallet, {
@@ -54,6 +59,8 @@ const defineAssociations = () => {
   Wallet.belongsTo(User, {
     foreignKey: "user_id",
     as: "owner",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
 
   // Recipient has many topups
@@ -69,6 +76,8 @@ const defineAssociations = () => {
   Topup.belongsTo(Recipient, {
     foreignKey: "recipient_id",
     as: "recipient",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
 
   // wallet and transaction
@@ -81,6 +90,9 @@ const defineAssociations = () => {
   });
   Transaction.belongsTo(Wallet, {
     foreignKey: "wallet_id",
+    as: "account",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
 
   //ledger and wallet
@@ -92,6 +104,9 @@ const defineAssociations = () => {
   });
   Ledger.belongsTo(Wallet, {
     foreignKey: "wallet_id",
+    as: "accountInfo",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
 
   // Transaction and ledger
@@ -103,6 +118,9 @@ const defineAssociations = () => {
   })
   Ledger.belongsTo(Transaction, {
     foreignKey: "transaction_id",
+    as: "transInfo",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
   associationsDefined = true;
 };

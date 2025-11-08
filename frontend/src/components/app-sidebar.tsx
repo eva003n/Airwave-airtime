@@ -80,9 +80,7 @@ const USERLINKS = [
   },
 ];
 
-const user = getItem<UserData>("user")
 
-const items = user && user.role === "user"? USERLINKS : ADMINLINKS
 
 
 export function AppSidebar() {
@@ -92,6 +90,9 @@ export function AppSidebar() {
     const saved = localStorage.getItem("sidebarOpen");
     return saved === null ? true : saved === "true";
   });
+
+  const user = getItem<UserData>("user");
+  const items = user && user.role === "user" ? USERLINKS : ADMINLINKS;
 
 
 
