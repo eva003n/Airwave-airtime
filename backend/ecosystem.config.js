@@ -4,7 +4,7 @@ export const apps = [
   //   name: "airwave-airtime-sandbox-api",
   //   // script: "./index.js", //docker
   //   script: "dist/index.js", //local
-  
+
   //   // watch: ["."],
   //   env: {
   //     NODE_ENV: "development",
@@ -14,24 +14,26 @@ export const apps = [
   // },
 
   // Process 2: Worker for topups
-  // {
-  //   name: "topups-worker",
-  //   // script: "./workers/topup.worker.js", //docker
-  //   script: "dist/workers/topup.worker.js", //docker
-  //   // watch: ["."],
-  //   env: {
-  //     NODE_ENV: "development",
-  //     PORT: 8100,
-  //     PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
-  //   },
-  // },
+  {
+    name: "topups-worker",
+    // script: "./workers/topup.worker.js", //docker
+    script: "dist/workers/topup.worker.js", //docker
+    instances: 1,
+    autorestart: true,
+    env: {
+      // NODE_ENV: "development",
+      PORT: 8100,
+      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
+    },
+  },
 
   // Production service
   {
     name: "airwave-airtime-api",
     // script: "./workers/topup.worker.js", //docker
-    script: "dist/index.js", 
-    // watch: ["."],
+    script: "dist/index.js",
+    instances: 1,
+    autorestart: true,
     env: {
       NODE_ENV: "production",
       PORT: 8080,

@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "pm2 start ecosystem.config.js",
+    "start": "pm2 start ecosystem.config.js && pm2 logs",
     "restart": "pm2 restart topups-worker",
     "build": "tsc -b ",
     "dev": "nodemon",
