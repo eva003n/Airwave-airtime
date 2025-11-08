@@ -105,7 +105,7 @@ export default function MakeTopUpPage() {
       const formData = new FormData();
       formData.append("recipients", csvFile);
 
-      const response = await createBulkTopUps(user.id, formData);
+      const response = await createBulkTopUps(user?.id as string, formData);
       setCsvFile(null);
       setBulkParsed([]);
       bulkForm.reset();

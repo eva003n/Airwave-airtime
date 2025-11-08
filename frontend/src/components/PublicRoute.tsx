@@ -8,7 +8,7 @@ const PublicRoute = () => {
   const user = getItem<UserData>("user")
   let isNew = false;
 if(user) {
-  const createdAt = new Date(user.createdAt);
+  const createdAt = new Date(user?.createdAt as string);
   const today = new Date()
   isNew = createdAt.getDay() === today.getDay() && createdAt.getMonth() === today.getMonth() && createdAt.getFullYear() === today.getFullYear()
 

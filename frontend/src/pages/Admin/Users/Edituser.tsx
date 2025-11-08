@@ -41,8 +41,8 @@ const EditUserPage = () => {
     useEffect(() => {
       const fetchUser = async () => {
         if (id) {
-          const recipientData = await getUser(id);
-          const data = recipientData.data.data;
+          const userData = await getUser(id);
+          const data = userData.data.data;
   
           reset(data);
         }

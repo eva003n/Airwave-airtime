@@ -95,7 +95,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return requestHandler(
       async () => {
         const user = getItem<UserData>("user");
-        await logOutUser(user.id);
+        await logOutUser(user?.id as string);
       },
       (response: AxiosResponse<{ message: string }>) => {
         try {
