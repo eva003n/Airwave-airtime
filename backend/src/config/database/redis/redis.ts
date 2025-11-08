@@ -15,7 +15,7 @@ import { Redis, type RedisOptions } from "ioredis";
 const parsed = new URL(REDIS_URL as string)
 
 const connection = new Redis({
-  host: (NODE_ENV === "production" ? parsed.host : REDIS_HOST ) as string,
+  host: (NODE_ENV === "production" ? parsed.hostname : REDIS_HOST ) as string,
   port: NODE_ENV === "production" ? Number(parsed.port) : Number(REDIS_PORT),
   username: NODE_ENV === "production"? parsed.username : REDIS_USER,
   password: NODE_ENV === "production"? parsed.password || undefined : REDIS_PASSWORD,
