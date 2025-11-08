@@ -14,12 +14,13 @@ const app = express();
 //configure cross origin resource sharing
 app.use(
   cors({
-    origin: CORS_ORIGIN_URLS?.split(","),
+    origin: CORS_ORIGIN_URLS?.split(",") || "https://www.evandev.codes",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     optionsSuccessStatus: 200,
   })
 );
+console.log(CORS_ORIGIN_URLS)
 //configure content security policy
 app.use(helmet());
 //parse http header cookies into req.cookies object
