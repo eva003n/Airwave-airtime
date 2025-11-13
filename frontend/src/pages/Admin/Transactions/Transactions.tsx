@@ -12,6 +12,7 @@ import type { AxiosResponse } from "axios";
 import  { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
 import transactionColumns from "./Columns";
+import { TransactionStatus } from "./TransactionStatus";
 
 
 const TransactionManagementPage = () => {
@@ -96,13 +97,18 @@ const TransactionManagementPage = () => {
   return (
     <Card className=" shadow-md container">
       <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle className="md:text-2xl font-semibold text-gray-700">
-            Transactions Management
-          </CardTitle>
-          <CardDescription className="py-2 text-gray-500">
-            Manage your transaction details, all in one place.
-          </CardDescription>
+        <div className="flex justify-between w-full">
+          <div>
+            <CardTitle className="md:text-2xl font-semibold text-gray-700">
+              Transactions Management
+            </CardTitle>
+            <CardDescription className="py-2 text-gray-500">
+              Manage your transaction details, all in one place.
+            </CardDescription>
+          </div>
+          <div>
+            <TransactionStatus/>
+          </div>
         </div>
         {/* <Link to={"/admin/users/user"}>
           <Button

@@ -409,6 +409,7 @@ export const transactionDataSchema = z.object({
   transaction_type: z.string(),
   status: z.enum(["Success", "Failed", "Pending"]),
   createdAt: z.date(),
+  reference: z.string(),
   deletedAt: z.date(),
   account: z.object({
     account_number: z.number(),
@@ -552,6 +553,14 @@ const analyticsAdminSchema = z.object({
   }),
 });
 
+export const transactionStatus = z.object({
+  shortCode: z.string(),
+  reference: z.string(),
+  securityCredential: z.string(),
+  accountNumber: z.string().trim().transform(Number).pipe(z.number()),
+  amount: z.transform(Number).pipe(z.number()),
+  type: z.enum(["Credit", "Debit"]),
+});
 
 export type BulkTopUpForm = z.infer<typeof bulkTopUpSchema>;
 export type SignUpAuth = z.infer<typeof signUpSchema>;
@@ -569,6 +578,7 @@ export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
 export type WalletForm = z.infer<typeof walletFormSchema>;
 export type TransactionData = z.infer<typeof transactionDataSchema>;
 export type LedgerData = z.infer<typeof ledgerDataSchema>;
+export type TransactStatus = z.infer<typeof transactionStatus>;
 
 //Api responses types
 export type RecipientData = z.infer<typeof recipientDataSchema>;

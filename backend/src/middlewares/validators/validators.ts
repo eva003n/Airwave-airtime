@@ -292,10 +292,10 @@ const AfricasTalkingTopUpSchema = z.object({
 const mpesaC2BApiResponseSchema = z.object({
   BillRefNumber: z.string(),
   BusinessShortCode: z.string(),
-  TransID: z.string().optional(),
-  TransAmount: z.string().optional(),
-  TransactionType: z.string().optional(),
-  ThirdPartyTransID: z.string().optional()
+  TransID: z.string(),
+  TransAmount: z.string(),
+  TransactionType: z.string(),
+  ThirdPartyTransID: z.string().optional(),
 });
 
 const walletUpdateSchema = z.object(
@@ -347,7 +347,7 @@ export const updateUserSchema = z.object({
     .optional(),
   username: z.string().min(1, "Username is required").optional(),
   email: z.email().optional(),
-  role: z.enum(["user", "admin"]).optional(), // Adjust roles as needed
+  role: z.enum(["user", "admin", "test"]).optional(), // Adjust roles as needed
   avatar_url: z.string().nullable().optional(),
   avatar_id: z.uuid().nullable().optional(),
   is_MFA_enabled: z.boolean(),
@@ -382,6 +382,31 @@ const ATTopUpStatusSchema = z.object({
   value: z.string(),
   discount: z.string()
 });
+
+const mpesaTransactionStatusSchema = z.object({
+  Result: z.object({
+    ResultCode: z.number(),
+    TransactionID: z.string(),
+    ResultParameters: z.object({
+      ResultParameter: z.array(z.object({
+        Key: z.string(),
+        Value: z.string().default("")
+      })).default([])
+    }),
+  }),
+});
+const transactionStatus = z.object({
+  shortCode: z.string(),
+  reference: z.string(),
+  securityCredential: z.string(),
+  accountNumber: z
+    .string()
+    .trim()
+    .transform(Number)
+    .pipe(z.number()),
+  amount: z.transform(Number).pipe(z.number()),
+  type: z.enum(["Credit", "Debit"]),
+});
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -398,6 +423,8 @@ export type RecipientQueryData = z.infer<typeof recipientQuerySchema>;
 export type WalletType = z.infer<typeof walletUpdateSchema>;
 export type UserData = z.infer<typeof userSchema>;
 export type UserUpdateForm = z.infer<typeof updateUserSchema>;
+export type TransactStatus = z.infer<typeof transactionStatus>;
+
 
 //reloadly api response types
 export type ReloadlyTopUp = z.infer<typeof reloadlyTopResponseSchema>;
@@ -407,6 +434,7 @@ export type ATTopUpResponse = z.infer<typeof AfricasTalkingTopUpSchema>;
 export type ATWallet = z.infer<typeof africasTalkingWalletBalanceSchema>
 export type ATValidateTopUp = z.infer<typeof validateTopUpATSchema>
 export type ATTopUpStatus = z.infer<typeof ATTopUpStatusSchema>
+export type MpesaTransStatus = z.infer<typeof mpesaTransactionStatusSchema>
 
 // Mpesa api response type
 export type MpesaC2BResponse = z.infer<typeof mpesaC2BApiResponseSchema>;
@@ -426,5 +454,5 @@ export {
   walletBalanceSchema,
   walletUpdateSchema,
   mpesaC2BApiResponseSchema,
-
+  transactionStatus,
 };

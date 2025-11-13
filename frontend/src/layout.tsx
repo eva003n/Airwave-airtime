@@ -46,7 +46,7 @@ const AppLayout = () => {
           </div>
 
           <div className="flex gap-6 items-center">
-            {user && user.role === "test" && (
+            {user && user.role === "test" || user?.role === "admin" && (
               <div>
                 <ModeSwitch />
               </div>

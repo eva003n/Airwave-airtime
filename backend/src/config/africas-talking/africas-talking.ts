@@ -54,6 +54,7 @@ class ApiClient {
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         config.headers["Idempotency-Key"] = this.idempotencyKey
+        logger.info(config.headers)
 
         return config
       },

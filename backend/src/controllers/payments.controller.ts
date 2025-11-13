@@ -2,10 +2,17 @@ import type { Request, Response, NextFunction } from "express";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
   AFRICAS_TALKING_PAYBILL,
+  AFRICAS_TALKING_SANDBOX_PAYBILL,
   BASE_URL,
   MPESA_BASE_URL,
   MPESA_INITIATOR,
+  MPESA_SANDBOX_INITIATOR,
+  MPESA_SANDBOX_SECURITY_CREDENTIAL,
+  MPESA_SANDBOX_SHORT_CODE,
+  MPESA_SECURITY_CREDENTIAL,
   MPESA_SHORT_CODE,
+  NODE_ENV,
+  SERVER_URL,
 } from "../config/env.js";
 import { mpesaClient } from "../config/mpesa/mpesa.js";
 import logger from "../logger/logger.winston.js";
@@ -13,9 +20,14 @@ import ApiResponse from "../utils/ApiResponse.js";
 import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
 import Wallet from "../models/Wallet.js";
-import type { MpesaC2BResponse } from "../middlewares/validators/validators.js";
+import type {
+  MpesaC2BResponse,
+  MpesaTransStatus,
+  TransactStatus,
+} from "../middlewares/validators/validators.js";
 import { sequelize } from "../config/database/postgres/postgres.js";
 import Ledger from "../models/Ledger.js";
+import ApiError from "../utils/ApiError.js";
 
 const ResponseCodes = {
   invalidAccount: "C2B00012",
@@ -32,38 +44,37 @@ const receivePaymentConfirmation = asyncHandler(
       TransAmount,
       BillRefNumber,
       ThirdPartyTransID,
+      BusinessShortCode,
     }: MpesaC2BResponse = req.body;
-
-    // console.log(req.body)
-
-    if (!ThirdPartyTransID)
-      return res.json({
-        ResultCode: ResponseCodes.otherError,
-        ResultDesc: "Rejected",
-      });
+    console.log(BillRefNumber);
 
     // perform an atomic transaction thus if one operation fails all do
     await sequelize.transaction(async (transaction) => {
-      //get wallet id from account number
+      //get wallet by account number
       const wallet = await Wallet.findOne({
-        where: { account_number: BillRefNumber },
+        where: { account_number: parseInt(BillRefNumber) },
         transaction,
       });
 
+      // Cancel transaction if wallet does not exist
       if (!wallet) return transaction.rollback();
+      const walletId = wallet.id;
 
-      const newTransaction = await Transaction.findByPk(ThirdPartyTransID, {
-        transaction,
-      });
-      // aborts the transaction if the transaction with the given id does not exist
-      if (!newTransaction) return transaction.rollback();
-
-      // update the transaction status
-      newTransaction.set({ status: "Success" });
-      await newTransaction.save({ transaction });
+      // record double entry transaction
+      // credit transaction
+      const creditTransaction = await Transaction.create(
+        {
+          reference: TransID as string,
+          transaction_type: "Credit",
+          status: "Success",
+          amount: parseFloat(TransAmount as string),
+          wallet_id: wallet?.id as string,
+        },
+        { transaction }
+      );
+      //debit transaction is done on the mpesa side
 
       // first get the last balance from ledger for particulat wallet
-      const walletId = wallet.id;
       const lastLedger = await Ledger.findOne({
         where: { wallet_id: walletId },
         order: [["createdAt", "DESC"]],
@@ -71,29 +82,29 @@ const receivePaymentConfirmation = asyncHandler(
       });
 
       const balanceBefore = Number(lastLedger ? lastLedger.balance_after : 0);
-      const amount = Number(newTransaction.amount);
+      const amount = Number(creditTransaction.amount);
 
       const balanceAfter = balanceBefore + amount;
 
-      // Record transaction
+      //Record transaction
       await Ledger.create(
         {
           wallet_id: wallet?.id as string,
-          transaction_id: newTransaction?.id as string,
+          transaction_id: creditTransaction?.id as string,
           balance_before: balanceBefore,
           balance_after: balanceAfter,
         },
         { transaction }
       );
 
-      //update wallet balance
+      // update wallet balance
       wallet.set({ balance: balanceAfter });
       await wallet.save({ transaction });
     });
 
     return res.json({
       ResultCode: 0,
-      ResultDesc: "Accepted",
+      ResultDesc: "Success",
     });
   }
 );
@@ -109,53 +120,21 @@ const validatePayment = asyncHandler(
       TransactionType,
     }: MpesaC2BResponse = req.body;
 
+    // Check if the account number exists
     const wallet = await Wallet.findOne({
       where: { account_number: BillRefNumber },
     });
 
+    // Cancel payment if account does not exist
     if (!wallet)
-      return res.json({
+      return res.status(404).json({
         ResultCode: ResponseCodes.invalidAccount,
         ResultDesc: "Rejected",
       });
+    // Accept payment if account exists
 
-    // record double entry transaction
-    const creditTransaction = await sequelize.transaction(
-      async (transaction) => {
-        // credit transaction
-        const transactionData = await Transaction.create(
-          {
-            reference: TransID as string,
-            transaction_type: "Credit",
-            amount: parseFloat(TransAmount as string),
-            wallet_id: wallet.id as string,
-          },
-          { transaction }
-        );
-        //debit
-        const debitTransaction = await Transaction.create(
-          {
-            reference: TransID as string,
-            transaction_type: "Debit",
-            status: "Success",
-            amount: parseFloat(TransAmount as string),
-            wallet_id: wallet.id as string,
-          },
-          { transaction }
-        );
-
-        return transactionData;
-      }
-    );
-
-    if (!creditTransaction)
-      return res.json({
-        ResultCode: ResponseCodes.otherError,
-        ResultDesc: "Rejected",
-      });
     return res.json({
       ResultCode: 0,
-      ThirdPartyTransID: creditTransaction.id,
       ResultDesc: "Accepted",
     });
   }
@@ -184,52 +163,118 @@ const registerC2BUrl = asyncHandler(
   }
 );
 
-const receivePayment = asyncHandler(
-  async (Req: Request, res: Response, next: NextFunction) => {
-    const payload = {
-      ShortCode: "600999",
-      CommandID: "CustomerPayBillOnline",
-      Amount: "50000",
-      Msisdn: "254708374149",
-      BillRefNumber: "29789252",
+const receivePaymentStatus = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { Result }: MpesaTransStatus = req.body;
+
+    // transaction failed
+    if (Result.ResultCode !== 0)
+      return res.json({
+        ResultCode: 0,
+        ResultDesc: "Success",
+      });
+
+    const parameters = Result.ResultParameters.ResultParameter;
+
+    type TransactStatus = {
+      TransactionStatus: "Completed" | "Failed",
+      // [k: string]: string
     };
+    const data = Object.fromEntries(parameters.map((p) => [p.Key, p.Value]));
+    console.dir(parameters);
+    console.dir(data);
 
-    const response = await mpesaClient.request(
-      "POST",
-      "/mpesa/c2b/v1/simulate",
-      payload
-    );
+    const isTransaction = await Transaction.findOne({
+      where: { reference: Result.TransactionID },
+    });
+   
+    await sequelize.transaction(async (transaction) => {
+      //get wallet
+      const wallet = await Wallet.findByPk(isTransaction?.wallet_id, {
+        transaction,
+      });
 
-    res
-      .status(201)
-      .json(
-        new ApiResponse(
-          201,
-          response.data,
-          "Successfully made payment waiting for confirmation"
-        )
+      // Cancel transaction if wallet does not exist
+      if (!wallet || !isTransaction) return transaction.rollback();
+
+      // first get the last balance from ledger for particular wallet --> (balance_after)
+      const lastLedger = await Ledger.findOne({
+        where: { wallet_id: wallet.id },
+        order: [["createdAt", "DESC"]],
+        transaction,
+      });
+
+      // auto calculate balances based on transaction type
+      const balanceBefore = Number(lastLedger ? lastLedger.balance_after : 0);
+      const amount = Number(isTransaction?.amount);
+      let balanceAfter = 0;
+
+      if (isTransaction?.transaction_type === "Credit") {
+        // credit
+        balanceAfter = balanceBefore + amount;
+      } else {
+        // Debit
+        balanceAfter = balanceBefore && balanceBefore - amount;
+      }
+
+      // Record transaction in ledger
+      await Ledger.create(
+        {
+          wallet_id: wallet.id as string,
+          transaction_id: isTransaction?.id as string,
+          balance_before: balanceBefore,
+          balance_after: balanceAfter,
+        },
+        { transaction }
       );
+
+      //update wallet balance
+      wallet.set({ balance: balanceAfter });
+      await wallet.save({ transaction });
+    });
+
+    isTransaction?.set({
+      status: (data as TransactStatus).TransactionStatus === "Completed"? "Success" : "Failed"
+    });
+
+    // update transaction status
+    await isTransaction?.save();
+
+    return res.json({
+      ResultCode: 0,
+      ResultDesc: "Success",
+    });
   }
 );
 
 // make paymnet to africas talking using paybill thus B2B
-const makePayment = async (amount: number, accountNumber: number) => {
+const makePaymentAfricasTalking = async (
+  amount: number,
+  accountNumber: number
+) => {
   const payload = {
-    Initiator: MPESA_INITIATOR,
+    Initiator:
+      NODE_ENV === "production" ? MPESA_SANDBOX_INITIATOR : MPESA_INITIATOR,
     SecurityCredential:
-      "FKXl/KPzT8hFOnozI+unz7mXDgTRbrlrZ+C1Vblxpbz7jliLAFa0E/…../uO4gzUkABQuCxAeq+0Hd0A==",
+      NODE_ENV === "production"
+        ? MPESA_SANDBOX_SECURITY_CREDENTIAL
+        : MPESA_SECURITY_CREDENTIAL,
     "Command ID": "BusinessPayBill",
     SenderIdentifierType: "4",
     RecieverIdentifierType: "4",
     Amount: amount,
-    PartyA: MPESA_SHORT_CODE,
-    PartyB: AFRICAS_TALKING_PAYBILL,
+    PartyA:
+      NODE_ENV === "production" ? MPESA_SANDBOX_SHORT_CODE : MPESA_SHORT_CODE,
+    PartyB:
+      NODE_ENV === "production"
+        ? AFRICAS_TALKING_PAYBILL
+        : AFRICAS_TALKING_SANDBOX_PAYBILL,
     AccountReference: accountNumber,
     Requester: "254700000000",
-    Remarks: "OK",
-    QueueTimeOutURL: "http://0.0.0.0:0000/ResultsListener.php",
-    ResultURL: "http://0.0.0.0:8888/TimeOutListener.php",
-    Occassion: "Payment",
+    Remarks: "Payment",
+    ResultURL: `${BASE_URL}/api/v1/payments/paybill/transaction-status/result`,
+    QueueTimeOutURL: `${BASE_URL}/api/v1/payments/paybill/transaction/timeout`,
+    Occassion: "Making payment",
   };
 
   const response = await mpesaClient.request(
@@ -237,9 +282,88 @@ const makePayment = async (amount: number, accountNumber: number) => {
     "/mpesa/b2b/v1/paymentrequest"
   );
 };
+
+// Check transaction status
+const getMpesaTransactionStatus = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const {
+      shortCode,
+      reference,
+      securityCredential,
+      accountNumber,
+      type,
+      amount,
+    }: TransactStatus = req.body;
+
+    const wallet = await Wallet.findOne({
+      where: { account_number: accountNumber },
+    });
+
+    if (!wallet)
+      return res
+        .status(404)
+        .json(
+          ApiError.notFound(404, req.originalUrl, "Account number doesnt exist")
+        );
+
+    //create transaction can be debit or credit
+   const [transaction, created] = await Transaction.findOrCreate({
+     where: { reference: reference },
+     defaults: {
+       reference: reference,
+       transaction_type: type,
+       amount,
+       wallet_id: wallet.id as string,
+     },
+   });
+
+   if(!created) return next(ApiError.conflictRequest(409, req.originalUrl, "Tranaction with that reference number already exist"))
+
+    const payload = {
+      Initiator:
+        NODE_ENV === "production" ? MPESA_INITIATOR : MPESA_SANDBOX_INITIATOR,
+      // SecurityCredential:
+      //   NODE_ENV === "production"
+      //     ? MPESA_SECURITY_CREDENTIAL
+      //     : MPESA_SANDBOX_SECURITY_CREDENTIAL,
+      SecurityCredential: securityCredential,
+      CommandID: "TransactionStatusQuery",
+      TransactionID: reference,
+      PartyA: `${shortCode}`,
+      IdentifierType: "4",
+      ResultURL: `${BASE_URL}/api/v1/payments/paybill/transaction-status/result`,
+      QueueTimeOutURL: `${BASE_URL}/api/v1/payments/paybill/transaction/timeout`,
+      Remarks: "Checking transaction status",
+      Occasion: "Reconciliation",
+    };
+    const response = await mpesaClient.request(
+      "POST",
+      "/mpesa/transactionstatus/v1/query",
+      payload
+    );
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          Object.assign({ transaction: transaction }, response.data),
+          "Transaction status fetched successfully"
+        )
+      );
+  }
+);
+const retryMpesaPayment = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    //notify your system in case the request times out before processing.
+    // when a payment request is readded to payment queue
+    console.log(req.body);
+  }
+);
 export {
   receivePaymentConfirmation,
   validatePayment,
-  registerC2BUrl,
-  receivePayment,
+  receivePaymentStatus,
+  getMpesaTransactionStatus,
+  retryMpesaPayment,
 };

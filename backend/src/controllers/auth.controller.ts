@@ -49,7 +49,7 @@ const signUp = asyncHandler(
       email,
       password,
     },
-    { transaction } // ✅ pass the transaction object here
+    { transaction } 
   ));
 
     return res

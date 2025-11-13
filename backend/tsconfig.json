@@ -13,10 +13,11 @@
     "moduleDetection": "force",
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
+    "types": ["node", "jest"],
 
     //Module
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "moduleResolution": "nodeNext",
     "lib": ["ES2022"],
 
@@ -38,6 +39,6 @@
     // "allowImportingTsExtensions": true,
     // "noEmit": true
   },
-  "include": ["src/**/*", "types/**/*", "src/migrations", "src/seeders"],
-  "exclude": ["node_modules", "tests/**/*"]
+  "include": ["src/**/*", "types/**/*", "tests/**/*.ts"],
+  "exclude": ["node_modules"]
 }

@@ -2,6 +2,7 @@ import axios, {
   AxiosError,
   type AxiosInstance,
   type AxiosResponse,
+  type InternalAxiosRequestConfig,
 } from "axios";
 import {
   MPESA_SANDBOX_CUSTOMER_KEY,
@@ -32,10 +33,22 @@ class MpesaClient {
   private api: AxiosInstance;
 
   constructor() {
-    this.customerKey = (NODE_ENV === "production"?  MPESA_CUSTOMER_KEY : MPESA_SANDBOX_CUSTOMER_KEY) as string;
-    this.customerSecret = (NODE_ENV === "production"? MPESA_SANDBOX_CUSTOMER_SECRET : MPESA_SANDBOX_CUSTOMER_SECRET) as string;
-    this.audience = (NODE_ENV === "production"? MPESA_BASE_URL : MPESA_SANDBOX_BASE_URL) as string ;
-    this.authUrl = (NODE_ENV === "production"? MPESA_AUTH_URL : MPESA_SANDBOX_AUTH_URL) as string;
+    this.customerKey = (
+      NODE_ENV === "production"
+        ? MPESA_CUSTOMER_KEY
+        : MPESA_SANDBOX_CUSTOMER_KEY
+    ) as string;
+    this.customerSecret = (
+      NODE_ENV === "production"
+        ? MPESA_SANDBOX_CUSTOMER_SECRET
+        : MPESA_SANDBOX_CUSTOMER_SECRET
+    ) as string;
+    this.audience = (
+      NODE_ENV === "production" ? MPESA_BASE_URL : MPESA_SANDBOX_BASE_URL
+    ) as string;
+    this.authUrl = (
+      NODE_ENV === "production" ? MPESA_AUTH_URL : MPESA_SANDBOX_AUTH_URL
+    ) as string;
 
     this.api = axios.create({
       baseURL: this.audience,
@@ -44,6 +57,15 @@ class MpesaClient {
       },
       timeout: 120000, // 2mins
     });
+
+    this.api.interceptors.request.use(
+      async (config: InternalAxiosRequestConfig) => {
+        logger.info(JSON.stringify(config.headers));
+
+        return config;
+      },
+      (error: any) => Promise.reject(error)
+    );
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error: AxiosError<{ errorMessage: string }>) => {

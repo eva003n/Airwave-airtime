@@ -14,7 +14,7 @@ const app = express();
 //configure cross origin resource sharing
 app.use(
   cors({
-    origin: CORS_ORIGIN_URLS?.split(",") || "https://www.evandev.codes",
+    origin: CORS_ORIGIN_URLS?.split(","),
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     optionsSuccessStatus: 200,
@@ -41,11 +41,9 @@ app.use(morganMiddleware);
 
 /*---Custom middleware--- */
 import setEnvironment from "./middlewares/env.middleware.js";
-import interceptRequest from "./middlewares/connect.middleware.js";
 
 app.use(setEnvironment)
 
-app.use(interceptRequest)
 
 //API endpoints
 import homeRouter from "./routes/home.routes.js";
@@ -58,6 +56,7 @@ import transactionRouter from "./routes/transaction.routes.js"
 import ledgerRouter from "./routes/ledger.routes.js"
 import reportRouter from "./routes/report.routes.js";
 import paymentRouter from "./routes/payment.routes.js"
+import eventRouter from "./routes/event.routes.js"
 import notFoundRouter from "./routes/not-found.routes.js";
 import healthCheckRouter from "./routes/health.routes.js";
 import { serverAdapter } from "./config/Bullmq/bullboard.js";
@@ -83,6 +82,8 @@ app.use("/api/v1/ledgers", ledgerRouter);
 app.use("/api/v1/reports", reportRouter);
 /* -- Payments -- */
 app.use("/api/v1/payments", paymentRouter)
+/* -- Realtime events --- */
+app.use("/api/v1/evants", eventRouter)
 /*-- API monotoring -- */
 app.use("/api/v1/health-check", healthCheckRouter);
 

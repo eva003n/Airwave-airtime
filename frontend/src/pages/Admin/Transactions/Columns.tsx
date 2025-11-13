@@ -9,17 +9,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ArrowUpDown, MoreHorizontal, Pen, Trash2 } from "lucide-react";
 
-
 import { Link, useNavigate } from "react-router-dom";
-import type { RecipientData, RecipientForm, TopUpData, TransactionData, TransactionDataApi } from "@/validation/validators";
+import type {
+  RecipientData,
+  RecipientForm,
+  TopUpData,
+  TransactionData,
+  TransactionDataApi,
+} from "@/validation/validators";
 import type { AxiosResponse } from "axios";
 import { getDateByDay } from "@/utils/formatdate";
 import { deleteRecipient } from "@/api";
 import { toast } from "react-toastify";
-
 
 const transactionColumns = (
   handleDelete: (id: string) => void
@@ -53,6 +57,11 @@ const transactionColumns = (
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+
+  {
+    accessorKey: "reference",
+    header: "Reference",
   },
   {
     accessorKey: "account.account_number",
@@ -119,7 +128,7 @@ const transactionColumns = (
       const type = row.getValue("transaction_type") as string;
 
       let amount = parseFloat(row.getValue("amount"));
-      
+
       const formatted = new Intl.NumberFormat("en-UK", {
         style: "currency",
         currency: "KES",
@@ -200,4 +209,4 @@ const transactionColumns = (
     },
   },
 ];
-export default transactionColumns
+export default transactionColumns;

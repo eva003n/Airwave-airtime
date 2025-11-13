@@ -11,8 +11,8 @@ const home = asyncHandler(
       .status(200)
       .json(new ApiResponse(200, {
         version: "1.0",
-        env: app.get("env"),
-        url: `${SERVER_URL}`,
+        // env: app.get("env"),
+        // url: `${SERVER_URL}`,
         api: NODE_ENV === "production" ? "airwave-airtime-api": "airwave-airtime-sandbox-api"
       }, "Welcome to Airwave airtime API"));
   }
