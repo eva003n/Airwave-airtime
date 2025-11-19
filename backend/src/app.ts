@@ -63,7 +63,7 @@ import { serverAdapter } from "./config/Bullmq/bullboard.js";
 
 
 
-app.use("/api/v1", homeRouter)
+app.use("/", homeRouter)
 /*--Authentication--*/
 app.use("/api/v1/auth", authRouter);
 /*--Airtime recipients management-- */
