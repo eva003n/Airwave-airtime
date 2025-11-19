@@ -27,7 +27,7 @@ const ModeSwitch = () => {
         checked={enabled}
         onCheckedChange={(checked) => handleModeChange(checked)}
       />
-      <span className="text-gray-400 tracking-widest w-20">
+      <span className="text-gray-400 tracking-widest w-20 text-sm">
         {enabled ? "Sandbox" : "Live"}
       </span>
     </div>

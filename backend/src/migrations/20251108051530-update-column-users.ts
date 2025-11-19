@@ -1,5 +1,4 @@
 import { QueryInterface, DataTypes } from "sequelize";
-import { UserRole } from "../models/User.js";
 
 async function up({ context }: { context: QueryInterface }) {
 await context.sequelize.query(`

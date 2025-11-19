@@ -20,9 +20,13 @@ import logger from "../logger/logger.winston.js";
 import { UpdatedAt } from "sequelize-typescript";
 import asyncHandler from "../utils/asyncHandler.js";
 import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
-import { AFRICAS_TALKING_USERNAME } from "../config/env.js";
+import {
+  AFRICAS_TALKING_SANDBOX_USERNAME,
+  AFRICAS_TALKING_USERNAME,
+  NODE_ENV,
+} from "../config/env.js";
 import { randomInt } from "crypto";
-
+import qs from "qs";
 //this ensure sequelize models are initialized before running process
 
 await connectDatabase();
@@ -69,20 +73,24 @@ const sendTopUp = async (
 
   if (!recipient) throw new Error("Recipient does not exist or is deleted");
 
+  const payload = {
+    username:
+      NODE_ENV === "production"
+        ? AFRICAS_TALKING_USERNAME
+        : AFRICAS_TALKING_SANDBOX_USERNAME,
+    recipients: JSON.stringify([
+      {
+        phoneNumber: phoneNumber,
+        amount: `KES ${airtimeAmount}`,
+      },
+    ]),
+    maxNumRetry: 5,
+  };
   const topResponse = (
     await africasTalkingClient.post<{}, ATTopUpResponse>(
       "/version1/airtime/send",
       //payload send to reloadly airtime api
-      {
-        username: AFRICAS_TALKING_USERNAME,
-        recipients: [
-          {
-            phoneNumber: phoneNumber,
-            amount: `KES ${airtimeAmount}`,
-          },
-        ],
-        maxNumRetry: 5,
-      }
+      qs.stringify(payload)
     )
   ).data;
 };

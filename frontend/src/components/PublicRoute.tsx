@@ -17,8 +17,7 @@ if(user) {
 
 
 
-  if (user && user.role === "user" ) {
-    console.log("user logged in")
+  if (user && user?.role === "user" || user?.role === "test" ) {
     return  <Navigate to="/dashboard" replace={true} />
     
   } 

@@ -285,8 +285,9 @@ const AfricasTalkingTopUpSchema = z.object({
       phoneNumber: z.string(),
       status: z.string(),
       amount: z.string(),
+      discount: z.string(),
     })
-  ),
+  ).default([]),
 });
 
 const mpesaC2BApiResponseSchema = z.object({
@@ -373,14 +374,20 @@ const validateTopUpATSchema = z.object({
   phoneNumber: z.string(),
   sourceIpAddress: z.string(),
   currencyCode: z.string(),
-  amount: z.number()
-})
+  amount: z.string(),
+  requestMetadata: z.object({
+    transactionId: z.uuidv4()
+  }),
+});
 const ATTopUpStatusSchema = z.object({
   requestId: z.string(),
   status: z.enum(["Success", "Failed"]),
   phoneNumber: z.string(),
   value: z.string(),
-  discount: z.string()
+  discount: z.string(),
+  requestMetadata: z.object({
+    transactionId: z.uuidv4(),
+  }),
 });
 
 const mpesaTransactionStatusSchema = z.object({
@@ -455,4 +462,6 @@ export {
   walletUpdateSchema,
   mpesaC2BApiResponseSchema,
   transactionStatus,
+  ATTopUpStatusSchema,
+  validateTopUpATSchema,
 };

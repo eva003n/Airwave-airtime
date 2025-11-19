@@ -535,7 +535,7 @@ const analyticsAdminSchema = z.object({
         totalUsers: z.number(),
         totalTransactions: z.number(),
         walletBalance: z.number(),
-        totalTopUps: z.number(),
+        totalDiscount: z.number(),
       }),
     transactionGrowth: z.array(
       z.object({

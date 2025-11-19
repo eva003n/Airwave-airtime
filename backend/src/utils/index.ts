@@ -10,8 +10,8 @@ const formatError = (errors: ZodIssue[]) => {
 }
 
 
-const getCurrency = (currency: string) => {
-  return parseInt(currency.replace("KES", "").trim())
+const getCurrency = (currency: string): number => {
+  return parseInt(parseInt(currency.replace("KES", "").trim()).toFixed(2));
 
 }
 

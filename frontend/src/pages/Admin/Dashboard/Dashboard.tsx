@@ -6,6 +6,8 @@ import {
   ArrowUpRight,
   Wallet,
   PhoneCall,
+  BadgeDollarSign,
+  TrendingUp,
 } from "lucide-react";
 import type { StatCardProps } from "../../../components/shared/Dashboard/StatsCard";
 import StatsCard from "../../../components/shared/Dashboard/StatsCard";
@@ -126,8 +128,8 @@ const DashboardPage = () => {
         <StatsCard
           key={"Total Transactions"}
           title={"Total Transactions"}
+          iconStyles={"text-orange-500  w-8 h-8 bg-orange-100 p-2 rounded-full"}
           icon={CreditCard}
-          iconStyles={"text-green-500  w-8 h-8 bg-green-100 p-2 rounded-ful"}
           count={analytics?.data?.stats?.totalTransactions || 0}
           description={"Completed payments"}
         />
@@ -143,12 +145,13 @@ const DashboardPage = () => {
           currency={true}
         />
         <StatsCard
-          key={"Airtime Purchases"}
-          title={"Airtime Purchases"}
-          icon={PhoneCall}
-          iconStyles={"text-orange-500  w-8 h-8 bg-orange-100 p-2 rounded-full"}
-          count={analytics?.data?.stats?.totalTopUps || 0}
-          description={"Airtime distributions"}
+          key={"Total profit"}
+          title={"Total profit"}
+          icon={TrendingUp}
+          iconStyles={"text-green-500  w-8 h-8 bg-green-100 p-2 rounded-full"}
+          count={analytics?.data?.stats?.totalDiscount || 0}
+          description={"Business profit"}
+          currency={true}
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

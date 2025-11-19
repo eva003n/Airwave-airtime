@@ -5,13 +5,16 @@ import { AppSidebar } from "@/components/app-sidebar";
 import Header from "./components/Header";
 import ToggleSwitch from "./components/ToggleSwitch";
 import { LogOut } from "lucide-react";
-import type { Id } from "./validation/validators";
+import type { Id, UserData } from "./validation/validators";
 import { useAuth } from "./context/authcontext";
 import { Button } from "./components/ui/button";
 import { useState } from "react";
 import ModeSwitch from "./components/ModeSwitch";
 import { useEnv } from "./context/Environment/env.context";
+import { getItem } from "./utils";
 
+// const user = getItem<UserData>("user")
+// console.log(user)
 const AppLayout = () => {
   const {logOut, user} = useAuth()
     const { enabled } = useEnv();
@@ -40,13 +43,13 @@ const AppLayout = () => {
     >
       <AppSidebar />
       <div className="w-full relative isolate ">
-        <Header className="sticky top-0 z-50  shadow-md bg-sidebar px-4 w-full flex justify-between">
+        <Header className="sticky top-0 z-50  shadow-md bg-white px-4 w-full flex justify-between">
           <div>
             <SidebarTrigger className="size-9" />
           </div>
 
           <div className="flex gap-6 items-center">
-            {user && user.role === "test" || user?.role === "admin" && (
+            {user && user.role !== "user"  && (
               <div>
                 <ModeSwitch />
               </div>

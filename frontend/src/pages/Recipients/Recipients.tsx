@@ -11,12 +11,15 @@ import type { RecipientData, RecipientDataApi, } from "@/validation/validators";
 import type { AxiosResponse } from "axios";
 import  { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
+import { useEnv } from "@/context/Environment/env.context";
+import { fa } from "zod/v4/locales";
 
 
 const RecipientManagementPage = () => {
   const [search, setSearch] = useState("");
   const [recipients, setRecipients] =
     useState<RecipientData[]>([]);
+  const { enabled } = useEnv();
 
   const [page, setPage] = useState(0)
   const [pages, setPages] = useState(0)
@@ -50,13 +53,17 @@ const RecipientManagementPage = () => {
           setPage(response.data.data.currentPage);
           setPages(response.data.data.totalPages);
         } catch (error) {
+          setLoading(false)
           // console.log(error.message)
+        }finally {
+          setLoading(false);
+
         }
        
 
       }
       fetchRecipients()
-    }, [branch, department, page, searchParams, name])
+    }, [branch, department, page, searchParams, name, enabled])
 
   // const filtered = recipients.filter(
   //   (r) =>

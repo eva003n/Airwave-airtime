@@ -21,9 +21,8 @@ import { deleteRecipient } from "@/api";
 import { toast } from "react-toastify";
 
 
-const ledgerColumns = (
-  // handleDelete: (id: string) => void
-): ColumnDef<LedgerData>[] => [
+const ledgerColumns = (): // handleDelete: (id: string) => void
+ColumnDef<LedgerData>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -72,7 +71,9 @@ const ledgerColumns = (
     },
     cell: ({ getValue }) => {
       const account = getValue<string>();
-      return <div className="text-gray-400 tracking-widest italic">{account}</div>;
+      return (
+        <div className="text-gray-400 tracking-widest italic">{account}</div>
+      );
     },
   },
   {
@@ -98,7 +99,7 @@ const ledgerColumns = (
     accessorKey: "transInfo.transaction_type",
     accessorFn: (row) => row.transInfo.transaction_type, // this makes it work for nested objects
     header: "Type",
-    cell: ({ getValue}) => {
+    cell: ({ getValue }) => {
       const type = getValue<string>();
       const color =
         type === "Debit"
@@ -115,34 +116,48 @@ const ledgerColumns = (
     accessorKey: "balance_before",
     header: () => <div className="text-right">Balance before</div>,
     cell: ({ row }) => {
-      const type = row.getValue("transaction_type") as string;
+      const type = row.getValue("transInfo.transaction_type") as string;
 
-      let amount = parseFloat(row.getValue("balance_before"));
+      const amount = parseFloat(row.getValue("balance_before"));
 
       const formatted = new Intl.NumberFormat("en-UK", {
         style: "currency",
         currency: "KES",
       }).format(amount);
 
-      return <div className="text-right  text-orange-500">{formatted}</div>;
-
+      return <div className="text-right  text-blue-500">{formatted}</div>;
     },
   },
   {
     accessorKey: "balance_after",
-    header: () => <div className="text-right">Balance before</div>,
+    header: () => <div className="text-right">Balance after</div>,
     cell: ({ row }) => {
-      const type = row.getValue("transaction_type") as string;
+      const type = row.original.transInfo.transaction_type
 
-      let amount = parseFloat(row.getValue("balance_after"));
+      const amount = parseFloat(row.getValue("balance_after"));
+
+      const diff =
+        type === "Credit"
+          ? `+${
+              parseFloat(row.getValue("balance_after")) -
+              parseFloat(row.getValue("balance_before"))
+            }`
+          : `${
+              parseFloat(row.getValue("balance_after")) -
+              parseFloat(row.getValue("balance_before"))
+            }`;
 
       const formatted = new Intl.NumberFormat("en-UK", {
         style: "currency",
         currency: "KES",
       }).format(amount);
 
-      return <div className="text-right  text-green-500">{formatted}</div>
-      
+      return (
+        <div className="text-right  text-green-500">
+          {formatted}
+          <sup className={`${type === "Credit"? "text-green-400": "text-rose-400"} align-top`}>{diff}</sup>
+        </div>
+      );
     },
   },
 

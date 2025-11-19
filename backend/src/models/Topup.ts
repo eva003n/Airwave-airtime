@@ -23,13 +23,19 @@ class Topup extends Model {
   declare airtime_amount: number;
   declare recipient_id: string;
   declare user_id: string;
+  declare discount: number;
   declare status?: TopStatus;
   declare createdAt?: Date;
   declare updatedAt?: Date;
   declare deletedAt?: Date;
 
-  public override toJSON(): object {
+  public override toJSON(showHidden = false): object {
     const attributes = { ...this.get() } as any;
+     if (!showHidden) {
+       delete attributes.discount;
+     }
+
+    
     return attributes;
   }
 }
@@ -47,9 +53,13 @@ Topup.init(
       allowNull: false,
       unique: true,
     },
-  
+
     airtime_amount: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    discount: {
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
     recipient_id: {
@@ -61,8 +71,8 @@ Topup.init(
       allowNull: false,
       references: {
         model: "users",
-        key: "id"
-      }
+        key: "id",
+      },
     },
     status: {
       type: DataTypes.ENUM(...Object.values(TopStatus)),

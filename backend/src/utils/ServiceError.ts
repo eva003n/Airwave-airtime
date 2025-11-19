@@ -1,8 +1,8 @@
 class ThirdPartyServiceError extends Error {
     status: number
     url: string
-    reason: string
-    constructor(url: string, reason: string, status: number, stack = "") {
+    reason: any
+    constructor(url: string, reason: any, status: number, stack = "") {
       super()  
       this.status = status
       this.reason = reason

@@ -1,7 +1,7 @@
 import { Router, type RequestHandler } from "express";
 import {  autoDetectOperator, createBulkTopUps, deleteTopUp, getBulkTopUpStatus, getMnpDetails, getOperators, getTopUps, getTopUpStatus, sendBulkTopUps, sendTopUp, startBulkTopUp, validateTopup,} from "../controllers/topup.controller.js";
 import { validate } from "../middlewares/validators/validator.middleware.js";
-import { IdSchema, OperatorDetailsSchema, paginateSchema, recipientQuerySchema, topUpSchema } from "../middlewares/validators/validators.js";
+import { ATTopUpStatusSchema, IdSchema, OperatorDetailsSchema, paginateSchema, recipientQuerySchema, topUpSchema, validateTopUpATSchema } from "../middlewares/validators/validators.js";
 import { uploadSingleFile } from "../middlewares/multer.middleware.js";
 import { protectRoute } from "../middlewares/auth.middleware.js";
 
@@ -9,8 +9,10 @@ const router = Router()
 
 
 // callback urls called by africas talking
-router.route("/validate").post(validateTopup)
-router.route("/status").post(getTopUpStatus)
+router.route("/top-up/validate").post(validate(validateTopUpATSchema), validateTopup)
+router
+  .route("/top-up/status")
+  .post(validate(ATTopUpStatusSchema), getTopUpStatus);
 
 
 //protect route from unauthorized access

@@ -11,12 +11,14 @@ import type { AxiosResponse } from "axios";
 import  { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
 import ledgerColumns from "./Columns";
+import { useEnv } from "@/context/Environment/env.context";
 
 
 const LedgerManagementPage = () => {
   const [search, setSearch] = useState("");
   const [ledgers, setLedgers] =
     useState<LedgerData[]>([]);
+  const { enabled } = useEnv();
 
   const [page, setPage] = useState(0)
   const [pages, setPages] = useState(0)
@@ -53,7 +55,7 @@ const LedgerManagementPage = () => {
 
       }
       fetchTransactions()
-    }, [page, name])
+    }, [page, name, enabled])
 
   // const filtered = recipients.filter(
   //   (r) =>

@@ -13,12 +13,14 @@ import  { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
 import transactionColumns from "./Columns";
 import { TransactionStatus } from "./TransactionStatus";
+import { useEnv } from "@/context/Environment/env.context";
 
 
 const TransactionManagementPage = () => {
   const [search, setSearch] = useState("");
   const [transactions, setTransactions] =
     useState<TransactionData[]>([]);
+  const { enabled } = useEnv();
 
   const [page, setPage] = useState(0)
   const [pages, setPages] = useState(0)
@@ -55,7 +57,7 @@ const TransactionManagementPage = () => {
 
       }
       fetchTransactions()
-    }, [page, name])
+    }, [page, name, enabled])
 
   // const filtered = recipients.filter(
   //   (r) =>

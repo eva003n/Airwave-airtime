@@ -12,9 +12,11 @@ import type { AxiosResponse } from "axios";
 import  { toast } from "react-toastify";
 import { useSearchParams } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useEnv } from "@/context/Environment/env.context";
 
 
 const UserManagementPage = () => {
+  const {enabled} = useEnv()
   const [search, setSearch] = useState("");
   const [users, setUsers] =
     useState<UserData[]>([]);
@@ -50,7 +52,7 @@ const UserManagementPage = () => {
 
       }
       fetchUsers()
-    }, [page, name])
+    }, [page, name, enabled])
 
   // const filtered = recipients.filter(
   //   (r) =>

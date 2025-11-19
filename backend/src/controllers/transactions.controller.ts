@@ -81,7 +81,7 @@ const getTransactionStatus = asyncHandler(
       transactionId: id
     };
 
-    const response = await africasTalkingClient.get<any, any>("/query/transaction/find", payload);
+    const response = await africasTalkingClient.get<any>("/query/transaction/find", payload);
 
     return res.status(200).json(new ApiResponse(200, response.data, "Top up transaction fetched successfully"))
 

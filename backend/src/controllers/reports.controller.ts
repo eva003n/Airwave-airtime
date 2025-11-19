@@ -157,13 +157,13 @@ const getAdminAnalytics = asyncHandler(
     const balance = getCurrency(walletBalance)
 
     // airtime purchase
-    const totalTopUps = (await Topup.findAndCountAll()).count;
+    const totalDiscount = await Topup.sum("discount") || 0;
 
     const stats = {
         totalUsers,
         totalTransactions,
         walletBalance: balance,
-        totalTopUps,
+        totalDiscount,
       }
     
 

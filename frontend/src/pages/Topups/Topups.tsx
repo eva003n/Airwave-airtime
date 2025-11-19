@@ -10,17 +10,19 @@ import type { RecipientForm, TopUpDataApi } from "@/validation/validators";
 
 import type { TopUpData } from "@/validation/validators";
 import { toast } from "react-toastify";
+import { useEnv } from "@/context/Environment/env.context";
 
 const TopUpsPage = () => {
   const [search, setSearch] = useState("");
   const [topUpData, setTopUpData] = useState<TopUpData[]>([]);
- 
+  const { enabled } = useEnv();
+
   const [pages, setPages] = useState(1);
   const [page, setPage] = useState(1);
   const [department, setDepartment] = useState("");
   const [branch, setBranch] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchDataTopUps = async () => {
@@ -31,28 +33,27 @@ const TopUpsPage = () => {
       setBranch(branch);
       setDepartment(department);
       setSearch(name);
-      setLoading(true)
+      setLoading(true);
       try {
-
-       const response = await getAllTopUps({
-         page,
-         limit: 10,
-         name,
-         department,
-         branch,
-       });
-       setTopUpData(response.data.data.topups);
-       setLoading(false)
-       setPages(response.data.data.totalPages);
-       setPage(response.data.data.currentPage);
-        
+        const response = await getAllTopUps({
+          page,
+          limit: 10,
+          name,
+          department,
+          branch,
+        });
+        setTopUpData(response.data.data.topups);
+        setLoading(false);
+        setPages(response.data.data.totalPages);
+        setPage(response.data.data.currentPage);
       } catch (error) {
-        
+        setLoading(false);
+      } finally {
+        setLoading(false);
       }
-     
     };
     fetchDataTopUps();
-  }, [branch, department, page, searchParams, name]);
+  }, [branch, department, page, searchParams, name, enabled]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this airtime topup?")) return;

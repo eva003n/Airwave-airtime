@@ -10,6 +10,7 @@ const errorHandlerMiddleware = async (
   next: NextFunction
 ) => {
   if (err instanceof ApiError) {
+    console.dir(err);
   
 
     return res.type("application/problem+json").status(err.status).json(err);

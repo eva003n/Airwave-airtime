@@ -54,7 +54,7 @@ class ApiClient {
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         config.headers["Idempotency-Key"] = this.idempotencyKey
-        logger.info(config.headers)
+        console.log(config.data)
 
         return config
       },
@@ -65,29 +65,30 @@ class ApiClient {
       (error: AxiosError<{ message: string }>) => {
         const reloadlyError = new ReloadlyError(
           error.config?.url || "/topups",
-          "Airtime api error",
+          error.response?.data || error.message || "Airtime api error",
           error.status || 500
         );
         if (error.status && error.status === 400) {
+          logger.error(error.message)
+
           return Promise.reject(
             ApiError.badRequest(
               error?.status || 500,
               error.config?.url || "/topups",
               error.response?.data.message ||
-                error.message ||
                 "Something went wrong",
-              reloadlyError
+                reloadlyError
             )
           );
         } else {
+          logger.error(error.message);
           return Promise.reject(
             ApiError.internalServerError(
               error?.status || 500,
               error.config?.url || "/topups",
               error.response?.data.message ||
-                error.message ||
                 "Something went wrong",
-              reloadlyError
+                reloadlyError
             )
           );
         }
@@ -99,7 +100,7 @@ class ApiClient {
     return this.api.post<D>(url, data);
   }
 
-  public async get<T, D>(url: string, data?: D): Promise<T> {
+  public async get<T>(url: string, data?: any): Promise<T> {
     return this.api.get(url, {
       params: {
         username: this.userName,

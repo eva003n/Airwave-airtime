@@ -62,6 +62,18 @@ const transactionColumns = (
   {
     accessorKey: "reference",
     header: "Reference",
+    cell: ({ getValue }) => (
+      <div
+        style={{
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "100px", // IMPORTANT
+        }}
+      >
+        {getValue() as React.ReactNode}
+      </div>
+    ),
   },
   {
     accessorKey: "account.account_number",

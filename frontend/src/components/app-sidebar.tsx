@@ -92,7 +92,7 @@ export function AppSidebar() {
   });
 
   const user = getItem<UserData>("user");
-  const items = user && user.role === "user" ? USERLINKS : ADMINLINKS;
+  const items = user && user?.role === "user" || user?.role === "test" ? USERLINKS : ADMINLINKS;
 
 
 
@@ -101,9 +101,9 @@ useEffect(() => {
   localStorage.setItem("sidebarOpen", String(isOpen));
 }, [isOpen]);
   return (
-    <Sidebar collapsible="icon">
-      <SidebarContent>
-        <SidebarHeader className="px-0 py-4">
+    <Sidebar collapsible="icon" >
+      <SidebarContent className="bg-white">
+        <SidebarHeader className="px-0 py-4 ">
           <div className="flex gap-1 items-center">
             <div>
               <img src={logoImage} width={50} />
