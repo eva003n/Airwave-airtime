@@ -6,6 +6,7 @@ import type { Id } from "../middlewares/validators/validators.js";
 import Transaction from "../models/Transaction.js";
 import Wallet from "../models/Wallet.js";
 import ApiError from "../utils/ApiError.js";
+import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
 
 const getTransactionHistory = asyncHandler(
       async (req: Request, res: Response, next: NextFunction) => {
@@ -71,6 +72,23 @@ const deleteTransaction = asyncHandler(
   }
 );
 
+const getTransactionStatus = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+
+    const {id} = req.params as Id
+
+    const payload = {
+      transactionId: id
+    };
+
+    const response = await africasTalkingClient.get<any, any>("/query/transaction/find", payload);
+
+    return res.status(200).json(new ApiResponse(200, response.data, "Top up transaction fetched successfully"))
+
+
+  }
+);
+
 const getPaginatedTransactions = async (
   page = 1,
   limit = 10,
@@ -114,9 +132,12 @@ const getPaginatedTransactions = async (
     totalItems: count,
   };
 };
+
+
 export {
     getTransactionHistory,
     getTransactions,
     getTransactionDetails,
-    deleteTransaction
+    deleteTransaction,
+    getTransactionStatus
 }

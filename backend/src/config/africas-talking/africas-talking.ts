@@ -99,11 +99,12 @@ class ApiClient {
     return this.api.post<D>(url, data);
   }
 
-  public async get<T>(url: string): Promise<T> {
+  public async get<T, D>(url: string, data?: D): Promise<T> {
     return this.api.get(url, {
       params: {
         username: this.userName,
       },
+      data
     });
   }
 }

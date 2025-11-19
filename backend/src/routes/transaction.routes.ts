@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deleteTransaction, getTransactionHistory, getTransactions } from "../controllers/transactions.controller.js";
+import { deleteTransaction, getTransactionHistory, getTransactions, getTransactionStatus } from "../controllers/transactions.controller.js";
 import { validate } from "../middlewares/validators/validator.middleware.js";
 import { IdSchema } from "../middlewares/validators/validators.js";
 import { privateRoute, protectRoute } from "../middlewares/auth.middleware.js";
@@ -13,6 +13,11 @@ router.route("/admin").get(privateRoute, getTransactionHistory)
 router
   .route("/admin/:id")
   .delete(validate(IdSchema), privateRoute, deleteTransaction);
+  //
+router
+  .route("/admin/:id")
+  .get(validate(IdSchema), privateRoute, getTransactionStatus);
+
 
 router.route("/").get(getTransactions)
 

@@ -87,38 +87,35 @@ export function TransactionStatus() {
                 </div>
               )}
             </div>
-            <div className="grid gap-3">
-              <Controller
-                // {...register("type")}
-                name="type"
-                control={control}
-                rules={{ required: "Transaction type is required" }}
-                render={({ field }) => (
-                  <div className="flex flex-col gap-3">
-                    {/* <Label htmlFor="type" className="text-gray-700 font-medium">
-                      Type
-                    </Label> */}
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className=" focus:ring-2 focus:ring-gray-500">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-gray-100" id="type">
-                        {TRANSACTION_TYPE.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.type && (
-                      <div className="text-rose-500 text-[.8rem]">
-                        {errors.type.message}
-                      </div>
-                    )}
-                  </div>
-                )}
-              />
-            </div>
+            <Controller
+              name="type"
+              control={control}
+              rules={{ required: "Transaction type is required" }}
+              render={({ field }) => (
+                <div className="grid gap-4">
+                  <Label htmlFor="branch" className="text-gray-700 font-medium">
+                    Type
+                  </Label>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-full focus:ring-2 focus:ring-gray-500">
+                      {/* <SelectValue placeholder="Select type" /> */}
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      {TRANSACTION_TYPE.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.type && (
+                    <div className="text-rose-500 text-[.8rem]">
+                      {errors.type.message}
+                    </div>
+                  )}
+                </div>
+              )}
+            />
             {enabled && (
               <div className="grid gap-3">
                 <Label htmlFor="credential">Security credential</Label>

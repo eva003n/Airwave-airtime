@@ -145,7 +145,7 @@ const EditUserPage = () => {
                         value={field.value}
                       >
                         <SelectTrigger className="w-full focus:ring-2 focus:ring-gray-500">
-                          <SelectValue placeholder="Select branch" />
+                          <SelectValue placeholder="Select role" />
                         </SelectTrigger>
                         <SelectContent className="bg-white">
                           {USERROLES.map((role) => (
