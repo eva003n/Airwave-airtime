@@ -84,9 +84,9 @@ const WalletPage = () => {
       const response = await getWalletBalance(user.id as string);
 
       setWallet(response.data);
-      setValue("wallet_type", response.data.data.wallet_type);
-      setValue("upper_threshold", response.data.data.upper_threshold);
-      setValue("lower_threshold", response.data.data.lower_threshold);
+      setValue("wallet_type", response.data?.data?.wallet_type);
+      setValue("upper_threshold", response.data?.data?.upper_threshold);
+      setValue("lower_threshold", response.data?.data?.lower_threshold);
     })();
   }, []);
 
@@ -143,7 +143,7 @@ const WalletPage = () => {
               <Badge className=" ">
                 Account Number
                 <strong className="py-1 px-4 bg-slate-200 tracking-widest italic text-gray-400">
-                  {wallet?.data.account_number}
+                  {wallet?.data?.account_number}
                 </strong>
               </Badge>
             </CardDescription>
@@ -173,7 +173,7 @@ const WalletPage = () => {
                 <Input
                   id="lower"
                   type="number"
-                  placeholder={String(Number(wallet?.data.lower_threshold))}
+                  placeholder={String(Number(wallet?.data?.lower_threshold))}
                   // placeholder="2547XXXXXXXX"
                   {...register("lower_threshold")}
                   className="focus:ring-2 focus:ring-gray-500"
