@@ -8,6 +8,11 @@ import {
   RELOADLY_CLIENT_SECRET,
   RELOADLY_AUDIENCE,
   RELOADLY_AUTH_URL,
+  NODE_ENV,
+  RELOADLY_SANDBOX_CLIENT_ID,
+  RELOADLY_SANDBOX_CLIENT_SECRET,
+  RELOADLY_SANDBOX_AUDIENCE,
+  RELOADLY_SANDBOX_AUTH_URL,
 } from "../env.js";
 import logger from "../../logger/logger.winston.js";
 import ApiError from "../../utils/ApiError.js";
@@ -29,14 +34,14 @@ class ReloadlyClient {
   private api: AxiosInstance;
 
   constructor() {
-    this.clientId = RELOADLY_CLIENT_ID || "";
-    this.clientSecret = RELOADLY_CLIENT_SECRET || "";
-    this.audience = RELOADLY_AUDIENCE || "https://topups-sandbox.reloadly.com";
-    this.authUrl =
-      RELOADLY_AUTH_URL || "https://auth.reloadly.com/oauth/token ";
+    this.clientId = NODE_ENV === "production"? RELOADLY_CLIENT_ID as string : RELOADLY_SANDBOX_CLIENT_ID as string;
+    this.clientSecret = NODE_ENV === "production"? RELOADLY_CLIENT_SECRET as string : RELOADLY_SANDBOX_CLIENT_SECRET as string;
+    this.audience = NODE_ENV === "production"? RELOADLY_AUDIENCE as string : RELOADLY_SANDBOX_AUDIENCE as string;
+    this.authUrl = NODE_ENV === "production"?
+      RELOADLY_AUTH_URL as string: RELOADLY_SANDBOX_AUTH_URL as string;
 
     this.api = axios.create({
-      baseURL: RELOADLY_AUDIENCE || "https://topups-sandbox.reloadly.com", // Change if using other Reloadly APIs
+      baseURL: this.audience, // Change if using other Reloadly APIs
       headers: {
         "Content-Type": "application/json",
       },

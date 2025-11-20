@@ -1,17 +1,10 @@
 import logger from "../../../logger/logger.winston.js";
 import {
-  DB_USER,
-  NODE_ENV,
-  REDIS_DB,
-  REDIS_HOST,
-  REDIS_PASSWORD,
-  REDIS_PORT,
   REDIS_URL,
-  REDIS_USER,
 } from "../../env.js";
 import { Redis, type RedisOptions } from "ioredis";
 
-const url = REDIS_URL ? REDIS_URL : "http://localhost:6379";
+const url = REDIS_URL as string;
 
 //connection to redis running in local machine or docker
 const parsed = new URL(url)
@@ -22,7 +15,7 @@ const connection = new Redis({
   username: parsed.username,
   password: parsed.password || undefined,
   maxRetriesPerRequest: null,
-  tls: parsed.protocol === "rediss:" || parsed.protocol === "postgres:"? {} : undefined,
+  tls: parsed.protocol.startsWith("rediss://")? {} : undefined,
   connectTimeout: 15000 //15s
 });
 

@@ -30,15 +30,15 @@ class CredoFasterClient {
   private apiKey: string;
 
   constructor() {
-    this.clientId = RELOADLY_CLIENT_ID || "";
-    this.clientSecret = RELOADLY_CLIENT_SECRET || "";
-    this.audience = RELOADLY_AUDIENCE || "https://topups-sandbox.reloadly.com";
+    this.clientId = RELOADLY_CLIENT_ID as string;
+    this.clientSecret = RELOADLY_CLIENT_SECRET as string;
+    this.audience = RELOADLY_AUDIENCE as string;
     this.authUrl =
-      RELOADLY_AUTH_URL || "https://auth.reloadly.com/oauth/token ";
+      RELOADLY_AUTH_URL as string;
     this.apiKey = "",
 
     this.api = axios.create({
-      baseURL: RELOADLY_AUDIENCE || "https://topups-sandbox.reloadly.com", // Change if using other Reloadly APIs
+      baseURL: RELOADLY_AUDIENCE , // Change if using other Reloadly APIs
       headers: {
         "Content-Type": "application/json",
         ApiKey: this.apiKey

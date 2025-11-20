@@ -33,22 +33,22 @@ class MpesaClient {
   private api: AxiosInstance;
 
   constructor() {
-    this.customerKey = (
+    this.customerKey = 
       NODE_ENV === "production"
-        ? MPESA_CUSTOMER_KEY
-        : MPESA_SANDBOX_CUSTOMER_KEY
-    ) as string;
-    this.customerSecret = (
+        ? MPESA_CUSTOMER_KEY as string
+        : MPESA_SANDBOX_CUSTOMER_KEY as string
+    ;
+    this.customerSecret = 
       NODE_ENV === "production"
-        ? MPESA_SANDBOX_CUSTOMER_SECRET
-        : MPESA_SANDBOX_CUSTOMER_SECRET
-    ) as string;
-    this.audience = (
-      NODE_ENV === "production" ? MPESA_BASE_URL : MPESA_SANDBOX_BASE_URL
-    ) as string;
-    this.authUrl = (
-      NODE_ENV === "production" ? MPESA_AUTH_URL : MPESA_SANDBOX_AUTH_URL
-    ) as string;
+        ? MPESA_SANDBOX_CUSTOMER_SECRET as string
+        : MPESA_SANDBOX_CUSTOMER_SECRET as string
+    ;
+    this.audience = 
+      NODE_ENV === "production" ? MPESA_BASE_URL as string : MPESA_SANDBOX_BASE_URL as string
+  ;
+    this.authUrl = 
+      NODE_ENV === "production" ? MPESA_AUTH_URL as string : MPESA_SANDBOX_AUTH_URL as string
+    ;
 
     this.api = axios.create({
       baseURL: this.audience,
@@ -61,7 +61,6 @@ class MpesaClient {
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         logger.info(JSON.stringify(config.headers));
-
         return config;
       },
       (error: any) => Promise.reject(error)
@@ -97,12 +96,7 @@ class MpesaClient {
             )
           );
         }
-        // return Promise.reject({
-        //   ststus: error.status,
-        //   message: error.response?.data.message || error.message || "Something went wrong",
-        //   url: error.config?.url,
-        //   method: error.config?.method
-        // });
+ 
       }
     );
   }
