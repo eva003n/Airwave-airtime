@@ -26,7 +26,7 @@ import {
   NODE_ENV,
 } from "../config/env.js";
 import { randomInt } from "crypto";
-import qs from "qs";
+import querystring from "querystring"
 //this ensure sequelize models are initialized before running process
 
 await connectDatabase();
@@ -90,7 +90,7 @@ const sendTopUp = async (
     await africasTalkingClient.post<{}, ATTopUpResponse>(
       "/version1/airtime/send",
       //payload send to reloadly airtime api
-      qs.stringify(payload)
+      querystring.stringify(payload)
     )
   ).data;
 };

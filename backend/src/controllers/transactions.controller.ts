@@ -8,7 +8,8 @@ import Wallet from "../models/Wallet.js";
 import ApiError from "../utils/ApiError.js";
 import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
 import { AFRICAS_TALKING_USERNAME } from "../config/env.js";
-import qs from "qs"
+import querystring from "querystring";
+
 
 const getTransactionHistory = asyncHandler(
       async (req: Request, res: Response, next: NextFunction) => {
@@ -84,8 +85,8 @@ const getTransactionStatus = asyncHandler(
       transactionId: id
     };
 
-    const _payload = JSON.stringify(payload)
-    const response = await africasTalkingClient.get<any>("/query/transaction/find", qs.stringify(_payload));
+    // const _payload = JSON.stringify(payload)
+    const response = await africasTalkingClient.get<any>("/query/transaction/find", querystring.stringify(payload));
 
     return res.status(200).json(new ApiResponse(200, response.data, "Transaction status fetched successfully"))
 

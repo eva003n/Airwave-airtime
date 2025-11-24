@@ -23,7 +23,8 @@ import fs from "fs";
 import csvParser from "csv-parser";
 import { uploadsRoot } from "../middlewares/multer.middleware.js";
 import path from "path";
-import qs from "qs";
+import querystring from "querystring"
+
 import User from "../models/User.js";
 import Topup, { TopStatus } from "../models/Topup.js";
 import { topUpQueue } from "../queues/topup.queue.js";
@@ -216,15 +217,15 @@ const sendTopUp = asyncHandler(
       ]),
       maxNumRetry: 5,
       // keep context in callback urls
-      requestMetadata: {
+      requestMetadata: JSON.stringify({
         transactionId: _transactionId,
-      },
+      }),
     };
     const topResponse = (
       await africasTalkingClient.post<{}, ATTopUpResponse>(
         "/version1/airtime/send",
         //payload send to reloadly airtime api
-        qs.stringify(payload)
+        querystring.stringify(payload)
       )
     ).data;
 
