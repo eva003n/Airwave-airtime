@@ -29,6 +29,12 @@ const connectDatabase = async () => {
   try {
     await sequelize.authenticate();
     logger.info("Connected to Postgres server successfully");
+
+    if(process) {
+      
+    }
+ 
+
     // Import associations dynamically to avoid ES module circular import issues
     // (models import this `sequelize` export). Using dynamic import here
     // delays evaluating the models until after `sequelize` is initialized.

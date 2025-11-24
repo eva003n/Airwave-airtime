@@ -5,7 +5,7 @@ import { CORS_ORIGIN_URLS, NODE_ENV } from "./config/env.js";
 import helmet from "helmet";
 import morganMiddleware from "./logger/morgan.js";
 import errorHandlerMiddleware from "./middlewares/errorHandler.middleware.js";
-
+import { createServer } from "http";
 const app = express();
 
 /*Global middleware */
@@ -98,4 +98,5 @@ app.use(notFoundRouter);
 //this error handling middleware comes last after all middleware to fully capture errors
 app.use(errorHandlerMiddleware);
 
-export { app };
+const server = createServer(app)
+export { server, app };

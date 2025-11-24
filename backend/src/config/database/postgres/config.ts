@@ -9,12 +9,12 @@ interface SequelizeConfig {
   database: string;
   host: string;
   port?: number;
-  dialect: "postgres"; // since all are postgres
+  dialect: "postgres"; 
 }
 
 interface ConfigEnv {
   development: SequelizeConfig;
-  test: SequelizeConfig;
+  staging: SequelizeConfig;
   production: SequelizeConfig;
 }
 
@@ -27,7 +27,7 @@ const config: ConfigEnv = {
     port: parseInt(DB_PORT as string, 10),
     dialect: "postgres",
   },
-  test: {
+  staging: {
     username: DB_USER as string,
     password: DB_PASSWORD  as string,
     database: DB_NAME as string,

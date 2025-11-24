@@ -3,7 +3,6 @@ import asyncHandler from "../utils/asyncHandler.js";
 import {
   AFRICAS_TALKING_PAYBILL,
   AFRICAS_TALKING_SANDBOX_PAYBILL,
-  BASE_URL,
   MPESA_BASE_URL,
   MPESA_INITIATOR,
   MPESA_SANDBOX_INITIATOR,
@@ -12,7 +11,7 @@ import {
   MPESA_SECURITY_CREDENTIAL,
   MPESA_SHORT_CODE,
   NODE_ENV,
-  SERVER_URL,
+  BASE_URL,
 } from "../config/env.js";
 import { mpesaClient } from "../config/mpesa/mpesa.js";
 import logger from "../logger/logger.winston.js";

@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { app } from "../app.js";
-import { NODE_ENV, SERVER_URL } from "../config/env.js";
+import { NODE_ENV, BASE_URL } from "../config/env.js";
 
 const home = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
