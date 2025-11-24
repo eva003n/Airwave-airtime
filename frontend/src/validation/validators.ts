@@ -557,7 +557,7 @@ export const transactionStatus = z.object({
   shortCode: z.string(),
   reference: z.string(),
   securityCredential: z.string(),
-  accountNumber: z.string().trim().transform(Number).pipe(z.number()),
+  accountNumber: z.transform(Number).pipe(z.number()),
   amount: z.transform(Number).pipe(z.number()),
   type: z.enum(["Credit", "Debit"]),
 });

@@ -407,8 +407,6 @@ const transactionStatus = z.object({
   reference: z.string(),
   securityCredential: z.string(),
   accountNumber: z
-    .string()
-    .trim()
     .transform(Number)
     .pipe(z.number()),
   amount: z.transform(Number).pipe(z.number()),
