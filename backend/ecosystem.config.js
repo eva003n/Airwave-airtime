@@ -1,19 +1,19 @@
 export const apps = [
-  // // Process 2: Worker for long running  background task
-  // {
-  //   name: "Background-processor",
-  //   // script: "./workers/topup.worker.js", //docker
-  //   script: "dist/workers/topup.worker.js",
-  //   instances: 1,
-  //   autorestart: true,
-  //   kill_timeout: 3000,
-  //   env: {
-  //     NODE_ENV: "production",
-  //   },
-  //   env_production: {
-  //     NODE_ENV: "production",
-  //   },
-  // },
+  // Process 2: Worker for long running  background task
+  {
+    name: "Background-processor",
+    // script: "./workers/topup.worker.js", //docker
+    script: "dist/workers/topup.worker.js",
+    instances: 1,
+    autorestart: true,
+    kill_timeout: 3000,
+    env: {
+      NODE_ENV: "production",
+    },
+    env_production: {
+      NODE_ENV: "production",
+    },
+  },
 
   // Production web service
   {
@@ -24,7 +24,7 @@ export const apps = [
     autorestart: true,
     wait_ready: true,
     kill_timeout: 3000,
-    env: {
+       env: {
       NODE_ENV: "production",
     },
     env_production: {
