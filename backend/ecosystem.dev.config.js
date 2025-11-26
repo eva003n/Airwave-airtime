@@ -17,20 +17,20 @@ export const apps = [
   },
 
   // Process 2: Worker for long running  background task
-  // {
-  //   name: "topups-worker",
-  //   // script: "./workers/topup.worker.js", //docker
-  //   script: "dist/workers/topup.worker.js", //docker
-  //   instances: 1,
-  //   autorestart: true,
-  //    kill_timeout: 3000,
+  {
+    name: "Background-processor",
+    // script: "./workers/topup.worker.js", //docker
+    script: "dist/workers/topup.worker.js", //docker
+    instances: 1,
+    autorestart: true,
+    kill_timeout: 3000,
 
-  //   env: {
-  //     NODE_ENV: "development",
-  //     PORT: 8100,
-  //     PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
-  //   },
-  // },
+    env: {
+      NODE_ENV: "development",
+      PORT: 8100,
+      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
+    },
+  },
 
   // Production web service
   {

@@ -1,7 +1,7 @@
 export const apps = [
   // Process 2: Worker for long running  background task
   {
-    name: "Background-process",
+    name: "Background-processor",
     // script: "./workers/topup.worker.js", //docker
     script: "dist/workers/topup.worker.js",
     instances: 1,

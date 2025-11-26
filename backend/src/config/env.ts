@@ -1,4 +1,3 @@
-import { config } from "dotenv";
 /* 
 Based on twelve factor app guide a single file that lists all the configs the app uses 
 Dotenv is only used used for development
@@ -10,10 +9,11 @@ Dotenv is only used used for development
 const deploy = process.env.DEPLOY;
 
 if (deploy) {
-  config();
+  const _dotenv = await import("dotenv")
+  _dotenv.config();
   const enviroment = process.env.NODE_ENV || "development";
   //the conditionally load the the correct .env based on mode
-  config({
+  _dotenv.config({
     path: `./.env.${enviroment}`,
   });
 }
