@@ -6,7 +6,7 @@ import { runMigrations } from "./config/database/postgres/umzug.js";
 
 const port = PORT;
 
-const serverUrl = BASE_URL;
+const serverUrl = BASE_URL || ` http://localhost:${port}`;
 
 // fist connect to postgresdatabase
 await connectDatabase();

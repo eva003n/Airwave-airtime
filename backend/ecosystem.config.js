@@ -1,23 +1,7 @@
 export const apps = [
-  // Process 1: Main HTTP sandbox API
-  // {
-  //   name: "airwave-airtime-sandbox-api",
-  //   // script: "./index.js", //docker
-  //   script: "dist/index.js", //local
-  //   instances: 1,
-  //   autorestart: true,
-  //   kill_timeout: 3000,
-  //   wait_ready: true,
-  //   env: {
-  //     NODE_ENV: "development",
-  //     PORT: 8000,
-  //     PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
-  //   },
-  // },
-
   // Process 2: Worker for long running  background task
   {
-    name: "topups-worker",
+    name: "Background-process",
     // script: "./workers/topup.worker.js", //docker
     script: "dist/workers/topup.worker.js",
     instances: 1,
@@ -27,7 +11,9 @@ export const apps = [
     env: {
       NODE_ENV: "production",
       PORT: 8100,
-      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
+    },
+    env_production: {
+      PORT: 8100,
     },
   },
 
@@ -43,7 +29,9 @@ export const apps = [
     env: {
       NODE_ENV: "production",
       PORT: 8080,
-      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
+    },
+    env_production: {
+      PORT: 8080,
     },
   },
 ];

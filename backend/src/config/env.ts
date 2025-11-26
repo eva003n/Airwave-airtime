@@ -1,14 +1,25 @@
-import { Console } from "console";
 import { config } from "dotenv";
+/* 
+Based on twelve factor app guide a single file that lists all the configs the app uses 
+Dotenv is only used used for development
+*/
 
-//first load the main .env file and get the mode
-config();
-const mode = process.env.NODE_ENV || "development";
-//the conditionally load the the correct .env based on mode
-config({
-  path: `./.env.${mode}`
-})
+/*---- This code only works in development | local environment using dotenv not in production since their is no dotenv package (local machine) ---- */
 
+//first load the main .env file and get the enviroment
+const deploy = process.env.DEPLOY;
+
+if (deploy) {
+  config();
+  const enviroment = process.env.NODE_ENV || "development";
+  //the conditionally load the the correct .env based on mode
+  config({
+    path: `./.env.${enviroment}`,
+  });
+}
+
+
+/*---- Shared configl loader no matter enviroment */
 export const {
   /*------ Shared env configs ------ */
   NODE_ENV,
@@ -28,7 +39,7 @@ export const {
   ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN_EXPIRY,
   APP_NAME,
-// Redis service
+  // Redis service
   REDIS_URL,
 
   /*------ Reloadly adapter service ------ */
@@ -73,4 +84,3 @@ export const {
   MPESA_SECURITY_CREDENTIAL,
   MPESA_SHORT_CODE,
 } = process.env;
-
