@@ -9,6 +9,7 @@ import axios, {
 import { logOutUser } from ".";
 import type { IUser } from "@/interfaces/user.interface";
 import type { TokenResponse, UserData } from "@/validation/validators";
+import { VITE_API_BASE_URI, VITE_SANDBOX_API_BASE_URL} from "@/config/env";
 
 const env = getItem<"Live" | "Sandbox">("env") || "Live";
 const user = getItem<UserData>("user");
@@ -29,16 +30,16 @@ class ApiClient {
     this.clientSecret = "";
     this.audience =
       env === "Live"
-        ? import.meta.env.VITE_API_BASE_URI
-        : import.meta.env.VITE_SANDBOX_API_BASE_URL;
+        ? VITE_API_BASE_URI
+        : VITE_SANDBOX_API_BASE_URL;
     this.authUrl = "/auth/refresh-token";
     this.isRefreshing = false;
 
     this.api = axios.create({
       baseURL:
         env === "Live"
-          ? import.meta.env.VITE_API_BASE_URI
-          : import.meta.env.VITE_SANDBOX_API_BASE_URL, // fallback base url
+          ? VITE_API_BASE_URI
+          : VITE_SANDBOX_API_BASE_URL, // fallback base url
       headers: {
         "Content-Type": "application/json",
         "x-env": `${env === "Live" ? "production" : "development"}`,
@@ -52,8 +53,8 @@ class ApiClient {
         const env = getItem<"Live" | "Sandbox">("env") || "Live"; // get ltest env variable
         (config.baseURL =
           env === "Live"
-            ? import.meta.env.VITE_API_BASE_URI
-            : import.meta.env.VITE_SANDBOX_API_BASE_URL), // call appropriate api based that env
+            ? VITE_API_BASE_URI
+            : VITE_SANDBOX_API_BASE_URL), // call appropriate api based that env
           // set xustom header for the environment
           (config.headers["x-env"] =
             env === "Live" ? "production" : "development");
