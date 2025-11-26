@@ -7,13 +7,11 @@ export const apps = [
     instances: 1,
     autorestart: true,
     kill_timeout: 3000,
-
     env: {
       NODE_ENV: "production",
-      PORT: 8100,
     },
     env_production: {
-      PORT: 8100,
+      NODE_ENV: "production",
     },
   },
 
@@ -28,10 +26,9 @@ export const apps = [
     kill_timeout: 3000,
     env: {
       NODE_ENV: "production",
-      PORT: 8080,
     },
     env_production: {
-      PORT: 8080,
+      NODE_ENV: "production",
     },
   },
 ];
