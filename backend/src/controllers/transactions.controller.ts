@@ -21,12 +21,13 @@ const getTransactionHistory = asyncHandler(
     const limit = parseInt(req.query.limit as string) || 10;
     const accountNumber = req.query.account as string;
 
-    const transactions = await getPaginatedTransactions(
+    const options = {
       page,
       limit,
-      parseInt(accountNumber),
-      false,
-    );
+      accountNumber: parseInt(accountNumber),
+      hide: false,
+    };
+    const transactions = await getPaginatedTransactions(options);
 
     return res
       .status(200)
@@ -41,12 +42,14 @@ const getTransactions = asyncHandler(
     const limit = parseInt(req.query.limit as string) || 10;
     const accountNumber = req.query.account as string;
 
-    const transactions = await getPaginatedTransactions(
+    const options = {
       page,
       limit,
-      parseInt(accountNumber),
-      true,
-    );
+      accountNumber: parseInt(accountNumber),
+      hide: false,
+    };
+
+    const transactions = await getPaginatedTransactions(options);
 
     return res
       .status(200)

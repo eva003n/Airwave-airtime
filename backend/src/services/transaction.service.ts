@@ -4,17 +4,22 @@ import { AFRICAS_TALKING_USERNAME } from "../config/env.js";
 import Transaction from "../models/Transaction.js";
 import Wallet from "../models/Wallet.js";
 import querystring from "querystring";
+
+type Option = {
+    page: number,
+    limit: number,
+    account?: number,
+    hide?: boolean
+}
+
 export const getPaginatedTransactions = async (
-  page = 1,
-  limit = 10,
-  account?: number,
-  hide?: boolean,
+  option: Option
 ) => {
   //inplements page by page logic
-  const offset = (page - 1) * limit;
+  const offset = (option.page - 1) * option.limit;
 
   //build an object of dynamic filters
-  const filters = { account_number: account || 0 };
+  const filters = { account_number: option.account || 0 };
 
   //convert resulting array to object for filtering
   const where = Object.fromEntries(
@@ -23,7 +28,7 @@ export const getPaginatedTransactions = async (
   );
 
   const { rows, count } = await Transaction.findAndCountAll({
-    limit,
+    limit: option.limit,
     offset,
     order: [["createdAt", "DESC"]],
     include: [
@@ -34,13 +39,13 @@ export const getPaginatedTransactions = async (
         attributes: ["account_number", "wallet_type"],
       },
     ],
-    paranoid: hide,
+    paranoid: option.hide,
   });
 
   return {
     transactions: rows,
-    currentPage: page,
-    totalPages: Math.ceil(count / limit),
+    currentPage: option.page,
+    totalPages: Math.ceil(count / option.limit),
     totalItems: count,
   };
 };
