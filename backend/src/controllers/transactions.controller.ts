@@ -9,140 +9,102 @@ import ApiError from "../utils/ApiError.js";
 import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
 import { AFRICAS_TALKING_USERNAME } from "../config/env.js";
 import querystring from "querystring";
-
+import {
+  getPaginatedTransactions,
+  removeTransaction,
+  transactionStatusAT,
+} from "../services/transaction.service.js";
 
 const getTransactionHistory = asyncHandler(
-      async (req: Request, res: Response, next: NextFunction) => {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-        const accountNumber = req.query.account as string;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const accountNumber = req.query.account as string;
 
-        const transactions = await getPaginatedTransactions(page, limit, parseInt(accountNumber), false)
+    const transactions = await getPaginatedTransactions(
+      page,
+      limit,
+      parseInt(accountNumber),
+      false,
+    );
 
-        return res.status(200).json(new ApiResponse(200, transactions, "Transactions fetched sucessfully"))
-
-     
-      }
-)
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, transactions, "Transactions fetched sucessfully"),
+      );
+  },
+);
 const getTransactions = asyncHandler(
-      async (req: Request, res: Response, next: NextFunction) => {
-        const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-        const accountNumber = req.query.account as string;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const accountNumber = req.query.account as string;
 
-        const transactions = await getPaginatedTransactions(page, limit, parseInt(accountNumber), true)
+    const transactions = await getPaginatedTransactions(
+      page,
+      limit,
+      parseInt(accountNumber),
+      true,
+    );
 
-        return res.status(200).json(new ApiResponse(200, transactions, "Transactions fetched sucessfully"))
-
-     
-      }
-)
-
-
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, transactions, "Transactions fetched sucessfully"),
+      );
+  },
+);
 
 const getTransactionDetails = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const {id} = req.params as Id 
-
-    const transactionDetails = await reloadlyClient.request("GET", `/topups/reports/transactions/${id}`)     
-
-    return res.status(200).json(
-        new ApiResponse(200, transactionDetails.data, "Transaction detail fetched successfully")
-    )
-  }
-)
+    const { id } = req.params as Id;
+  },
+);
 
 const deleteTransaction = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params as Id;
 
-    const isTransaction = await Transaction.findByPk(id);
+    const isTransaction = await removeTransaction(id);
 
     if (!isTransaction)
       return next(
         ApiError.notFound(
           404,
           req.originalUrl,
-          "Transaction doesnt exist or is already deleted"
-        )
+          "Transaction doesnt exist or is already deleted",
+        ),
       );
-
-    await Transaction.destroy({ where: { id }, force: true  }); // hard delete 
 
     return res
       .status(200)
       .json(new ApiResponse(200, null, "Transaction deleted successfully"));
-  }
+  },
 );
 
 const getTransactionStatus = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params as Id;
 
-    const {id} = req.params as Id
+    const response = await transactionStatusAT(id);
 
-    const payload = {
-      username: AFRICAS_TALKING_USERNAME,
-      transactionId: id
-    };
-
-    // const _payload = JSON.stringify(payload)
-    const response = await africasTalkingClient.get<any>("/query/transaction/find", querystring.stringify(payload));
-
-    return res.status(200).json(new ApiResponse(200, response.data, "Transaction status fetched successfully"))
-
-
-  }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          response.data,
+          "Transaction status fetched successfully",
+        ),
+      );
+  },
 );
 
-const getPaginatedTransactions = async (
-  page = 1,
-  limit = 10,
-  account?: number,
-  hide?: boolean
-) => {
-  //inplements page by page logic
-  const offset = (page - 1) * limit;
-
-  //build an object of dynamic filters
-  const filters = { account_number: account || 0 };
-
-  //convert resulting array to object for filtering
-  const where = Object.fromEntries(
-    //build an array of key value pairs removing empty values
-    Object.entries(filters).filter(([_, v]) => v?.toString().trim())
-  );
-
-  const { rows, count } = await Transaction.findAndCountAll({
-    limit,
-    offset,
-    order: [["createdAt", "DESC"]],
-    include: [
-      {
-        model: Wallet,
-        // where,
-        as: "account",
-        attributes: [
-          "account_number",
-          "wallet_type",
-        ],
-      },
-    ],
-    paranoid: hide
-  });
-
-  return {
-    transactions: rows,
-    currentPage: page,
-    totalPages: Math.ceil(count / limit),
-    totalItems: count,
-  };
-};
-
-
 export {
-    getTransactionHistory,
-    getTransactions,
-    getTransactionDetails,
-    deleteTransaction,
-    getTransactionStatus
-}
+  getTransactionHistory,
+  getTransactions,
+  getTransactionDetails,
+  deleteTransaction,
+  getTransactionStatus,
+};
