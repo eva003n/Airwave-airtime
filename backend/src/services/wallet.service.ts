@@ -25,4 +25,6 @@ export const editWallet = async (
     upper_threshold: walletData.upper_threshold,
   });
   const updatedWallet = await wallet.save();
+
+  return updatedWallet;
 };

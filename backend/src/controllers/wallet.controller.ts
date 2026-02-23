@@ -95,8 +95,6 @@ const updateWallet = asyncHandler(
 
     return res.status(201).json(new ApiResponse(201, wallet, "Wallet updated sucessfully"))
 
-
-
   }
 
 )
