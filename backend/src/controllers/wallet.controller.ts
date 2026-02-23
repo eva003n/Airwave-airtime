@@ -7,6 +7,7 @@ import { getCurrency } from "../utils/index.js";
 import logger from "../logger/logger.winston.js";
 import Wallet from "../models/Wallet.js";
 import ApiError from "../utils/ApiError.js";
+import { editWallet, findWallet } from "../services/wallet.service.js";
 
 
 
@@ -24,10 +25,9 @@ const getWallet = asyncHandler(
  
     const {id} = req.params as Id
 
-     const wallet = await Wallet.findOne({ where: { user_id: id } });
-     const balance = Number(wallet?.balance) || 0;
+    const wallet = await findWallet(id)
 
-
+    if(!wallet) return next(ApiError.notFound(404, req.originalUrl, "Wallet does not exists"))
 
     return res.status(200).json(
         new ApiResponse(200, wallet, "Wallet balance fetched successfully")
@@ -82,21 +82,20 @@ const getATWalletFloatBallance = asyncHandler(
 
 const updateWallet = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
+    const {id} = req.params as Id;
 
     const {wallet_type, userId, lower_threshold, upper_threshold }: WalletType = req.body 
     
-    const wallet = await Wallet.findOne({where: {user_id: userId}})
+    const wallet = await editWallet(id, {wallet_type: wallet_type as string, lower_threshold: lower_threshold as number, upper_threshold: upper_threshold as number}, req.user.id);
 
-    if(!wallet) return next(ApiError.notFound(404, req.originalUrl, "Wallet does not exist"))
+    if (!wallet)
+      return next(
+        ApiError.notFound(404, req.originalUrl, "Wallet does not exist"),
+      );
 
-    wallet.set({
-      wallet_type,
-      lower_threshold,
-      upper_threshold
-    })
-    const updatedWallet = await wallet.save()
+    return res.status(201).json(new ApiResponse(201, wallet, "Wallet updated sucessfully"))
 
-    return res.status(201).json(new ApiResponse(201, updatedWallet, "Wallet updated sucessfully"))
+
 
   }
 
