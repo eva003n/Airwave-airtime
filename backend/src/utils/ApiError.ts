@@ -15,6 +15,8 @@ class ApiError extends Error {
   override message: string;
   errors: string | object[] | null;
   instance: string;
+
+  
   constructor(
     type: string,
     title: string,
@@ -22,9 +24,15 @@ class ApiError extends Error {
     errors: string | object[] | null = null,
     message: string = "Something went wrong",
     instance: string,
-    stack = ""
   ) {
-    super(message);
+
+    // pevent generating stack trace twice(Optimization)
+    const { stackTraceLimit} = Error;// 10 
+    
+    Error.stackTraceLimit = 0;
+    super();// no stack trace generated
+    Error.stackTraceLimit = stackTraceLimit;
+
     this.type = type ? `${API_DOC_URI}/${type}` : "about:blank";
     this.title = title;
     this.status = statusCode;
@@ -33,12 +41,13 @@ class ApiError extends Error {
     this.errors = errors;
     this.instance = instance;
 
-    if (stack) {
-      this.stack = stack;
-    } else {
-      //captures the stack trace vand sets it to the ApiError stack property
+    
+    if(!this.stack) {
+      //captures the stack trace manually from when this object is created and sets it to the stack property for instance of ApiError
       Error.captureStackTrace(this, this.constructor);
     }
+
+
   }
   // static method to create a new instance of ApiError
 
@@ -122,6 +131,17 @@ class ApiError extends Error {
     errors: object[] | null | any = null,
     type: string = "probs/internal-error",
     title: string = "InternalError"
+  ) {
+    return new ApiError(type, title, statusCode, errors, message, instance);
+  }
+
+  static serviceUnavavilable(
+    statusCode: number = 503,
+    instance: string,
+    message: string = "Service unavailable, try again later",
+    errors: object[] | null | any = null,
+    type: string = "probs/unavailable-error",
+    title: string = "UnaavailableError"
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
