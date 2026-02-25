@@ -5,22 +5,23 @@ import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { app } from "../app.js";
 import { NODE_ENV } from "../config/env.js";
+import type { CookieData } from "./validators/validators.js";
 
 
 
 
 const protectRoute = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { AccessToken } = req.cookies;
-    //extract accesstoken from cookies]
+    const { AccessToken } = req.signedCookies as CookieData;
+    //extract accesstoken from cookies
     if (!AccessToken)
       return next(
-        ApiError.unAuthorizedRequest(
-          401,
+        ApiError.badRequest(
+          400,
           req.originalUrl,
           NODE_ENV === "development"
-            ? "Unauthorized request, access token is required"
-            : "Unauthorized please logout"
+            ? "Bad  request, access token is required"
+            : "Bad request"
         )
       );
     //decode accesstoken with token secret to check validity
@@ -30,6 +31,8 @@ const protectRoute = asyncHandler(
       process.env.ACCESS_TOKEN_SECRET as string
     ) as JwtPayload;
 
+    // sanitize jwt data
+
     //query db with user credentials
     const user = await User.findOne({where: {id: decodedToken.userId}})
     if (!user)
@@ -37,13 +40,14 @@ const protectRoute = asyncHandler(
         ApiError.unAuthorizedRequest(
           401,
           req.originalUrl,
-          "Unauthorized request, account doesn't exist or is already deleted"
-        )
+          NODE_ENV === "development"
+            ? "Unauthorized request, account doesn't exist or is already deleted"
+            : "Unauthorized request",
+        ),
       );
 
-    // attach the user to request obj
+    // attach the user to request object
     req.user = user;
-    app.set("user", user)
 
     next();
   }
@@ -53,7 +57,15 @@ const protectRoute = asyncHandler(
 const privateRoute = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
       if(req.user && req.user.role !== "admin") {
-        return next(ApiError.forbiddenRequest(403, req.originalUrl, "Forbidden request, contact administator "))
+        return next(
+          ApiError.forbiddenRequest(
+            403,
+            req.originalUrl,
+            NODE_ENV === "development"
+              ? "Forbidden request, user is not admin"
+              : "Forbidden request, contact administator ",
+          ),
+        );
       }
 
       next();
