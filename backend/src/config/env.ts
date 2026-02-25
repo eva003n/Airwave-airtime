@@ -8,7 +8,7 @@ Dotenv is only used used for development
 //first load the main .env file and get the enviroment
 const deploy = process.env.DEPLOY;
 
-if (deploy) {
+// if (deploy) {
   const _dotenv = await import("dotenv")
   _dotenv.config();
   const enviroment = process.env.NODE_ENV || "development";
@@ -16,7 +16,7 @@ if (deploy) {
   _dotenv.config({
     path: `./.env.${enviroment}`,
   });
-}
+// }
 
 
 /*---- Shared configl loader no matter enviroment */
@@ -26,6 +26,7 @@ export const {
   BASE_URL,
   PORT,
   CORS_ORIGIN_URLS,
+  COOKIE_SECRET,
   API_DOC_URI,
   DB_NAME,
   DB_USER,

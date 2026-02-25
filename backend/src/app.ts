@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { CORS_ORIGIN_URLS, NODE_ENV } from "./config/env.js";
+import { COOKIE_SECRET, CORS_ORIGIN_URLS, NODE_ENV } from "./config/env.js";
 import helmet from "helmet";
 import morganMiddleware from "./logger/morgan.js";
 import errorHandlerMiddleware from "./middlewares/errorHandler.middleware.js";
@@ -9,7 +9,6 @@ import { createServer } from "http";
 const app = express();
 
 /*Global middleware */
-
 
 //configure cross origin resource sharing
 app.use(
@@ -20,11 +19,10 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
-console.log(CORS_ORIGIN_URLS)
 //configure content security policy
 app.use(helmet());
-//parse http header cookies into req.cookies object
-app.use(cookieParser());
+//parse http header signed cookies into req.signedCookies object
+app.use(cookieParser(COOKIE_SECRET?.split(",")));
 //parses the payload into json format
 app.use(
   express.json({
