@@ -1,7 +1,10 @@
 import { PORT, NODE_ENV, BASE_URL } from "./config/env.js";
 import { server } from "./app.js";
 import logger from "./logger/logger.winston.js";
-import { connectDatabase, sequelize } from "./config/database/postgres/postgres.js";
+import {
+  connectDatabase,
+  sequelize,
+} from "./config/database/postgres/postgres.js";
 import { runMigrations } from "./config/database/postgres/umzug.js";
 
 const port = PORT;
@@ -21,31 +24,40 @@ server.listen(port, () => {
 
 // handle graceful shutdown
 
-const shutDown =  () => {
-  server.close(async(err) => {
+const shutDown = () => {
+  server.close((err) => {
     if (err) {
       logger.error(`❌ Error shutting down server: ${err.message}`);
       process.exit(1);
     }
 
-
-    
-    logger.info("🧹Cleaning up resources 🧹");
-    setTimeout(() => {
-      logger.info("✅ Resources cleaned up successfully. Exiting process ➡️");
-
-      process.exit(0);
-    }, 1000)
+    // If a graceful shutdown is not achieved after 1 second,
+    // shut down the process completely
+    logger.info("Server gracefully shutting down...");
+    process.exit(0);
   });
+
+  logger.info("⌛ Shutting down the server completely after 1 second ⌛");
+  setTimeout(() => {
+    logger.info("✅ Shutdown successfully and generated core dump file ➡️");
+    process.abort(); // abort immediately and generate core dump file
+  }, 1000).unref();
 };
 
 process.on("SIGINT", async () => {
-  shutDown()
+  shutDown();
   logger.info("✅ Server shutdown gracefully ✅");
-
 });
 process.on("SIGTERM", async () => {
-  shutDown()
+  shutDown();
   logger.info("✅ Server shutdown gracefully ✅");
+});
 
+process.on("uncaughtException", (err) => {
+  logger.error(`Uncaught exception: ${err.message}`);
+  shutDown();
+});
+process.on("unhandledRejection", () => {
+  logger.error(`Uncaught rejection: `);
+  shutDown();
 });
