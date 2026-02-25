@@ -244,8 +244,14 @@ const recipientSchema = z.object({
 });
 
 const recipientQuerySchema = z.object({
-  page: z.string().optional(),
-  limit: z.string().optional(),
+  page: z
+    .transform(Number)
+    .pipe(z.number().min(1, "Page must be at least 1")).optional()
+    .default(1).optional(),
+  limit: z
+    .transform(Number)
+    .pipe(z.number().min(10, "Limit must be at least 10")).optional()
+    .default(10).optional(),
   department: z.string().optional(),
   branch: z.string().optional(),
   name: z.string().optional(),
@@ -412,6 +418,15 @@ const transactionStatus = z.object({
   amount: z.transform(Number).pipe(z.number()),
   type: z.enum(["Credit", "Debit"]),
 });
+
+const filterOptions = z.object({
+  page: z.number().min(1, "Page must be at least 1"),
+  limit:
+      z.number().min(10, "Limit must be at least 10"),
+  branch: z.string().optional(),
+  department: z.string().optional(),
+  name: z.string().optional(),
+});
 //covert from zod types to typescript types
 export type SignUpAuth = z.infer<typeof signUpSchema>;
 export type SignInAuth = z.infer<typeof signInSchema>;
@@ -429,6 +444,7 @@ export type WalletType = z.infer<typeof walletUpdateSchema>;
 export type UserData = z.infer<typeof userSchema>;
 export type UserUpdateForm = z.infer<typeof updateUserSchema>;
 export type TransactStatus = z.infer<typeof transactionStatus>;
+export type FilterOptions = z.infer<typeof filterOptions>;
 
 
 //reloadly api response types
