@@ -48,7 +48,7 @@ const logInUser = async (userData: { username: string; password: string }) => {
   const user = await User.findOne({ where: { username: userData.username } });
 
   if (!user) {
-    return { user, valid: user };
+    return { user, valid: user, accessToken: null, refreshToken: null };
   }
 
   //verify password
@@ -66,7 +66,7 @@ const logInUser = async (userData: { username: string; password: string }) => {
   user.refresh_token = refreshToken;
   await user.save();
 
-  return { user, valid: isValidPassword };
+  return { user, valid: isValidPassword, accessToken, refreshToken };
 };
 
 const logOutUser = async (id: string) => {
