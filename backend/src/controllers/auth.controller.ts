@@ -51,12 +51,14 @@ const signIn = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { userName: username, password } = req.body as SignInAuth;
    
-    const {user, valid} = await logInUser({username, password})
+    const {user, valid, accessToken, refreshToken} = await logInUser({username, password})
     if(!user) {
       return next(ApiError.unAuthorizedRequest(401, req.originalUrl, "Authentication failed"))
     }
 
     if(valid === false) return next(ApiError.forbiddenRequest(403, req.originalUrl, "Authentication failed"))
+
+      configureAndSendCookie(res, accessToken, refreshToken);
 
     return res
       .status(200)
@@ -77,7 +79,7 @@ const signOut = asyncHandler(
 
 const tokenRefresh = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { RefreshToken } = req.cookies as CookieData;
+    const { RefreshToken } = req.signedCookies as CookieData;
 
     if (!RefreshToken) {
       return next(
@@ -107,7 +109,7 @@ const tokenRefresh = asyncHandler(
         new ApiResponse(
           201,
           { access_token: accessToken, expires_in: 900, token_type: "Bearer" },
-          "Access token generated successfully",
+          "Token generated successfully",
         ),
       );
   },
@@ -125,12 +127,14 @@ const configureAndSendCookie = (
       maxAge: 15 * 60 * 1000, //15min
       secure: NODE_ENV === "production",
       sameSite: "strict",
+      signed: true,
     })
     .cookie("RefreshToken", refreshToken, {
       httpOnly: true, //prevent xss attacks
       secure: NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000, //1day
+      signed: true
     });
 };
 export { signUp, signIn, signOut, tokenRefresh };
