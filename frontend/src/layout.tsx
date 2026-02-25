@@ -43,7 +43,7 @@ const AppLayout = () => {
     >
       <AppSidebar />
       <div className="w-full relative isolate ">
-        <Header className="sticky top-0 z-50  shadow-md bg-white px-4 w-full flex justify-between">
+        <Header className="sticky top-0 z-50   shadow-md bg-white px-4 w-full flex justify-between">
           <div>
             <SidebarTrigger className="size-9" />
           </div>

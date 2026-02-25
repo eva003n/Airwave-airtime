@@ -7,6 +7,7 @@ const env = (NODE_ENV as keyof ConfigEnv) || "development";
 // const env = (app.get("env") as keyof ConfigEnv) || "development";
 const dbConfig = config[env];
 
+console.log(dbConfig)
 const sequelize = new Sequelize({
   host: dbConfig.host,
   dialect: dbConfig.dialect,
@@ -48,6 +49,7 @@ const connectDatabase = async () => {
     }
   } catch (error) {
     logger.error(`Failed to connect to Postgres server with error ${error}`);
+    console.error(error)
     process.exit(1);
   }
 };

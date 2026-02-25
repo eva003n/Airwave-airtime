@@ -18,6 +18,7 @@ import logger from "../../logger/logger.winston.js";
 import ApiError from "../../utils/ApiError.js";
 import ReloadlyError from "../../utils/ServiceError.js";
 import { randomUUID } from "crypto";
+import ThirdPartyServiceError from "../../utils/ServiceError.js";
 
 interface TokenResponse {
   access_token: string;
@@ -54,7 +55,6 @@ class ApiClient {
     this.api.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         config.headers["Idempotency-Key"] = this.idempotencyKey
-        console.log(config.data)
 
         return config
       },
@@ -63,7 +63,7 @@ class ApiClient {
     this.api.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error: AxiosError<{ message: string }>) => {
-        const reloadlyError = new ReloadlyError(
+        const africasTalkingError = new ThirdPartyServiceError(
           error.config?.url || "/topups",
           error.response?.data || error.message || "Airtime api error",
           error.status || 500
@@ -77,18 +77,18 @@ class ApiClient {
               error.config?.url || "/topups",
               error.response?.data.message ||
                 "Something went wrong",
-                reloadlyError
+                africasTalkingError
             )
           );
         } else {
           logger.error(error.message);
           return Promise.reject(
             ApiError.internalServerError(
-              error?.status || 500,
+             500,
               error.config?.url || "/topups",
               error.response?.data.message ||
                 "Something went wrong",
-                reloadlyError
+                africasTalkingClient
             )
           );
         }

@@ -8,11 +8,11 @@ export const apps = [
     autorestart: true,
     kill_timeout: 3000,
     wait_ready: true,
+    exec_mode: "fork",
     env: {
       DEPLOY: "local",
       NODE_ENV: "development",
       PORT: 8000,
-      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
     },
   },
 
@@ -24,11 +24,11 @@ export const apps = [
     instances: 1,
     autorestart: true,
     kill_timeout: 3000,
+    exec_mode: "fork",
 
     env: {
       NODE_ENV: "development",
       PORT: 8100,
-      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
     },
   },
 
@@ -41,11 +41,11 @@ export const apps = [
     autorestart: true,
     wait_ready: true,
     kill_timeout: 3000,
+    exec_mode: "fork",
     env: {
       DEPLOY: "local",
       NODE_ENV: "production",
       PORT: 8080,
-      PM2_NO_PIDUSAGE: "true", // ✅ disables wmic
     },
   },
 ];
@@ -57,7 +57,8 @@ export const deploy = {
     repo: "GIT_REPOSITORY",
     path: "DESTINATION_PATH",
     "pre-deploy-local": "",
-    "post-deploy": "pnpm install && pm2 reload ecosystem.config.js --env production",
+    "post-deploy":
+      "pnpm install && pm2 reload ecosystem.config.js --env production",
     "pre-setup": "",
   },
 };

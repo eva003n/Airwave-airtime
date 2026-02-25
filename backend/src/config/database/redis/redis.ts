@@ -4,7 +4,7 @@ import {
 } from "../../env.js";
 import { Redis, type RedisOptions } from "ioredis";
 
-const url = REDIS_URL as string;
+const url = REDIS_URL as string || "http://localhost:6379" ;
 
 //connection to redis running in local machine or docker
 const parsed = new URL(url)

@@ -1,4 +1,15 @@
-# Bulk Airtime Distribution System Requirements Document
+## Overview 
+<!-- What it does in two lines -->
+## Features
+## Installation
+## Usage
+## Design decisions
+## Future improvements
+
+
+
+
+<!-- # Bulk Airtime Distribution System Requirements Document
 
 ## Introduction & Scope
 
@@ -112,4 +123,4 @@ Asynchronous Processing: A message queue (e.g., RabbitMQ, Kafka) is assumed to b
 Hosting Environment: The application will be deployed on a cloud-based infrastructure (e.g., AWS, GCP, Azure) to ensure scalability and reliability.
 
 Technology Stack: The backend can be built with modern framework Node.js The frontend can use a framework like React.
-
+ -->
