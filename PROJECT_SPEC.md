@@ -46,7 +46,8 @@ This project ises the PERN stack which involves the following technologies
 ## Non Functional requirements
 1. Reliability - the system must be able to handle the functions stated above without failure expecially when performing bulk airtime distribution
 2. Security - the system should protect private data through robust authentication eg oauth 2.0 and use https for data transmission
-3.  Scalability - the system should handle 1000+ aritime distributions per minute
+3.  Scalability - the system should handle 1000+ airtime distributions per minute
+4. Avalabilty - the system should be highly available to pro
 
 <!-- Scope the MVP -->
 ## MVP features

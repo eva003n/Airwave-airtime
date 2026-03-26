@@ -24,6 +24,10 @@ async function up({ context }: { context: QueryInterface }) {
     user_id: {
       type: DataTypes.UUID,
       allowNull: false,
+      references: {
+        model: "users",
+        key: "id"
+      }
     },
     phone_number: {
       type: DataTypes.STRING,

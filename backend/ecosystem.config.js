@@ -1,10 +1,9 @@
 export const apps = [
-  // Process 2: Worker for long running  background task
   {
-    name: "Background-processor",
+    name: "topup-worker",
     // script: "./workers/topup.worker.js", //docker
     script: "dist/workers/topup.worker.js",
-    instances: 1,
+    instances: 2, //control concurrency
     autorestart: true,
     kill_timeout: 3000,
     env: {
@@ -20,7 +19,8 @@ export const apps = [
     name: "airwave-airtime-api",
     // script: "./workers/topup.worker.js", //docker
     script: "dist/index.js",
-    instances: 1,
+    instances: "max",
+    exec_mode: "cluster",
     autorestart: true,
     wait_ready: true,
     kill_timeout: 3000,
