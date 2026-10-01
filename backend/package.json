@@ -66,5 +66,6 @@
     "umzug": "^3.8.2",
     "winston": "^3.17.0",
     "zod": "^4.1.9"
-  }
+  },
+  "packageManager": "pnpm@12.8.1"
 }
