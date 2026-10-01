@@ -54,7 +54,6 @@ const StatsCard = ({
           start={0}
           end={count}
           className="text-2xl font-bold  tabular-nums text-gray-700"
-          duration={2}
           separator=","
           decimals={currency? 2 : 0}
         />

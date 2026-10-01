@@ -126,7 +126,6 @@ const WalletPage = () => {
                 <CountUp
                   start={0}
                   end={Number(wallet?.data?.balance || 0)}
-                  duration={2}
                   separator=","
                   decimals={2}
                 />
