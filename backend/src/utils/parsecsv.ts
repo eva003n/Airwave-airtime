@@ -4,7 +4,7 @@ import fs from "fs";
 import {
   topUpCsvSchema,
   type BulkTopUpData,
-} from "../middlewares/validators/validators.js";
+} from "../validators/validators.js";
 import ApiError from "./ApiError.js";
 import type { NextFunction } from "express";
 import { randomUUID } from "crypto";
@@ -22,25 +22,23 @@ const parseCsv = async (filePath: string): Promise<BulkTopUpData[]> => {
       .pipe(
         csvParser({
           mapHeaders: ({ header }) => header.trim().replace(/^['"]|['"]$/g, ""), // removes quotes + spaces
-        })
+        }),
       )
-      .on("data", async(data: BulkTopUpData, row: any) => {
-
+      .on("data", async (data: BulkTopUpData, row: any) => {
         const operator = data.operator;
         data.operator_code = OPERATOR_CODE_MAP[operator] || 266; //default to safaricom
-        data.status = "Pending"
-        data.createdAt = new Date().toISOString()
-        data.updatedAt = new Date().toISOString()
-        data.id = randomUUID()
+        data.status = "Pending";
+        data.createdAt = new Date().toISOString();
+        data.updatedAt = new Date().toISOString();
+        data.id = randomUUID();
 
-       
         results.push(data);
 
         //  await pub.publish(
         //    "topup_updates",
         //    JSON.stringify({
         //      ...data,
-             
+
         //    })
         //  );
       })

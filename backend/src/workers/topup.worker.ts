@@ -1,32 +1,31 @@
 import { Job, tryCatch, Worker } from "bullmq";
-import { connection, pub } from "../config/database/redis/redis.js";
+import { connection, pub } from "../api/config/database/redis/redis.js";
 import {
   topUpCsvSchema,
   type ATTopUpResponse,
   type BulkTopUpData,
   type OperatorDetailApi,
   type ReloadlyTopUp,
-} from "../middlewares/validators/validators.js";
-import { reloadlyClient } from "../config/reloadly/reloadlyclient.js";
+} from "../validators/validators.js";
 import Recipient from "../models/Recipient.js";
 import Topup, { MobileOperator, TopStatus } from "../models/Topup.js";
-import { app } from "../app.js";
+import { app } from "../api/app.js";
 import type User from "../models/User.js";
 import { generateQueueEvents } from "./index.js";
-import { connectDatabase } from "../config/database/postgres/postgres.js";
-import { runMigrations } from "../config/database/postgres/umzug.js";
-import { topUpQueue } from "../queues/topup.queue.js";
+import { connectDatabase } from "../api/config/database/postgres/postgres.js";
+import { runMigrations } from "../api/config/database/postgres/umzug.js";
+import { topUpQueue } from "../api/queues/topup.queue.js";
 import logger from "../logger/logger.winston.js";
 import { UpdatedAt } from "sequelize-typescript";
 import asyncHandler from "../utils/asyncHandler.js";
-import { africasTalkingClient } from "../config/africas-talking/africas-talking.js";
+import { africasTalkingClient } from "../api/config/africas-talking/africas-talking.js";
 import {
   AFRICAS_TALKING_SANDBOX_USERNAME,
   AFRICAS_TALKING_USERNAME,
   NODE_ENV,
-} from "../config/env.js";
+} from "../api/config/env.js";
 import { randomInt } from "crypto";
-import querystring from "querystring"
+import querystring from "querystring";
 //this ensure sequelize models are initialized before running process
 
 await connectDatabase();
@@ -40,32 +39,10 @@ const validateTopUpData = async (data: BulkTopUpData) => {
 
   return result.data;
 };
-const autoDetect = async (phoneNumber: string) => {
-  const countryIsoCode = "KE";
-  const operatorDetails = await reloadlyClient.request<OperatorDetailApi>(
-    "GET",
-    `/operators/auto-detect/phone/${phoneNumber}/countries/${countryIsoCode}`
-  );
-  return operatorDetails;
-};
-
-const sendBulkTopUps = async (job: Job) => {
-  const transactionId = await reloadlyClient.request(
-    "POST",
-    "/topups-async",
-    {}
-  );
-
-  const topUpStatus = await reloadlyClient.request(
-    "GET",
-    `/topups/${transactionId}/status`
-  );
-};
-
 const sendTopUp = async (
   phoneNumber: string,
   airtimeAmount: number,
-  job: Job
+  job: Job,
 ) => {
   const recipient = await Recipient.findOne({
     where: { phone_number: phoneNumber },
@@ -90,7 +67,7 @@ const sendTopUp = async (
     await africasTalkingClient.post<{}, ATTopUpResponse>(
       "/version1/airtime/send",
       //payload send to reloadly airtime api
-      querystring.stringify(payload)
+      querystring.stringify(payload),
     )
   ).data;
 };
@@ -117,7 +94,7 @@ const startWorker = async () => {
     {
       connection,
       autorun: false,
-    }
+    },
   );
 
   const topUpEvants = generateQueueEvents("topUpQueue");
@@ -186,13 +163,13 @@ const startWorker = async () => {
   });
 
   topUpWorker.on("error", (error) =>
-    logger.error(`Top up worker failed ${error.message}`)
+    logger.error(`Top up worker failed ${error.message}`),
   );
 };
 
 startWorker()
   .then(() =>
-    logger.info("Successfully started background processor for bulk top ups")
+    logger.info("Successfully started background processor for bulk top ups"),
   )
   .catch((err) => {
     logger.error("Top upWorker startup failed:", err);

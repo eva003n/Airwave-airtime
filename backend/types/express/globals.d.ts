@@ -1,20 +1,20 @@
-import User from "./src/models/User.js"
+import User from "./src/models/User";
 
 declare global {
-    namespace Express {
-        interface Request {
-          user: User;
-          cookies: {
-            AccessToken: string;
-            RefreshToken: string;
-          };
-          query: {
-            page?: number;
-            limit?: number;
-            [key: string]: any;
-          };
-        }
+  namespace Express {
+    interface Request {
+      user: User;
+      cookies: {
+        AccessToken: string;
+        RefreshToken: string;
+      };
+      query: {
+        page?: number;
+        limit?: number;
+        [key: string]: any;
+      };
     }
+  }
 }
 
-export {}
+export {};

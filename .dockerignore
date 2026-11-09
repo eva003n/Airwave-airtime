@@ -1,0 +1,13 @@
+# Ignore ALL node_modules everywhere
+node_modules
+**/node_modules
+
+
+
+
+# IDE and git stuff
+.vscode
+.git
+.github
+.husky
+.history

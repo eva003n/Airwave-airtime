@@ -14,7 +14,7 @@ https://medium.com/@mahammadkhalilov/how-to-build-a-custom-ledger-system-a-compr
 // records all financial events in the system
 
 import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/database/postgres/postgres.js";
+import { sequelize } from "../api/config/database/postgres/postgres.js";
 
 export enum TransactionStatus {
   Pending = "Pending",
@@ -23,7 +23,7 @@ export enum TransactionStatus {
 }
 export enum TransactionType {
   CREDIT = "Credit",
-  DEBIT = "Debit"
+  DEBIT = "Debit",
 }
 
 class Transaction extends Model {
@@ -86,7 +86,7 @@ Transaction.init(
     //         fields: ["reference"]
     //     }
     // ]
-  }
+  },
 );
 
-export default Transaction
+export default Transaction;

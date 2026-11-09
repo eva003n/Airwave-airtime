@@ -1,9 +1,8 @@
 // records exact value movement
 
 import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/database/postgres/postgres.js";
+import { sequelize } from "../api/config/database/postgres/postgres.js";
 import Transaction from "./Transaction.js";
-
 
 class Ledger extends Model {
   declare id?: string;
@@ -56,15 +55,13 @@ Ledger.init(
     tableName: "ledgers",
     timestamps: true,
     paranoid: true,
-  }
+  },
 );
 
-export default Ledger
+export default Ledger;
 
 Ledger.beforeCreate(async (ledger, options) => {
-  const transaction = await Transaction.findByPk(ledger.transaction_id)
-
-
-})
+  const transaction = await Transaction.findByPk(ledger.transaction_id);
+});
 
 //balance_after = balance_before + (credit - debit)

@@ -1,5 +1,5 @@
 import { Model, DataTypes } from "sequelize";
-import { sequelize } from "../config/database/postgres/postgres.js";
+import { sequelize } from "../api/config/database/postgres/postgres.js";
 
 export enum MobileOperator {
   Safaricom = "Safaricom",
@@ -31,11 +31,10 @@ class Topup extends Model {
 
   public override toJSON(showHidden = false): object {
     const attributes = { ...this.get() } as any;
-     if (!showHidden) {
-       delete attributes.discount;
-     }
+    if (!showHidden) {
+      delete attributes.discount;
+    }
 
-    
     return attributes;
   }
 }
@@ -91,7 +90,7 @@ Topup.init(
     ],
     timestamps: true,
     paranoid: true,
-  }
+  },
 );
 
 export default Topup;

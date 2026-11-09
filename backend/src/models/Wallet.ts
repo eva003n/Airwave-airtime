@@ -1,14 +1,12 @@
 import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../config/database/postgres/postgres.js";
+import { sequelize } from "../api/config/database/postgres/postgres.js";
 import { randomInt } from "crypto";
-
-
 
 export enum WalletTypes {
   BASIC = "Basic",
   PLUS = "Plus",
   PREMIUM = "Premium",
-  MAX = "Max"
+  MAX = "Max",
 }
 // server
 class Wallet extends Model {
@@ -30,7 +28,6 @@ class Wallet extends Model {
     instance.account_number = accNo; // e.g. 12345678
   }
 }
-
 
 Wallet.init(
   {
@@ -57,7 +54,6 @@ Wallet.init(
     account_number: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      
     },
     currency_code: {
       type: DataTypes.STRING,
@@ -72,7 +68,7 @@ Wallet.init(
     wallet_type: {
       type: DataTypes.ENUM(...Object.values(WalletTypes)),
       allowNull: false,
-      defaultValue: WalletTypes.BASIC
+      defaultValue: WalletTypes.BASIC,
     },
     active: {
       type: DataTypes.BOOLEAN,
@@ -110,7 +106,7 @@ Wallet.init(
         fields: ["user_id", "account_number"],
       },
     ],
-  }
+  },
 );
 
 Wallet.beforeValidate(Wallet.generateAccountNo);

@@ -1,58 +1,32 @@
-ARG NODE_VERSION=22.16.0
+ARG NODE_VERSION=24.21.0
+
 FROM node:${NODE_VERSION}-alpine AS base
-RUN apk update
+RUN corepack enable
 WORKDIR /app
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-# install pnpm package manager
-RUN npm install -g pnpm 
-RUN npm install -g pm2 
-# Make file an executable
 
-
-# cache dependacies
+# ---- All dependencies (for building) ----
 FROM base AS deps
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm fetch
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
-# install dotenvx
-# RUN curl -sfS https://dotenvx.sh/install.sh | sh
 
-# Builder
+# ---- Build ----
 FROM deps AS builder
 COPY . .
-
 RUN pnpm run build
 
+# ---- Production-only dependencies ----
+FROM base AS prod-deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+
 # ---- Production Runner ----
-FROM node:${NODE_VERSION}-alpine AS runner
-WORKDIR /app
-RUN apk add --no-cache libc6-compat
-# Install pnpm in runner stage
-RUN npm install -g pnpm
-RUN npm install -g pm2 
-
-
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 expressjs
-
-USER expressjs
-
-# Copy only necessary files
-COPY --from=builder /app/dist ./
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/ecosystem.config.js ./
-
-COPY --from=deps /app/node_modules ./node_modules
-USER root
-RUN mkdir -p /app/uploads && chown -R node:node /app/uploads
-# RUN dotenvx ext prebuild
+FROM base AS runner
+ENV NODE_ENV=production
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=prod-deps /app/package.json ./
+USER node
 
 EXPOSE 8000
 
-# CMD ["./wait-for-db.sh"]
-# CMD [ "node", "index.js"]
-CMD ["pm2-runtime", "ecosystem.config.js"]
-
-
+CMD ["node", "dist/index.js"]

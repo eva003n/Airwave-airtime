@@ -2,9 +2,9 @@ import { Model, DataTypes } from "sequelize";
 
 import { hash } from "bcryptjs";
 
-import { sequelize } from "../config/database/postgres/postgres.js";
+import { sequelize } from "../api/config/database/postgres/postgres.js";
 import Wallet from "./Wallet.js";
-import { NODE_ENV } from "../config/env.js";
+import { NODE_ENV } from "../api/config/env.js";
 
 export enum UserRole {
   Admin = "admin",
@@ -30,7 +30,7 @@ class User extends Model {
     if (instance.changed("password")) {
       instance.password = (await hash(
         instance.password as string,
-        12
+        12,
       )) as unknown as string;
     }
   }
@@ -83,7 +83,7 @@ User.init(
     role: {
       type: DataTypes.ENUM(...Object.values(UserRole)),
       defaultValue: "user",
-      allowNull: false
+      allowNull: false,
     },
 
     refresh_token: {
@@ -122,7 +122,7 @@ User.init(
         fields: ["email", "username"],
       },
     ],
-  }
+  },
 );
 
 export default User;
@@ -139,7 +139,7 @@ User.afterCreate(async (user, options) => {
       user_id: user.id as string,
       balance: NODE_ENV === "production" ? 0 : 129168,
     },
-    { transaction: options.transaction }
+    { transaction: options.transaction },
   );
 });
 
@@ -151,11 +151,9 @@ User.afterUpdate(async (user, options) => {
   }
 
   if (user.changed("role") && user.role === "user") {
-    await Wallet.create(
-      {
-        user_id: user.id as string,
-        balance: NODE_ENV === "production" ? 0 : 129168,
-      },
-    );
+    await Wallet.create({
+      user_id: user.id as string,
+      balance: NODE_ENV === "production" ? 0 : 129168,
+    });
   }
 });

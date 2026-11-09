@@ -11,7 +11,7 @@ let associationsDefined = false;
 const defineAssociations = () => {
   if (associationsDefined) return;
   //  User owns many recipients and topups
-  logger.info("✅ Defining associations ")
+  logger.info("✅ Defining associations ");
   User.hasMany(Recipient, {
     sourceKey: "id",
     foreignKey: "user_id",
@@ -115,7 +115,7 @@ const defineAssociations = () => {
     foreignKey: "transaction_id",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
-  })
+  });
   Ledger.belongsTo(Transaction, {
     foreignKey: "transaction_id",
     as: "transInfo",

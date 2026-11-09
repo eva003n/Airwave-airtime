@@ -1,13 +1,13 @@
-# Ignore ALL node_modules everywhere
 node_modules
 **/node_modules
-
-
-
-
-# IDE and git stuff
-.vscode
+dist
+tests
+uploads
+app.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.sample
 .git
-.github
-.husky
-.history
+.vscode
+Dockerfile

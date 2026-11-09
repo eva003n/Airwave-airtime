@@ -5,7 +5,7 @@
  
  */
 
-import { API_DOC_URI } from "../config/env.js";
+import { API_DOC_URI } from "../api/config/env.js";
 //standadize error response
 class ApiError extends Error {
   type: string;
@@ -16,7 +16,6 @@ class ApiError extends Error {
   errors: string | object[] | null;
   instance: string;
 
-  
   constructor(
     type: string,
     title: string,
@@ -25,12 +24,11 @@ class ApiError extends Error {
     message: string = "Something went wrong",
     instance: string,
   ) {
-
     // pevent generating stack trace twice(Optimization)
-    const { stackTraceLimit} = Error;// 10 
-    
+    const { stackTraceLimit } = Error; // 10
+
     Error.stackTraceLimit = 0;
-    super();// no stack trace generated
+    super(); // no stack trace generated
     Error.stackTraceLimit = stackTraceLimit;
 
     this.type = type ? `${API_DOC_URI}/${type}` : "about:blank";
@@ -41,13 +39,10 @@ class ApiError extends Error {
     this.errors = errors;
     this.instance = instance;
 
-    
-    if(!this.stack) {
+    if (!this.stack) {
       //captures the stack trace manually from when this object is created and sets it to the stack property for instance of ApiError
       Error.captureStackTrace(this, this.constructor);
     }
-
-
   }
   // static method to create a new instance of ApiError
 
@@ -57,7 +52,7 @@ class ApiError extends Error {
     message: string = "Bad Request",
     errors: object[] | null | any = null,
     type: string = "probs/validation-error",
-    title: string = "Validationerrors"
+    title: string = "Validationerrors",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
@@ -68,7 +63,7 @@ class ApiError extends Error {
     message: string = "Unauthorized request",
     errors: string | object[] | null = null,
     type: string = "probs/unauthorized-error",
-    title: string = "Unauthorized request"
+    title: string = "Unauthorized request",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
@@ -78,7 +73,7 @@ class ApiError extends Error {
     message: string = "Conflict request",
     errors: string | object[] | null = null,
     type: string = "probs/conflict-error",
-    title: string = "Conflict request"
+    title: string = "Conflict request",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
@@ -88,7 +83,7 @@ class ApiError extends Error {
     message: string = "Not Found",
     errors: string | object[] | null = null,
     type: string = "probs/not-found-error",
-    title: string = "ResourceNotFoundError"
+    title: string = "ResourceNotFoundError",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
@@ -99,7 +94,7 @@ class ApiError extends Error {
     message: string = "Unprocessable content",
     errors: string | object[] | null = null,
     type: string = "probs/unprocessable-error",
-    title: string = "UnprocessableError"
+    title: string = "UnprocessableError",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
@@ -110,7 +105,7 @@ class ApiError extends Error {
     errors: string | object[] | null = null,
 
     type: string = "probs/too-many-request-error",
-    title: string = "TooManyRequestError"
+    title: string = "TooManyRequestError",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
@@ -120,7 +115,7 @@ class ApiError extends Error {
     message: string = "Forbidden request",
     errors: string | object[] | null = null,
     type: string = "probs/forbidden-error",
-    title: string = "ForbiddenError"
+    title: string = "ForbiddenError",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
@@ -130,7 +125,7 @@ class ApiError extends Error {
     message: string = "Something went wrong",
     errors: object[] | null | any = null,
     type: string = "probs/internal-error",
-    title: string = "InternalError"
+    title: string = "InternalError",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }
@@ -141,7 +136,7 @@ class ApiError extends Error {
     message: string = "Service unavailable, try again later",
     errors: object[] | null | any = null,
     type: string = "probs/unavailable-error",
-    title: string = "UnaavailableError"
+    title: string = "UnaavailableError",
   ) {
     return new ApiError(type, title, statusCode, errors, message, instance);
   }

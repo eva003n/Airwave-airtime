@@ -1,5 +1,5 @@
 import { Model, DataTypes } from "sequelize";
-import { sequelize } from "../config/database/postgres/postgres.js";
+import { sequelize } from "../api/config/database/postgres/postgres.js";
 
 export enum MobileOperator {
   Safaricom = "Safaricom",
@@ -86,7 +86,7 @@ Recipient.init(
         fields: ["phone_number"],
       },
     ],
-  }
+  },
 );
 
 // Register hooks (same behavior as @BeforeCreate / @BeforeBulkCreate)
